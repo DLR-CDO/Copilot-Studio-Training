@@ -18,15 +18,28 @@ export type ConceptBlock =
       rows: string[][]
     }
 
+export interface BuildSubStep {
+  tokens: InlineToken[]
+  /** Click path not yet confirmed against the live Copilot Studio UI. */
+  verify?: boolean
+}
+
 export interface BuildStep {
   id: string
   tokens: InlineToken[]
+  substeps?: BuildSubStep[]
+  /** Click path not yet confirmed against the live Copilot Studio UI. */
+  verify?: boolean
 }
 
 export interface ScreenshotSlot {
   id: string
   caption: string
   annotation: string
+  /** Path under `public/`, e.g. `images/02-environment-picker.png`. */
+  image?: string
+  /** Render a labeled gray box describing the screenshot still to be captured. */
+  placeholder?: boolean
 }
 
 export interface LinkItem {

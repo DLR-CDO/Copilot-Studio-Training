@@ -9,7 +9,7 @@ export const glossary: GlossaryTerm[] = [
     id: 'agent',
     term: 'Agent',
     definition:
-      'Knowledge + instructions + tools + channels. Conversational agents chat with people; autonomous agents act on triggers.',
+      'Built from a description, model, instructions, knowledge, tools, triggers, other agents (child agents), topics, and suggested prompts, and used through channels. Conversational agents chat with people; autonomous agents act on triggers.',
   },
   {
     id: 'environment',
@@ -21,7 +21,7 @@ export const glossary: GlossaryTerm[] = [
     id: 'knowledge-source',
     term: 'Knowledge source',
     definition:
-      'Content an agent can search to ground its answers: SharePoint, uploaded files, public websites, or Dataverse. A good description helps the agent pick the right source.',
+      'Content an agent can search to ground its answers. The main sources are SharePoint, OneDrive, uploaded files, and public websites; Dataverse and other options are used less often. A good description helps the agent pick the right source.',
   },
   {
     id: 'grounding',
@@ -123,6 +123,30 @@ export const glossary: GlossaryTerm[] = [
     term: 'Escalation',
     definition:
       "Handing a conversation off, for example through a system topic like fallback or escalate. It's one of the numbers analytics tracks, alongside sessions, engagement, and resolution.",
+  },
+  {
+    id: 'trigger',
+    term: 'Trigger',
+    definition:
+      'Something that starts the agent automatically, for example an urgent question arriving by email that the agent then answers by email.',
+  },
+  {
+    id: 'suggested-prompt',
+    term: 'Suggested prompt',
+    definition:
+      'A starter question shown to users, with a short title, so they know what to ask the agent.',
+  },
+  {
+    id: 'agent-description',
+    term: 'Description',
+    definition:
+      'A short summary of what the agent does. People and other agents read it to decide when to use the agent.',
+  },
+  {
+    id: 'solution',
+    term: 'Solution',
+    definition:
+      'A container in Power Apps that stores all the work for your agent, so it can be moved between environments later.',
   },
 ]
 

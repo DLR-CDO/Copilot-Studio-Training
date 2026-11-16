@@ -1,41 +1,63 @@
 import { useEffect, useId, useState } from 'react'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
-type Step = 0 | 1 | 2 | 3
+/** 0 = idle, 1 = at sources, 2 = merged at the agent, 3 = at the answer, 4 = finished. */
+type Step = 0 | 1 | 2 | 3 | 4
 
-const STOPS: Record<Exclude<Step, 0>, { x: number; y: number; caption: string }> = {
-  1: { x: 105, y: 105, caption: 'Searches the connected sources.' },
-  2: { x: 325, y: 105, caption: 'Composes an answer from what it found.' },
-  3: { x: 530, y: 105, caption: 'Cites the source in the final answer.' },
+interface Point {
+  x: number
+  y: number
 }
+
+const SOURCES = [
+  { label: 'SharePoint', y: 20 },
+  { label: 'Files you upload', y: 84 },
+  { label: 'Public websites', y: 148 },
+]
+
+/** Each ball starts at the right edge of its own source box. */
+const BALL_START: Point[] = SOURCES.map((s) => ({ x: 180, y: s.y + 21 }))
+const AGENT_POINT: Point = { x: 262, y: 105 }
+const ANSWER_POINT: Point = { x: 450, y: 105 }
+
+const CAPTIONS: Record<Exclude<Step, 0>, string> = {
+  1: 'Searches the connected sources.',
+  2: 'Brings what it found together and composes an answer.',
+  3: 'Cites the source in the final answer.',
+  4: 'Done: one grounded answer with a citation. Press Replay to watch again.',
+}
+
+const STEP_MS = 2400
+const TRAVEL_MS = 1800
 
 /** Static diagram extracted from copilot-studio-training-guide.html (fig 3). */
 export function Fig3KnowledgeGrounding() {
   const prefersReducedMotion = usePrefersReducedMotion()
   const [step, setStep] = useState<Step>(0)
-  const [playing, setPlaying] = useState(false)
   const titleId = useId()
+
+  const playing = step >= 1 && step <= 3
 
   useEffect(() => {
     if (!playing) return
-    const stepDelay = prefersReducedMotion ? 80 : 1100
-    const finishDelay = prefersReducedMotion ? 120 : 900
-
-    if (step >= 3) {
-      const timer = setTimeout(() => setPlaying(false), finishDelay)
-      return () => clearTimeout(timer)
-    }
-
-    const timer = setTimeout(() => setStep((s) => (s + 1) as Step), stepDelay)
+    const timer = setTimeout(
+      () => setStep((s) => (s + 1) as Step),
+      prefersReducedMotion ? 80 : STEP_MS,
+    )
     return () => clearTimeout(timer)
   }, [step, playing, prefersReducedMotion])
 
-  const handlePlay = () => {
-    setStep(1)
-    setPlaying(true)
+  const ballPosition = (index: number): Point => {
+    if (step === 1) return BALL_START[index]!
+    if (step === 2) return AGENT_POINT
+    return ANSWER_POINT
   }
 
-  const current = step > 0 ? STOPS[step as Exclude<Step, 0>] : null
+  // Three balls travel separately, merge at the agent, and only one continues to the answer.
+  const visibleBalls = step === 1 || step === 2 ? [0, 1, 2] : step === 3 ? [0] : []
+  const sourcesLit = step === 1
+  const agentLit = step === 2
+  const answerLit = step === 3
 
   return (
     <figure className="rounded-block border-[1.5px] border-line bg-paper p-[22px] text-center">
@@ -44,45 +66,24 @@ export function Fig3KnowledgeGrounding() {
           <title id={titleId}>
             Diagram: knowledge sources feed the agent, which gives a cited answer
           </title>
-          <rect
-            x="30"
-            y="20"
-            width="150"
-            height="42"
-            rx="10"
-            fill="#fff"
-            stroke="#0E8C86"
-            strokeWidth="2"
-          />
-          <text x="105" y="46" textAnchor="middle" className="st">
-            SharePoint
-          </text>
-          <rect
-            x="30"
-            y="84"
-            width="150"
-            height="42"
-            rx="10"
-            fill="#fff"
-            stroke="#0E8C86"
-            strokeWidth="2"
-          />
-          <text x="105" y="110" textAnchor="middle" className="st">
-            Files you upload
-          </text>
-          <rect
-            x="30"
-            y="148"
-            width="150"
-            height="42"
-            rx="10"
-            fill="#fff"
-            stroke="#0E8C86"
-            strokeWidth="2"
-          />
-          <text x="105" y="174" textAnchor="middle" className="st">
-            Public websites
-          </text>
+          {SOURCES.map((source) => (
+            <g key={source.label}>
+              <rect
+                x="30"
+                y={source.y}
+                width="150"
+                height="42"
+                rx="10"
+                fill={sourcesLit ? '#E3F3F2' : '#fff'}
+                stroke="#0E8C86"
+                strokeWidth={sourcesLit ? 3 : 2}
+                style={{ transition: 'fill 300ms ease, stroke-width 300ms ease' }}
+              />
+              <text x="105" y={source.y + 26} textAnchor="middle" className="st">
+                {source.label}
+              </text>
+            </g>
+          ))}
           <rect
             x="260"
             y="76"
@@ -90,9 +91,9 @@ export function Fig3KnowledgeGrounding() {
             height="58"
             rx="12"
             fill="#6B5BD2"
-            stroke={step === 2 ? '#1E2447' : 'none'}
-            strokeWidth={step === 2 ? 3 : 0}
-            style={{ transition: 'stroke-width 200ms ease' }}
+            stroke={agentLit ? '#1E2447' : 'none'}
+            strokeWidth={agentLit ? 3 : 0}
+            style={{ transition: 'stroke-width 300ms ease' }}
           />
           <text x="325" y="110" textAnchor="middle" className="stw">
             Agent
@@ -104,9 +105,9 @@ export function Fig3KnowledgeGrounding() {
             height="78"
             rx="12"
             fill="#fff"
-            stroke={step === 3 ? '#6B5BD2' : '#1E2447'}
-            strokeWidth={step === 3 ? 3 : 2}
-            style={{ transition: 'stroke 200ms ease, stroke-width 200ms ease' }}
+            stroke={answerLit ? '#6B5BD2' : '#1E2447'}
+            strokeWidth={answerLit ? 3 : 2}
+            style={{ transition: 'stroke 300ms ease, stroke-width 300ms ease' }}
           />
           <text x="530" y="92" textAnchor="middle" className="st" fontWeight="600">
             Answer
@@ -128,21 +129,30 @@ export function Fig3KnowledgeGrounding() {
           <path d="M390 105 L442 105" stroke="#1E2447" strokeWidth="2" />
           <path d="M436 99 L446 105 L436 111" fill="none" stroke="#1E2447" strokeWidth="2" />
 
-          {current ? (
-            <g
-              className="diagram-token"
-              style={{ transform: `translate(${current.x}px, ${current.y}px)` }}
-            >
-              <circle r="8" fill="#F2B33D" stroke="#1E2447" strokeWidth="1.5" />
-            </g>
-          ) : null}
+          {visibleBalls.map((index) => {
+            const p = ballPosition(index)
+            return (
+              <g
+                key={index}
+                data-testid="fig3-ball"
+                style={{
+                  transform: `translate(${p.x}px, ${p.y}px)`,
+                  transition: prefersReducedMotion
+                    ? undefined
+                    : `transform ${TRAVEL_MS}ms ease-in-out`,
+                }}
+              >
+                <circle r="9" fill="#F2B33D" fillOpacity="0.55" stroke="#1E2447" strokeWidth="1" />
+              </g>
+            )
+          })}
         </svg>
       </div>
 
       <div className="mx-auto mt-3 flex flex-col items-center gap-2">
         <button
           type="button"
-          onClick={handlePlay}
+          onClick={() => setStep(1)}
           disabled={playing}
           className={`rounded-pill px-5 py-2 font-display text-sm font-semibold ${
             playing
@@ -150,10 +160,10 @@ export function Fig3KnowledgeGrounding() {
               : 'bg-violet text-white hover:opacity-90'
           }`}
         >
-          {playing ? 'Playing…' : step === 3 ? 'Replay' : 'Play'}
+          {playing ? 'Playing…' : step === 4 ? 'Replay' : 'Play'}
         </button>
         <div className="min-h-[1.5rem] text-sm text-ink" role="status" aria-live="polite">
-          {current ? current.caption : 'Press Play to watch a question get answered.'}
+          {step === 0 ? 'Press Play to watch a question get answered.' : CAPTIONS[step]}
         </div>
       </div>
 

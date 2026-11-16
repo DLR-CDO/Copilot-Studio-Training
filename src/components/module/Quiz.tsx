@@ -38,7 +38,12 @@ export function Quiz({ questions, locked, bestScore, onResult }: QuizProps) {
       ) : questions.length === 0 ? (
         <p className="text-sm text-muted">No questions are available for this module yet.</p>
       ) : (
-        <QuizAttempt key={attempt} questions={questions} onResult={onResult} onRetake={retake} />
+        <QuizAttempt
+          key={`${questions[0]?.id ?? 'quiz'}-${attempt}`}
+          questions={questions}
+          onResult={onResult}
+          onRetake={retake}
+        />
       )}
     </section>
   )

@@ -1,15 +1,30 @@
 import { useEffect, useId, useState } from 'react'
+import { useCycle } from '../../hooks/useCycle'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { onActivateKeyDown } from './internal/a11y'
+import { WrapText } from './internal/WrapText'
 
 type TokenPosition = 'hidden' | 'draft' | 'demo'
+type BoxId = 'draft' | 'publish' | 'demo' | 'live' | 'teams'
+
+const CYCLE_ORDER: BoxId[] = ['draft', 'publish', 'demo', 'live', 'teams']
+const CYCLE_MS = 1600
+
+const CHANNEL_X = 460
+const CHANNEL_WIDTH = 150
+const DEMO_BOX = { y: 10, height: 52 }
+const LIVE_BOX = { y: 82, height: 52 }
+const TEAMS_BOX = { y: 154, height: 60 }
 
 const TOKEN_COORDS: Record<Exclude<TokenPosition, 'hidden'>, { x: number; y: number }> = {
   draft: { x: 110, y: 104 },
-  demo: { x: 535, y: 37 },
+  demo: { x: 452, y: 36 },
 }
 
 const DEFAULT_MESSAGE = 'Publish to send this draft to the demo website first.'
+
+const LIT_FILL = '#EEEBFA'
+const LIT_STROKE = '#6B5BD2'
 
 /** Static diagram extracted from copilot-studio-training-guide.html (fig 10). */
 export function Fig10PublishPath() {
@@ -20,6 +35,9 @@ export function Fig10PublishPath() {
   const [nudge, setNudge] = useState<string | null>(null)
   const [message, setMessage] = useState(DEFAULT_MESSAGE)
   const titleId = useId()
+
+  const cycleIndex = useCycle(CYCLE_ORDER.length, CYCLE_MS, !prefersReducedMotion)
+  const lit: BoxId | null = prefersReducedMotion ? null : CYCLE_ORDER[cycleIndex]!
 
   useEffect(() => {
     if (publishRun === 0) return
@@ -66,11 +84,16 @@ export function Fig10PublishPath() {
   }
 
   const tokenCoords = tokenAt === 'hidden' ? null : TOKEN_COORDS[tokenAt]
+  const channelCx = CHANNEL_X + CHANNEL_WIDTH / 2
+  const boxTransition = {
+    transition: 'fill 300ms ease, stroke 300ms ease, stroke-width 300ms ease',
+  }
+  const teamsOpacity = demoUnlocked ? 1 : 0.5
 
   return (
     <figure className="rounded-block border-[1.5px] border-line bg-paper p-[22px] text-center">
       <div className="mx-auto max-w-full overflow-x-auto">
-        <svg viewBox="0 0 640 210" role="img" aria-labelledby={titleId}>
+        <svg viewBox="0 0 640 224" role="img" aria-labelledby={titleId}>
           <title id={titleId}>
             Diagram: a draft agent is published to channels like the demo website, live website, and
             Teams
@@ -81,10 +104,11 @@ export function Fig10PublishPath() {
             width="140"
             height="58"
             rx="12"
-            fill="#fff"
-            stroke="#1E2447"
-            strokeWidth="2"
+            fill={lit === 'draft' ? LIT_FILL : '#fff'}
+            stroke={lit === 'draft' ? LIT_STROKE : '#1E2447'}
+            strokeWidth={lit === 'draft' ? 3 : 2}
             strokeDasharray="6 4"
+            style={boxTransition}
           />
           <text x="110" y="99" textAnchor="middle" className="st" fontWeight="600">
             Draft agent
@@ -101,7 +125,17 @@ export function Fig10PublishPath() {
             onClick={handlePublish}
             onKeyDown={onActivateKeyDown(handlePublish)}
           >
-            <rect x="250" y="75" width="130" height="58" rx="29" fill="#6B5BD2" />
+            <rect
+              x="250"
+              y="75"
+              width="130"
+              height="58"
+              rx="29"
+              fill="#6B5BD2"
+              stroke={lit === 'publish' ? '#F2B33D' : 'none'}
+              strokeWidth={lit === 'publish' ? 4 : 0}
+              style={boxTransition}
+            />
             <text x="315" y="110" textAnchor="middle" className="stw">
               Publish
             </text>
@@ -116,22 +150,22 @@ export function Fig10PublishPath() {
             onKeyDown={onActivateKeyDown(handleDemoClick)}
           >
             <rect
-              x="460"
-              y="15"
-              width="150"
-              height="44"
+              x={CHANNEL_X}
+              y={DEMO_BOX.y}
+              width={CHANNEL_WIDTH}
+              height={DEMO_BOX.height}
               rx="10"
-              fill={demoUnlocked ? '#E3F3F2' : '#fff'}
-              stroke="#0E8C86"
-              strokeWidth={demoUnlocked ? 3 : 2}
-              style={{ transition: 'fill 200ms ease, stroke-width 200ms ease' }}
+              fill={lit === 'demo' ? LIT_FILL : '#fff'}
+              stroke={lit === 'demo' ? LIT_STROKE : '#0E8C86'}
+              strokeWidth={lit === 'demo' ? 3 : 2}
+              style={boxTransition}
             />
-            <text x="535" y="36" textAnchor="middle" className="st" fontSize="12.5">
+            <WrapText x={channelCx} y={DEMO_BOX.y + 23} width={CHANNEL_WIDTH}>
               Demo website
-            </text>
-            <text x="535" y="51" textAnchor="middle" className="stm">
+            </WrapText>
+            <WrapText x={channelCx} y={DEMO_BOX.y + 40} width={CHANNEL_WIDTH} className="stm">
               stakeholder review
-            </text>
+            </WrapText>
           </g>
 
           <g
@@ -143,18 +177,19 @@ export function Fig10PublishPath() {
             onKeyDown={onActivateKeyDown(handleLiveClick)}
           >
             <rect
-              x="460"
-              y="83"
-              width="150"
-              height="44"
+              x={CHANNEL_X}
+              y={LIVE_BOX.y}
+              width={CHANNEL_WIDTH}
+              height={LIVE_BOX.height}
               rx="10"
-              fill="#fff"
-              stroke="#0E8C86"
-              strokeWidth="2"
+              fill={lit === 'live' ? LIT_FILL : '#fff'}
+              stroke={lit === 'live' ? LIT_STROKE : '#0E8C86'}
+              strokeWidth={lit === 'live' ? 3 : 2}
+              style={boxTransition}
             />
-            <text x="535" y="110" textAnchor="middle" className="st" fontSize="12.5">
+            <WrapText x={channelCx} y={LIVE_BOX.y + 31} width={CHANNEL_WIDTH}>
               Live website
-            </text>
+            </WrapText>
           </g>
 
           <g
@@ -171,44 +206,42 @@ export function Fig10PublishPath() {
             onKeyDown={onActivateKeyDown(handleTeamsClick)}
           >
             <rect
-              x="460"
-              y="151"
-              width="150"
-              height="44"
+              x={CHANNEL_X}
+              y={TEAMS_BOX.y}
+              width={CHANNEL_WIDTH}
+              height={TEAMS_BOX.height}
               rx="10"
-              fill="#fff"
-              stroke="#0E8C86"
-              strokeWidth="2"
-              opacity={demoUnlocked ? 1 : 0.5}
-              style={{ transition: 'opacity 200ms ease' }}
+              fill={lit === 'teams' ? LIT_FILL : '#fff'}
+              stroke={lit === 'teams' ? LIT_STROKE : '#0E8C86'}
+              strokeWidth={lit === 'teams' ? 3 : 2}
+              opacity={lit === 'teams' ? 1 : teamsOpacity}
+              style={boxTransition}
             />
-            <text
-              x="535"
-              y="172"
-              textAnchor="middle"
-              className="st"
-              fontSize="12.5"
-              opacity={demoUnlocked ? 1 : 0.5}
+            <WrapText
+              x={channelCx}
+              y={TEAMS_BOX.y + 25}
+              width={CHANNEL_WIDTH}
+              opacity={teamsOpacity}
             >
               {demoUnlocked ? 'Teams & Microsoft 365' : 'Teams & Microsoft 365 🔒'}
-            </text>
-            <text
-              x="535"
-              y="187"
-              textAnchor="middle"
+            </WrapText>
+            <WrapText
+              x={channelCx}
+              y={TEAMS_BOX.y + 51}
+              width={CHANNEL_WIDTH}
               className="stm"
-              opacity={demoUnlocked ? 1 : 0.5}
+              opacity={teamsOpacity}
             >
               admin approval needed
-            </text>
+            </WrapText>
           </g>
 
           <path d="M180 104 L242 104" stroke="#1E2447" strokeWidth="2" />
           <path d="M236 98 L246 104 L236 110" fill="none" stroke="#1E2447" strokeWidth="2" />
-          <path d="M380 90 C 415 75 425 45 452 38" fill="none" stroke="#1E2447" strokeWidth="2" />
-          <path d="M380 104 L452 105" fill="none" stroke="#1E2447" strokeWidth="2" />
+          <path d="M380 90 C 415 75 425 45 452 36" fill="none" stroke="#1E2447" strokeWidth="2" />
+          <path d="M380 104 L452 108" fill="none" stroke="#1E2447" strokeWidth="2" />
           <path
-            d="M380 118 C 415 133 425 165 452 172"
+            d="M380 118 C 415 133 425 175 452 184"
             fill="none"
             stroke="#1E2447"
             strokeWidth="2"

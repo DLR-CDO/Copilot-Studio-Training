@@ -8,6 +8,7 @@
  */
 import type {
   BuildStep,
+  BuildSubStep,
   ConceptBlock,
   InlineToken,
   LinkItem,
@@ -23,9 +24,37 @@ const ui = (text: string): InlineToken => ({ type: 'ui', text })
 const para = (tokens: InlineToken[]): ConceptBlock => ({ type: 'paragraph', tokens })
 const list = (items: InlineToken[][]): ConceptBlock => ({ type: 'list', items })
 
-function buildSteps(moduleNum: number, steps: InlineToken[][]): BuildStep[] {
-  return steps.map((tokens, i) => ({ id: `m${moduleNum}-step-${i + 1}`, tokens }))
+interface StepDef {
+  tokens: InlineToken[]
+  substeps?: BuildSubStep[]
+  verify?: boolean
 }
+
+const sub = (tokens: InlineToken[], verify = false): BuildSubStep =>
+  verify ? { tokens, verify } : { tokens }
+
+/** Marks a step whose click path still needs testing in the live Copilot Studio UI. */
+const verifyStep = (tokens: InlineToken[], substeps?: BuildSubStep[]): StepDef => ({
+  tokens,
+  substeps,
+  verify: true,
+})
+
+function buildSteps(moduleNum: number, steps: (InlineToken[] | StepDef)[]): BuildStep[] {
+  return steps.map((step, i) => ({
+    id: `m${moduleNum}-step-${i + 1}`,
+    ...(Array.isArray(step) ? { tokens: step } : step),
+  }))
+}
+
+/** First step for every module after Module 1: get from the home screen to the practice agent. */
+const openPracticeAgent = (): InlineToken[] => [
+  t('Check that the '),
+  ui('globe icon'),
+  t(' in the bottom left corner shows DEV. Then select '),
+  ui('Agents'),
+  t(' in the left navigation, and select your practice agent.'),
+]
 
 function goDeeper(links: LinkItem[]): LinkItem[] {
   return links
@@ -69,9 +98,9 @@ const m1ScreenshotSlots: ScreenshotSlot[] = [
 const m2ScreenshotSlots: ScreenshotSlot[] = [
   {
     id: 'm2-shot-1',
-    caption:
-      'Capture the environment picker open, showing your Dev and Test environments in the list.',
+    caption: 'Switch environment menu, opened from the globe icon at the bottom left.',
     annotation: 'Annotate: circle the current environment name, add "always check this first"',
+    image: 'images/02-environment-picker.png',
   },
 ]
 
@@ -88,8 +117,9 @@ const m3ScreenshotSlots: ScreenshotSlot[] = [
   },
   {
     id: 'm3-shot-2',
-    caption: 'A test-pane answer with a citation link visible.',
+    caption: 'Always check the source the agent cites.',
     annotation: 'Annotate: arrow to the citation with "always check the source"',
+    image: 'images/03-test-pane-sources.png',
   },
 ]
 
@@ -114,8 +144,9 @@ const m5ScreenshotSlots: ScreenshotSlot[] = [
   {
     id: 'm5-shot-1',
     caption:
-      'Capture the Add tool wizard with the description field filled in with a good example.',
+      'A connector tool’s Details page. The Description field is how the agent decides when to use it.',
     annotation: 'Annotate: highlight the description field, "this is how the agent decides"',
+    image: 'images/05-connector.png',
   },
 ]
 
@@ -126,10 +157,10 @@ const m5ScreenshotSlots: ScreenshotSlot[] = [
 const m6ScreenshotSlots: ScreenshotSlot[] = [
   {
     id: 'm6-shot-1',
-    caption:
-      'Child agent Details on the Agents tab — description is required before the agent can be saved.',
+    caption: 'Child agent Details: the description is required before the agent can be saved.',
     annotation:
       'Annotate: the missing Description error — routing depends on a crisp one-line job description',
+    image: 'images/06-child-agent.png',
   },
 ]
 
@@ -140,15 +171,15 @@ const m6ScreenshotSlots: ScreenshotSlot[] = [
 const m7ScreenshotSlots: ScreenshotSlot[] = [
   {
     id: 'm7-shot-1',
-    caption:
-      'Overview model picker for AI Enablement Assistant with Claude Sonnet 4.6 selected (CDO - DEV).',
-    annotation: 'Annotate: model choice sits next to instructions — this is the agent\'s brain',
+    caption: 'The model dropdown on the Overview page, under "Select your agent’s model".',
+    annotation: "Annotate: model choice sits next to instructions — this is the agent's brain",
+    image: 'images/07-model-dropdown-1.png',
   },
   {
     id: 'm7-shot-2',
-    caption:
-      'The model dropdown open, showing OpenAI / Anthropic options and Preview or Experimental tags.',
+    caption: 'The model dropdown open. Preview and Experimental tags mean not for production.',
     annotation: 'Annotate: circle Preview / Experimental tags — not for production',
+    image: 'images/07-model-dropdown-2.png',
   },
 ]
 
@@ -159,13 +190,19 @@ const m7ScreenshotSlots: ScreenshotSlot[] = [
 const m8ScreenshotSlots: ScreenshotSlot[] = [
   {
     id: 'm8-shot-1',
-    caption: 'The activity map expanded during a test.',
-    annotation: 'Annotate: point to a failed case with "this is gold, it tells you what to fix"',
+    caption:
+      'The activity map for a test conversation, showing which knowledge, tools, and topics the agent used for one answer.',
+    annotation:
+      'Capture: open the Activity tab for a test conversation and expand one answer. Annotate: label each step the agent took, and circle the knowledge source it picked.',
+    placeholder: true,
   },
   {
     id: 'm8-shot-2',
-    caption: 'An evaluation results page after a run.',
-    annotation: 'Annotate: point to a failed case with "this is gold, it tells you what to fix"',
+    caption:
+      'The results of an evaluation run on the Evaluation page, with pass and fail results for each test question.',
+    annotation:
+      'Capture: the finished run with at least one failed question visible. Annotate: point to a failed case with "this is gold, it tells you what to fix".',
+    placeholder: true,
   },
 ]
 
@@ -176,8 +213,11 @@ const m8ScreenshotSlots: ScreenshotSlot[] = [
 const m9ScreenshotSlots: ScreenshotSlot[] = [
   {
     id: 'm9-shot-1',
-    caption: 'Capture the Analytics summary page of a live or demo agent.',
-    annotation: 'Annotate: circle resolution rate and escalation rate',
+    caption:
+      'The Analytics page of a published agent, showing sessions, engagement, resolution, and escalation.',
+    annotation:
+      'Capture: the Analytics summary for the last 7 days of a published agent. Annotate: circle the resolution rate and the escalation rate.',
+    placeholder: true,
   },
 ]
 
@@ -189,13 +229,17 @@ const m10ScreenshotSlots: ScreenshotSlot[] = [
   {
     id: 'm10-shot-1',
     caption:
-      'Channels page showing Demo website, Teams/M365, and other channel tiles (auth may limit web channels).',
-    annotation: 'Annotate: start with Demo website for stakeholder review before broad rollout',
+      'The Channels page after publishing, showing the Demo website tile alongside Teams and Microsoft 365 and the other channel tiles.',
+    annotation:
+      'Capture: the full Channels page of your published practice agent. Annotate: circle the Demo website tile with "start here for stakeholder review".',
+    placeholder: true,
   },
   {
     id: 'm10-shot-2',
-    caption: 'The demo website open in a browser with the agent responding.',
-    annotation: 'Annotate: "share this demo link for feedback before going live"',
+    caption: 'The demo website open in a browser, with the agent answering a test question.',
+    annotation:
+      'Capture: the demo website after you ask one question. Annotate: point to the browser address bar with "share this demo link for feedback before going live".',
+    placeholder: true,
   },
 ]
 
@@ -208,23 +252,37 @@ export const modules: Module[] = [
     slug: 'what-is-an-agent',
     title: 'What is an agent?',
     whyItMatters:
-      'Everything in Copilot Studio makes sense once you can picture the four parts of an agent.',
+      'Everything in Copilot Studio makes sense once you can picture the parts of an agent.',
     estimatedMinutes: '45–60 min',
     badgeName: 'Agent Architect',
     diagram: 'fig1',
     concept: [
       para([
-        t('Everything in Copilot Studio makes sense once you can picture the four parts of an '),
+        t('Everything in Copilot Studio makes sense once you can picture the parts of an '),
         kw('agent', 'agent'),
-        t(': knowledge, instructions, tools, and channels.'),
+        t(
+          ': description, model, instructions, knowledge, tools, triggers, other agents, topics, and suggested prompts, plus the channels where people use it.',
+        ),
       ]),
       list([
         [
           t('What an '),
           kw('agent', 'agent'),
-          t(' is, in plain language: knowledge + instructions + '),
+          t(' is, in plain language: a '),
+          kw('description', 'agent-description'),
+          t(' + a '),
+          kw('model', 'model'),
+          t(' + instructions + knowledge + '),
           kw('tools', 'tool'),
           t(' + '),
+          kw('triggers', 'trigger'),
+          t(' + other agents ('),
+          kw('child agents', 'child-agent'),
+          t(') + '),
+          kw('topics', 'topic'),
+          t(' + '),
+          kw('suggested prompts', 'suggested-prompt'),
+          t(', used through '),
           kw('channels', 'channel'),
         ],
         [
@@ -232,17 +290,158 @@ export const modules: Module[] = [
           kw('agents', 'agent'),
           t(' (people chat with them) vs autonomous '),
           kw('agents', 'agent'),
-          t(' (they act on triggers)'),
+          t(' (they act on '),
+          kw('triggers', 'trigger'),
+          t(')'),
         ],
-        [t('A tour of the maker portal: the Overview page, left navigation, and test pane')],
+        [
+          t('Why every agent is created inside a '),
+          kw('solution', 'solution'),
+          t(' in the DEV environment'),
+        ],
+        [
+          t(
+            'A tour of Copilot Studio: the Overview page, the tabs along the top, and the test pane',
+          ),
+        ],
         [t('Licensing basics and Copilot Credits, awareness level only')],
       ]),
     ],
     buildSteps: buildSteps(1, [
-      [t('Open the maker portal and select '), ui('Create'), t(' to start a new agent.')],
-      [t('Describe your agent in plain English when prompted.')],
-      [t('Explore the Overview page, left navigation, and '), ui('test pane'), t(' layout.')],
-      [t('In the '), ui('test pane'), t(', ask your new agent three questions.')],
+      [
+        t(
+          'Before you do anything, make sure you are in the correct environment, which is the DEV environment. Do not do anything until it is selected. To change it, click the ',
+        ),
+        ui('globe icon'),
+        t(' in the bottom left corner, above your name, and select the DEV environment.'),
+      ],
+      [
+        t('On the home screen, once logged in, select '),
+        ui('Other ways to build'),
+        t(', then select '),
+        ui('Agent (standard)'),
+        t('.'),
+      ],
+      {
+        tokens: [t('Name your agent and create the solution that will store it.')],
+        substeps: [
+          sub([t('In the '), ui('Name'), t(' box, enter a name for your agent.')]),
+          sub([t('Expand the agent settings section below the name.')]),
+          sub([t('Leave the schema name as it is.')]),
+          sub([t('Select the language your agent will speak.')]),
+          sub([
+            t('Open a new browser tab and go to Power Apps at '),
+            ui('make.powerapps.com'),
+            t('.'),
+          ]),
+          sub([t('Log in with your work account.')]),
+          sub([t('In the left navigation, select '), ui('Solutions'), t('.')]),
+          sub([
+            t('Select '),
+            ui('+ New solution'),
+            t(' in the top left corner of the Solutions page.'),
+          ]),
+          sub([t('Enter a '), ui('Display name'), t(' for the solution.')]),
+          sub([t('Enter a '), ui('Name'), t(' for the solution.')]),
+          sub([t('Select a '), ui('Publisher'), t('.')]),
+          sub([t('Leave the '), ui('Version'), t(' as it is.')]),
+          sub([t('Leave '), ui('Set as preferred solution'), t(' unchecked.')]),
+          sub([
+            t('Select '),
+            ui('Create'),
+            t('. The solution stores all the work you do on this agent.'),
+          ]),
+          sub([t('Go back to the Copilot Studio browser tab.')]),
+          sub([
+            t('In the agent settings, select the display name of the solution you just created.'),
+          ]),
+          sub([t('Select '), ui('Create'), t('.')]),
+        ],
+      },
+      {
+        tokens: [
+          t('Work through the '),
+          ui('Overview'),
+          t(' page one section at a time, from top to bottom.'),
+        ],
+        substeps: [
+          sub([
+            t('Explore the '),
+            ui('Overview'),
+            t(' page. The '),
+            ui('test pane'),
+            t(', where you chat with your agent, sits on the right side of the screen.'),
+          ]),
+          sub([
+            ui('Description'),
+            t(
+              ': write one or two sentences that say what your agent does. People and other agents read it to decide when to use your agent.',
+            ),
+          ]),
+          sub([
+            ui('Model'),
+            t(': leave the default model selected. Module 07 covers choosing a model.'),
+          ]),
+          sub([
+            ui('Instructions'),
+            t(
+              ': use a generative AI tool to help you write structured instructions. Look at the instructions of live agents for examples.',
+            ),
+          ]),
+          sub([
+            ui('Knowledge'),
+            t(': select '),
+            ui('Add knowledge'),
+            t(
+              '. A pop-up opens where you can drag and drop files, or connect SharePoint or OneDrive.',
+            ),
+          ]),
+          sub([
+            t('In the pop-up, select '),
+            ui('OneDrive'),
+            t(
+              ' and pick your file. Turn on web search only for broad agents that do not handle confidential information.',
+            ),
+          ]),
+          sub([
+            ui('Tools'),
+            t(': select '),
+            ui('Add tool'),
+            t(' to connect apps like Outlook, Teams, or SharePoint. You can skip this for now.'),
+          ]),
+          sub([
+            ui('Triggers'),
+            t(
+              ': triggers start the agent automatically. For example, when an urgent question arrives by email, the agent can answer it by email. Leave this for now.',
+            ),
+          ]),
+          sub([
+            ui('Agents'),
+            t(
+              ': you can add agents inside your agent to handle specific steps of a workflow. You will do this later, in Module 06.',
+            ),
+          ]),
+          sub([
+            ui('Topics'),
+            t(': every agent needs a greeting topic. Leave the default topics for now.'),
+          ]),
+          sub([
+            ui('Suggested prompts'),
+            t(
+              ': starter prompts, each with a title, that show users what to ask. Leave these for now.',
+            ),
+          ]),
+        ],
+      },
+      [
+        t(
+          "Once you've added the description, model, instructions, and knowledge, test your agent by entering three different questions in the ",
+        ),
+        ui('test pane'),
+        t(
+          ". Use a generative AI tool to write questions your knowledge files are certain to answer. That way you know the agent works, and a wrong answer isn't caused by missing knowledge.",
+        ),
+      ],
     ]),
     watchOuts: [
       'One agent, built progressively — every module adds a layer to the same practice agent, and by Module 10 you will have published something real.',
@@ -251,7 +450,7 @@ export const modules: Module[] = [
     ],
     screenshotSlots: m1ScreenshotSlots,
     tryIt:
-      "Create your first agent by describing it in plain English. Ask it three questions in the test pane. That's it, you've built an agent.",
+      "Create your first agent in the DEV environment, inside a new solution. Add a description, instructions, and knowledge, then ask it three questions in the test pane. That's it, you've built an agent.",
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/fundamentals-what-is-copilot-studio',
@@ -272,10 +471,11 @@ export const modules: Module[] = [
     ]),
     quiz: getQuizForModule(1),
     checklist: [
-      'Opened the maker portal and found the Overview page',
-      'Created a first agent by describing it in plain English',
+      'Confirmed the DEV environment is selected before building',
+      'Created a solution in Power Apps and created my agent inside it',
+      'Added a description, instructions, and knowledge on the Overview page',
       'Asked the agent three questions in the test pane',
-      'Can point to where knowledge, instructions, tools, and channels show up for this agent',
+      'Can point to the description, model, instructions, knowledge, tools, triggers, agents, topics, and suggested prompts on the Overview page',
     ],
   },
 
@@ -316,7 +516,7 @@ export const modules: Module[] = [
         [
           t('How to check and switch your '),
           kw('environment', 'environment'),
-          t(' in the portal (top-right picker)'),
+          t(': the globe icon in the bottom left corner, above your name'),
         ],
         [
           t('What admins control per '),
@@ -328,9 +528,24 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(2, [
-      [t('Select the '), ui('environment picker'), t(' in the top-right of the portal.')],
-      [t('Confirm which environment is currently selected — say it out loud.')],
-      [t('Switch to your Dev environment if you are not already there.')],
+      [
+        t('Look at the bottom left corner of Copilot Studio. The '),
+        ui('globe icon'),
+        t(' above your name shows the environment you are in.'),
+      ],
+      [
+        t('Click the '),
+        ui('globe icon'),
+        t(' to open the '),
+        ui('Switch environment'),
+        t(' menu.'),
+      ],
+      [t('Read the name under '), ui('Current environment'), t(' and say it out loud.')],
+      [
+        t('If it is not your DEV environment, select DEV from the list under '),
+        ui('All environments'),
+        t('.'),
+      ],
       [
         t(
           'Note what your admin controls here: data policies, and whether preview AI models are allowed.',
@@ -343,7 +558,7 @@ export const modules: Module[] = [
     ],
     screenshotSlots: m2ScreenshotSlots,
     tryIt:
-      "Open the environment picker, say out loud which environment you're in, and switch to Dev if you're not already there.",
+      "Click the globe icon in the bottom left corner, above your name. Say out loud which environment you're in, and switch to DEV if you're not already there.",
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/environments-first-run-experience',
@@ -360,8 +575,8 @@ export const modules: Module[] = [
     ]),
     quiz: getQuizForModule(2),
     checklist: [
-      'Opened the environment picker',
-      'Confirmed I am in Dev',
+      'Opened the Switch environment menu from the globe icon in the bottom left corner',
+      'Confirmed I am in DEV',
       'Confirmed my practice agent lives in Dev',
       'Know who to ask about data policy and preview model questions',
     ],
@@ -396,7 +611,7 @@ export const modules: Module[] = [
       ]),
       list([
         [t('How generative answers use '), kw('knowledge sources', 'knowledge-source')],
-        [t('Source types: SharePoint, uploaded files, public websites, Dataverse')],
+        [t('The main source types: SharePoint, OneDrive, uploaded files, and public websites')],
         [
           t('Writing a good description for each source, this is how the '),
           kw('agent', 'agent'),
@@ -407,28 +622,63 @@ export const modules: Module[] = [
       ]),
       {
         type: 'table',
-        caption: 'Source types and what they’re for',
+        caption: 'Main knowledge sources and what they’re for',
         headers: ['Source type', 'What it’s for'],
         rows: [
           ['SharePoint', 'Search a SharePoint site or document library your team already uses.'],
+          ['OneDrive', 'Ground answers in files stored in your OneDrive.'],
           [
             'Uploaded files',
-            'Ground answers in files you upload directly, like PDFs or Word docs.',
+            'Ground answers in files you drag and drop in directly, like PDFs or Word docs.',
           ],
-          ['Public websites', 'Pull answers from pages on the public web.'],
-          ['Dataverse', 'Answer from structured business data stored in Dataverse tables.'],
+          [
+            'Public websites',
+            'Pull answers from pages on the public web. Use web search only for broad agents that do not handle confidential information.',
+          ],
         ],
       },
+      para([
+        t(
+          'Other sources: Copilot Studio also lists other options, such as Dataverse tables and other business systems. They are used less often here.',
+        ),
+      ]),
     ],
     buildSteps: buildSteps(3, [
-      [t('Open '), ui('Add knowledge'), t(' on your practice agent.')],
-      [t('Choose SharePoint (or uploaded files) and connect one site or file.')],
-      [t('Write a clear description of the source so the agent picks it correctly.')],
-      [t('In the '), ui('test pane'), t(', ask five questions.')],
+      openPracticeAgent(),
       [
-        t('Check each '),
+        t('Select the '),
+        ui('Knowledge'),
+        t(' tab in the row of tabs along the top of the page, next to '),
+        ui('Overview'),
+        t('.'),
+      ],
+      [t('Select '), ui('Add knowledge'), t('. A pop-up opens with the source options.')],
+      [
+        t('In the pop-up, select '),
+        ui('SharePoint'),
+        t(' or '),
+        ui('OneDrive'),
+        t(', or drag and drop a file into the upload area.'),
+      ],
+      [t('Pick one site or file, following the prompts in the pop-up.')],
+      [
+        t('In the '),
+        ui('Description'),
+        t(' box, write a clear description of the source so the agent picks it correctly.'),
+      ],
+      [t('Select '), ui('Add'), t(' to finish adding the source.')],
+      [
+        t('If the '),
+        ui('test pane'),
+        t(' is closed, select '),
+        ui('Test'),
+        t(' in the top right corner of the page to open it.'),
+      ],
+      [t('In the '), ui('test pane'), t(', ask five questions, one at a time.')],
+      [
+        t('Under each answer, select the reference link to check the '),
         kw('citation', 'citation'),
-        t(' to confirm the answer came from your knowledge source.'),
+        t(' and confirm the answer came from your knowledge source.'),
       ],
     ]),
     watchOuts: [
@@ -512,11 +762,117 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(4, [
-      [t('Create a new topic and add a trigger phrase or description.')],
-      [t('Add a '), ui('Question'), t(' node to collect input from the user.')],
-      [t('Add a '), ui('Condition'), t(' node to branch two ways.')],
-      [t('Wire one branch to answer from knowledge, and the other to offer an escalation.')],
-      [t('Test the topic in the '), ui('test pane'), t('.')],
+      openPracticeAgent(),
+      [t('Select the '), ui('Topics'), t(' tab in the row of tabs along the top of the page.')],
+      // VERIFY IN UI
+      verifyStep([
+        t("Select '"),
+        ui('+ New topic'),
+        t("', give it a name, and add a short description."),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'The topic opens on the authoring canvas. Find the Trigger node at the top, and the small ',
+        ),
+        ui('+'),
+        t(' (Add node) button on the line just below it.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Select the '),
+        ui('+'),
+        t(' button below the Trigger node, then select '),
+        ui('Ask a question'),
+        t('.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'In the new Question node, type your question in the message box, for example "Which system do you need help with?"',
+        ),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Under '),
+        ui('Identify'),
+        t(', select the answer type, for example '),
+        ui('Multiple choice options'),
+        t('.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Select '),
+        ui('+ New option'),
+        t(' and type each answer the user can pick, for example "Outlook" and "Teams".'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Under '),
+        ui('Save user response as'),
+        t(', select the variable name and rename it to something clear, like SystemName.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Select the '),
+        ui('+'),
+        t(' button below the Question node, then select '),
+        ui('Add a condition'),
+        t('. The canvas splits into two branches.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('In the left branch (Condition), select '),
+        ui('Select a variable'),
+        t(' and choose the variable you just saved.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Set the comparison to '),
+        ui('is equal to'),
+        t(' and pick a value, for example "Outlook".'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Under the left branch, select '),
+        ui('+'),
+        t(', then select '),
+        ui('Send a message'),
+        t(' and type the answer for that choice.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Under the right branch ('),
+        ui('All other conditions'),
+        t('), select '),
+        ui('+'),
+        t(', then select '),
+        ui('Topic management'),
+        t(' > '),
+        ui('Go to another topic'),
+        t(' > '),
+        ui('Escalate'),
+        t('.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'To change how the topic starts, select the Trigger node at the top of the canvas, select its ',
+        ),
+        ui('…'),
+        t(' (More) menu, then select '),
+        ui('Change trigger'),
+        t(' and pick the trigger type you need.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([t('Select '), ui('Save'), t(' in the top right corner of the canvas.')]),
+      [
+        t('Select '),
+        ui('Test'),
+        t(' in the top right corner to open the '),
+        ui('test pane'),
+        t(', then type a message that should start your topic, and try both branches.'),
+      ],
     ]),
     watchOuts: [
       'Descriptions are a skill — write trigger phrases and topic descriptions like you mean it, since the agent routes by reading them.',
@@ -593,10 +949,68 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(5, [
-      [t('Open '), ui('Add tool'), t(' on your practice agent.')],
-      [t('Pick a connector (for example, Outlook, SharePoint, or Dataverse) for your tool.')],
-      [t('Write a clear description so the agent knows when to use it.')],
-      [t('Trigger the tool from the '), ui('test pane'), t(' and confirm it runs.')],
+      openPracticeAgent(),
+      [t('Select the '), ui('Tools'), t(' tab in the row of tabs along the top of the page.')],
+      [
+        t('Select '),
+        ui('Add a tool'),
+        t('. A pop-up opens with a search box and a list of tools.'),
+      ],
+      [t('In the search box at the top of the pop-up, type '), ui('Outlook'), t('.')],
+      [
+        t('Select an Office 365 Outlook action from the results, for example '),
+        ui('Send an email (V2)'),
+        t('.'),
+      ],
+      [
+        t('Look at the '),
+        ui('Connection'),
+        t(
+          ' area in the pop-up. If it shows a sign-in prompt instead of a green check mark, select ',
+        ),
+        ui('Sign in'),
+        t(' (or '),
+        ui('Create new connection'),
+        t(').'),
+      ],
+      [
+        t(
+          'In the sign-in window that opens, select your work account and accept any permission prompt.',
+        ),
+      ],
+      [
+        t('Back in the pop-up, confirm the connection now shows a green check mark, then select '),
+        ui('Add and configure'),
+        t('.'),
+      ],
+      // VERIFY IN UI
+      verifyStep([
+        t("The tool's Details page opens. The "),
+        ui('Description'),
+        t(
+          ' field is in the Details section, just below Name. To get back here later, open the Tools tab and select the tool name.',
+        ),
+      ]),
+      [
+        t('In the '),
+        ui('Description'),
+        t(' field, write a clear description so the agent knows when to use the tool.'),
+      ],
+      [t('Select '), ui('Save'), t(' in the top right corner of the page.')],
+      [
+        t('Select '),
+        ui('Test'),
+        t(
+          ' in the top right corner to open the test pane, then ask the agent to do the task, for example "Send me an email with a summary of our chat."',
+        ),
+      ],
+      [
+        t('If the '),
+        ui('test pane'),
+        t(' asks for permission to use your connection, select '),
+        ui('Allow'),
+        t(', then confirm the tool ran.'),
+      ],
     ]),
     watchOuts: [
       "The tool's description decides whether the agent picks it at the right moment — a vague description means a missed tool.",
@@ -672,11 +1086,98 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(6, [
-      [t('Open the '), ui('Agents'), t(' tab on your parent agent.')],
-      [t('Add a child agent (new, or an existing Copilot Studio agent) with one narrow job.')],
-      [t('Write a crisp, one-line description for the child agent.')],
+      openPracticeAgent(),
+      [t('Select the '), ui('Agents'), t(' tab in the row of tabs along the top of the page.')],
+      // VERIFY IN UI
+      verifyStep([t('Select '), ui('+ New agent'), t(', then select '), ui('Child agent'), t('.')]),
+      verifyStep(
+        [t('Fill in the Details section at the top of the new child agent page.')],
+        [
+          // VERIFY IN UI
+          sub([t('In '), ui('Name'), t(', enter a short name for the child agent.')], true),
+          // VERIFY IN UI
+          sub(
+            [
+              t('Under '),
+              ui('When will this be used?'),
+              t(', select '),
+              ui('The agent chooses - Based on description'),
+              t('.'),
+            ],
+            true,
+          ),
+          // VERIFY IN UI
+          sub(
+            [
+              t('In '),
+              ui('Description'),
+              t(', write one crisp line about the child agent’s narrow job. It is required.'),
+            ],
+            true,
+          ),
+        ],
+      ),
+      verifyStep(
+        [t('Use the side menu on the left of the child agent page to add the rest.')],
+        [
+          // VERIFY IN UI
+          sub(
+            [
+              t('Select '),
+              ui('Instructions'),
+              t(' and describe what this agent does, its tone, and its rules.'),
+            ],
+            true,
+          ),
+          // VERIFY IN UI
+          sub(
+            [
+              t('Select '),
+              ui('Knowledge'),
+              t(', then '),
+              ui('+ Add'),
+              t(', and add only the knowledge this child agent needs.'),
+            ],
+            true,
+          ),
+          // VERIFY IN UI
+          sub(
+            [
+              t('Select '),
+              ui('Tools'),
+              t(', then '),
+              ui('+ Add'),
+              t(', and add the tools it needs.'),
+            ],
+            true,
+          ),
+          // VERIFY IN UI
+          sub(
+            [
+              t('Select '),
+              ui('Inputs'),
+              t(
+                ' and add any details the child agent needs from the parent, for example the user’s question.',
+              ),
+            ],
+            true,
+          ),
+          // VERIFY IN UI
+          sub(
+            [
+              t('For each tool, open it and scroll to '),
+              ui('Completion'),
+              t(' to choose what the agent does when it finishes using the tool.'),
+            ],
+            true,
+          ),
+        ],
+      ),
+      [t('Select '), ui('Save'), t(' in the top right corner of the page.')],
       [
-        t('Ask a question in the '),
+        t('Select '),
+        ui('Test'),
+        t(' in the top right corner, then ask a question in the '),
         ui('test pane'),
         t(' that should route to the child agent, and watch what happens.'),
       ],
@@ -770,14 +1271,32 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(7, [
-      [t('Open '), ui('Settings'), t(' on your practice agent.')],
-      [t('Find the Generative AI / orchestration section.')],
+      openPracticeAgent(),
+      [t('Select '), ui('Settings'), t(' in the top right corner of the page, next to Publish.')],
+      [
+        t('In the Settings menu on the left, select '),
+        ui('Generative AI'),
+        t(' to find the orchestration section.'),
+      ],
       [t('Write down the current orchestration mode (generative vs classic) without changing it.')],
       [
-        t(
-          'Open the model dropdown and note the primary model and any preview or experimental tags.',
-        ),
+        t('Go back to the Overview page. Close Settings, then select '),
+        ui('Overview'),
+        t(' in the row of tabs along the top of the page.'),
       ],
+      [
+        t('Open the model dropdown. It sits under '),
+        ui('Select your agent’s model'),
+        t(', below the Details card.'),
+      ],
+      [
+        t('Note the primary model and any '),
+        ui('Preview'),
+        t(' or '),
+        ui('Experimental'),
+        t(' tags.'),
+      ],
+      [t('Close the dropdown without changing the model.')],
     ]),
     watchOuts: [
       'Preview means not for production — preview and experimental model tags are fine to explore, but stay out of anything real.',
@@ -863,15 +1382,65 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(8, [
+      openPracticeAgent(),
       [
-        t('Open the '),
+        t('Select '),
+        ui('Test'),
+        t(' in the top right corner to open the '),
         ui('test pane'),
-        t(' and review the activity map for a sample conversation.'),
+        t(', and ask your agent one question.'),
       ],
-      [t('Create a test set with 10 real user questions and expected answers.')],
-      [t('Choose an evaluation method and run it.')],
-      [t('Read the results and find your worst-scoring answer.')],
-      [t('Fix the description or instructions behind it, then re-run and compare.')],
+      // VERIFY IN UI
+      verifyStep([
+        t('Select the '),
+        ui('Activity'),
+        t(' tab in the row of tabs along the top of the page.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Select your test conversation at the top of the list to open its activity map.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'Read the activity map from top to bottom. Each step shows which knowledge, tool, or topic the agent used for the answer, and why.',
+        ),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Select the '),
+        ui('Evaluation'),
+        t(' tab in the row of tabs along the top of the page.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([t('Select '), ui('+ New test set'), t('.')]),
+      // VERIFY IN UI
+      verifyStep([t('Enter a '), ui('Name'), t(' for the test set.')]),
+      // VERIFY IN UI
+      verifyStep([t('Enter a '), ui('Description'), t(' that says what the test set checks.')]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Add 10 real user questions, each with the answer you expect, then select '),
+        ui('Save'),
+        t('.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Choose an evaluation method, then select '),
+        ui('Evaluate'),
+        t(' to start the run.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Wait until the run shows as complete, then select the run to open its results.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'Read the results question by question, and open your worst-scoring answer to see why it failed.',
+        ),
+      ]),
+      [t('Fix the description or instructions behind it, then re-run the test set and compare.')],
     ]),
     watchOuts: [
       'Nothing ships untested — evaluation before publishing, every time. A 10-question test set is the minimum bar.',
@@ -935,8 +1504,33 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(9, [
-      [t('Open the Analytics summary page of a live (or demo) agent.')],
-      [t('Review sessions, engagement, resolution, and escalation numbers.')],
+      [
+        t('Check that the '),
+        ui('globe icon'),
+        t(' in the bottom left corner shows the environment of a published agent. Then select '),
+        ui('Agents'),
+        t(' in the left navigation, and select that agent. Its Overview page opens.'),
+      ],
+      // VERIFY IN UI
+      verifyStep([
+        t('In the row of tabs along the top of the page, select '),
+        ui('+2'),
+        t(' at the right end to show the hidden tabs.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([t('Select '), ui('Analytics'), t('. The analytics summary opens.')]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'Use the date range picker in the top right corner of the Analytics page to choose the last 7 days.',
+        ),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'Review the sessions, engagement, resolution, and escalation numbers in the summary cards.',
+        ),
+      ]),
       [t('Name one thing you would improve based on what you see.')],
     ]),
     watchOuts: [
@@ -1029,8 +1623,41 @@ export const modules: Module[] = [
           'Run through the pre-publish checklist: knowledge verified, evaluation passed, right environment, right channel.',
         ),
       ],
-      [t('Select '), ui('Publish'), t(' on your practice agent.')],
-      [t('Open the '), ui('Channels'), t(' page and enable the demo website channel.')],
+      openPracticeAgent(),
+      // VERIFY IN UI
+      verifyStep([
+        t('Select '),
+        ui('Publish'),
+        t(' in the top right corner of the page, next to Settings.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('In the confirmation box, select '),
+        ui('Publish'),
+        t(' again, and wait for the message that says publishing finished.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('In the row of tabs along the top of the page, select '),
+        ui('+2'),
+        t(' at the right end, then select '),
+        ui('Channels'),
+        t('.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('On the Channels page, select the '),
+        ui('Demo website'),
+        t(
+          ' tile. If it is not listed, publish your agent first. If it is still missing after publishing, the channel may be turned off in your environment, so ask your admin.',
+        ),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'In the panel that opens on the right, copy the demo website link, then open it in a new browser tab to check it works.',
+        ),
+      ]),
       [t('Send the demo website link to a classmate for feedback.')],
     ]),
     watchOuts: [
@@ -1063,7 +1690,7 @@ export const modules: Module[] = [
     checklist: [
       'Completed the pre-publish checklist',
       'Published my practice agent',
-      'Enabled the demo website channel',
+      'Opened the Demo website channel and copied its link',
       'Sent the demo link to a classmate for feedback',
     ],
   },

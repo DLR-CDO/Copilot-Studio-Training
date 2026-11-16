@@ -38,6 +38,7 @@ export function BuildStepper({ steps, checked, onToggle }: BuildStepperProps) {
           return (
             <li
               key={step.id}
+              data-verify={step.verify ? 'true' : undefined}
               className={`flex gap-3 rounded-block border px-3 py-3 ${
                 isChecked ? 'border-teal bg-teal-soft/50' : 'border-line bg-card'
               }`}
@@ -55,8 +56,17 @@ export function BuildStepper({ steps, checked, onToggle }: BuildStepperProps) {
                   checked={isChecked}
                   onChange={(e) => onToggle(step.id, e.target.checked)}
                 />
-                <span className="text-[15px] leading-relaxed">
+                <span className="min-w-0 text-[15px] leading-relaxed">
                   <RichText tokens={step.tokens} />
+                  {step.substeps && step.substeps.length > 0 ? (
+                    <ol className="mt-2 list-[lower-alpha] space-y-1.5 pl-5">
+                      {step.substeps.map((sub, subIndex) => (
+                        <li key={subIndex} data-verify={sub.verify ? 'true' : undefined}>
+                          <RichText tokens={sub.tokens} />
+                        </li>
+                      ))}
+                    </ol>
+                  ) : null}
                 </span>
               </label>
             </li>

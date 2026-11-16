@@ -68,7 +68,10 @@ function recordsForModule(mod: Module): SearchRecord[] {
 
   push('why', mod.whyItMatters, 'main')
   mod.concept.forEach((block, i) => push('concept', conceptBlockToText(block), String(i)))
-  mod.buildSteps.forEach((step) => push('build', tokensToText(step.tokens), step.id))
+  mod.buildSteps.forEach((step) => {
+    const subText = (step.substeps ?? []).map((sub) => tokensToText(sub.tokens)).join(' ')
+    push('build', `${tokensToText(step.tokens)} ${subText}`.trim(), step.id)
+  })
   mod.watchOuts.forEach((item, i) => push('watch-out', item, String(i)))
   push('try-it', mod.tryIt, 'main')
   mod.checklist.forEach((item, i) => push('checklist', item, String(i)))

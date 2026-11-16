@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { WrapText } from './internal/WrapText'
 
 type SpecialistId = 'hr' | 'it' | 'finance'
 
@@ -15,21 +16,21 @@ const PRESETS: QuestionPreset[] = [
     id: 'hr',
     question: 'What does PTO accrual mean?',
     specialistLabel: 'HR specialist',
-    pathD: 'M280 76 C 200 95 150 110 132 128',
+    pathD: 'M280 80 C 200 95 150 110 132 128',
     color: '#0E8C86',
   },
   {
     id: 'it',
     question: "My laptop won't start",
     specialistLabel: 'IT specialist',
-    pathD: 'M320 76 L320 128',
+    pathD: 'M320 80 L320 128',
     color: '#0E8C86',
   },
   {
     id: 'finance',
     question: 'Where is my expense reimbursement?',
     specialistLabel: 'Finance specialist',
-    pathD: 'M360 76 C 440 95 490 110 508 128',
+    pathD: 'M360 80 C 440 95 490 110 508 128',
     color: '#0E8C86',
   },
 ]
@@ -58,20 +59,21 @@ export function Fig6MultiAgentRouting() {
           <title id={titleId}>
             Diagram: a parent agent routes questions to specialist child agents
           </title>
-          <rect x="245" y="20" width="150" height="56" rx="12" fill="#6B5BD2" />
-          <text x="320" y="44" textAnchor="middle" className="stw">
+          <rect x="245" y="10" width="150" height="70" rx="12" fill="#6B5BD2" />
+          <text x="320" y="32" textAnchor="middle" className="stw">
             Parent agent
           </text>
-          <text
-            x="320"
-            y="62"
-            textAnchor="middle"
+          <WrapText
+            x={320}
+            y={56}
+            width={150}
+            className="stm"
             fontFamily="Consolas"
-            fontSize="10.5"
+            fontSize={10.5}
             fill="#EEEBFA"
           >
             {asked ? `"${asked.question}"` : 'routes the question'}
-          </text>
+          </WrapText>
 
           {(Object.entries(SPECIALIST_BOX) as [SpecialistId, (typeof SPECIALIST_BOX)['hr']][]).map(
             ([id, box]) => {
@@ -99,23 +101,22 @@ export function Fig6MultiAgentRouting() {
                       transition: 'fill 200ms ease, stroke 200ms ease, stroke-width 200ms ease',
                     }}
                   />
-                  <text
+                  <WrapText
                     x={box.x + box.width / 2}
                     y={box.y + 22}
-                    textAnchor="middle"
-                    className="st"
-                    fontWeight="600"
+                    width={box.width}
+                    fontWeight={600}
                   >
                     {label}
-                  </text>
-                  <text
+                  </WrapText>
+                  <WrapText
                     x={box.x + box.width / 2}
                     y={box.y + 39}
-                    textAnchor="middle"
+                    width={box.width}
                     className="stm"
                   >
                     {sub}
-                  </text>
+                  </WrapText>
                 </g>
               )
             },

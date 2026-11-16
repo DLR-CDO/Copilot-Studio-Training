@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getModuleById } from '../content/modules'
 import { useLearner } from '../lib/useLearner'
@@ -28,6 +28,13 @@ export function ModulePage() {
   const moduleId = Number(id)
   const { state, updateModule } = useLearner()
   const [celebrate, setCelebrate] = useState(false)
+
+  // The page is keyed by module id, so this runs once per module visit.
+  useEffect(() => {
+    // Deep links with a hash (search results) are scrolled by useHashHighlight instead.
+    if (window.location.hash) return
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [])
 
   const mod = getModuleById(moduleId)
 

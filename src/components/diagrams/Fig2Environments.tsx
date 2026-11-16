@@ -1,12 +1,16 @@
 import { useId, useState } from 'react'
 import { Callout } from '../ui/Callout'
+import { useCycle } from '../../hooks/useCycle'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { onActivateKeyDown } from './internal/a11y'
+import { WrapText } from './internal/WrapText'
 
 type EnvId = 'dev' | 'test' | 'prod'
 
 interface EnvDef {
   id: EnvId
   label: string
+  subtitle: string
   box: { x: number; y: number; width: number; height: number }
   happens: string
   never: string
@@ -16,30 +20,40 @@ const ENVS: EnvDef[] = [
   {
     id: 'dev',
     label: 'Dev',
-    box: { x: 30, y: 55, width: 160, height: 62 },
+    subtitle: 'you build here',
+    box: { x: 30, y: 55, width: 160, height: 66 },
     happens: 'You build and experiment here, freely and often.',
     never: 'Never treat Dev as production truth — it can break at any time.',
   },
   {
     id: 'test',
     label: 'Test',
-    box: { x: 240, y: 55, width: 160, height: 62 },
+    subtitle: 'others verify here',
+    box: { x: 240, y: 55, width: 160, height: 66 },
     happens: 'Other people verify your work before it goes further.',
     never: 'Never skip verification before Production.',
   },
   {
     id: 'prod',
     label: 'Production',
-    box: { x: 450, y: 55, width: 160, height: 62 },
+    subtitle: 'real users, never build here',
+    box: { x: 450, y: 55, width: 160, height: 66 },
     happens: 'Real users rely on this every day.',
     never: 'Never build or experiment directly in Production.',
   },
 ]
 
+const CYCLE_MS = 1800
+
 /** Static diagram extracted from copilot-studio-training-guide.html (fig 2). */
 export function Fig2Environments() {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const [selected, setSelected] = useState<EnvId | null>(null)
   const titleId = useId()
+
+  const animating = !prefersReducedMotion && selected === null
+  const cycleIndex = useCycle(ENVS.length, CYCLE_MS, animating)
+  const highlighted = selected ?? (animating ? ENVS[cycleIndex]!.id : null)
 
   const active = ENVS.find((e) => e.id === selected) ?? null
 
@@ -50,11 +64,12 @@ export function Fig2Environments() {
           <title id={titleId}>Diagram: build in Dev, verify in Test, ship to Production</title>
 
           {ENVS.map((env) => {
-            const isDev = env.id === 'dev'
+            const isLit = highlighted === env.id
             const isSelected = selected === env.id
+            const cx = env.box.x + env.box.width / 2
             return (
               <g key={env.id}>
-                {isDev ? (
+                {isLit ? (
                   <rect
                     x={env.box.x - 6}
                     y={env.box.y - 6}
@@ -82,43 +97,38 @@ export function Fig2Environments() {
                     width={env.box.width}
                     height={env.box.height}
                     rx="12"
-                    fill={isDev ? '#0E8C86' : isSelected ? '#EEEBFA' : '#fff'}
-                    stroke={isSelected ? '#6B5BD2' : isDev ? '#0E8C86' : '#1E2447'}
-                    strokeWidth={isSelected ? 3 : 2}
-                    style={{ transition: 'fill 200ms ease, stroke 200ms ease' }}
+                    fill={isLit ? '#0E8C86' : '#fff'}
+                    stroke={isLit ? '#0E8C86' : '#1E2447'}
+                    strokeWidth={isLit ? 3 : 2}
+                    style={{ transition: 'fill 300ms ease, stroke 300ms ease' }}
                   />
-                  <text
-                    x={env.box.x + env.box.width / 2}
-                    y={env.box.y + 27}
-                    textAnchor="middle"
-                    className={isDev ? 'stw' : 'st'}
-                    fontWeight={isDev ? undefined : 600}
+                  <WrapText
+                    x={cx}
+                    y={env.box.y + 26}
+                    width={env.box.width}
+                    className={isLit ? 'stw' : 'st'}
+                    fontWeight={600}
                   >
                     {env.label}
-                  </text>
-                  <text
-                    x={env.box.x + env.box.width / 2}
-                    y={env.box.y + 45}
-                    textAnchor="middle"
+                  </WrapText>
+                  <WrapText
+                    x={cx}
+                    y={env.box.y + 48}
+                    width={env.box.width}
                     className="stm"
-                    fontFamily={isDev ? 'Consolas' : undefined}
-                    fill={isDev ? '#E3F3F2' : undefined}
+                    fill={isLit ? '#E3F3F2' : undefined}
                   >
-                    {env.id === 'dev'
-                      ? 'you build here'
-                      : env.id === 'test'
-                        ? 'others verify here'
-                        : 'real users, never build here'}
-                  </text>
+                    {env.subtitle}
+                  </WrapText>
                 </g>
               </g>
             )
           })}
 
-          <path d="M190 86 L232 86" stroke="#1E2447" strokeWidth="2" fill="none" />
-          <path d="M226 80 L236 86 L226 92" fill="none" stroke="#1E2447" strokeWidth="2" />
-          <path d="M400 86 L442 86" stroke="#1E2447" strokeWidth="2" fill="none" />
-          <path d="M436 80 L446 86 L436 92" fill="none" stroke="#1E2447" strokeWidth="2" />
+          <path d="M190 88 L232 88" stroke="#1E2447" strokeWidth="2" fill="none" />
+          <path d="M226 82 L236 88 L226 94" fill="none" stroke="#1E2447" strokeWidth="2" />
+          <path d="M400 88 L442 88" stroke="#1E2447" strokeWidth="2" fill="none" />
+          <path d="M436 82 L446 88 L436 94" fill="none" stroke="#1E2447" strokeWidth="2" />
           <text x="110" y="35" textAnchor="middle" className="stm">
             ← start every project here
           </text>
@@ -134,6 +144,17 @@ export function Fig2Environments() {
             <Callout variant="watch" title="What you must never do here">
               <p>{active.never}</p>
             </Callout>
+            {!prefersReducedMotion ? (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setSelected(null)}
+                  className="rounded-pill border border-line bg-card px-4 py-1.5 font-mono text-xs uppercase tracking-wide hover:border-violet"
+                >
+                  Resume animation
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : (
           <p className="text-center text-sm text-muted">

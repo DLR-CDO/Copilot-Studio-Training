@@ -14,16 +14,16 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm1-q1',
       type: 'multiple-choice',
-      prompt: 'Which four parts make up an agent, as covered in this module?',
+      prompt: 'Which list names parts of an agent that you set up on its Overview page?',
       options: [
-        'Knowledge, instructions, tools, and channels',
-        'Knowledge, topics, connectors, and licensing',
-        'Instructions, variables, models, and channels',
-        'Tools, environments, topics, and citations',
+        'Description, instructions, knowledge, tools, triggers, agents, topics, and suggested prompts',
+        'Environments, licensing, Copilot Credits, and data policies',
+        'Variables, conditions, citations, and evaluations',
+        'Analytics, test sets, sessions, and escalations',
       ],
       correctIndex: 0,
       explanation:
-        'An agent is knowledge + instructions + tools + channels — the four parts this module walks through.',
+        'The Overview page walks through the description, model, instructions, knowledge, tools, triggers, agents, topics, and suggested prompts. Channels are where people use the agent once it is published.',
     },
     {
       id: 'm1-q2',
@@ -36,7 +36,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm1-q3',
       type: 'multiple-choice',
-      prompt: 'In the maker portal, where do you try out a new agent by asking it questions?',
+      prompt: 'In Copilot Studio, where do you try out a new agent by asking it questions?',
       options: ['The left navigation', 'The test pane', 'The Overview page', 'The Channels page'],
       correctIndex: 1,
       explanation:
@@ -57,13 +57,13 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: "What's the very first step in creating your practice agent?",
       options: [
         'Open Settings and pick a model',
-        'Open the maker portal and select Create',
+        'Make sure the DEV environment is selected',
         'Add a knowledge source',
         'Publish to the demo website',
       ],
       correctIndex: 1,
       explanation:
-        'The build steps start with opening the maker portal and selecting Create to start a new agent.',
+        'Before you do anything, make sure you are in the DEV environment. To change it, click the globe icon in the bottom left corner, above your name.',
     },
   ],
 
@@ -96,16 +96,16 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm2-q3',
       type: 'multiple-choice',
-      prompt: 'Where do you check and switch your current environment in the maker portal?',
+      prompt: 'Where do you check and switch your current environment in Copilot Studio?',
       options: [
         'The Channels page',
-        'The top-right environment picker',
+        'The globe icon in the bottom left corner, above your name',
         'The Settings page',
         'The Overview page',
       ],
       correctIndex: 1,
       explanation:
-        'You check and switch your environment using the picker in the top-right of the portal.',
+        'Click the globe icon in the bottom left corner, above your name, to open the Switch environment menu.',
     },
     {
       id: 'm2-q4',

@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import { onActivateKeyDown } from './internal/a11y'
+import { WrapText } from './internal/WrapText'
 
 const EXAMPLE_SETS: [string, string, string][] = [
   ['Send an email', 'Look up a record', 'Start an approval'],
@@ -68,15 +69,9 @@ export function Fig5Tools() {
                 strokeWidth="2"
                 className="diagram-draw"
               />
-              <text
-                x="535"
-                y={(BOX_Y[i] ?? 0) + 27}
-                textAnchor="middle"
-                className="st"
-                style={{ fontSize: label.length > 18 ? '11.5px' : undefined }}
-              >
+              <WrapText x={535} y={(BOX_Y[i] ?? 0) + 27} width={150}>
                 {label}
-              </text>
+              </WrapText>
             </g>
           ))}
 

@@ -19,8 +19,13 @@ describe('searchModules', () => {
   })
 
   it('finds build step content', () => {
-    const results = searchModules('environment picker')
+    const results = searchModules('switch environment')
     expect(results.some((r) => r.section === 'build' && r.moduleId === 2)).toBe(true)
+  })
+
+  it('finds build sub-step content', () => {
+    const results = searchModules('preferred solution')
+    expect(results.some((r) => r.section === 'build' && r.moduleId === 1)).toBe(true)
   })
 
   it('includes a snippet around the match', () => {

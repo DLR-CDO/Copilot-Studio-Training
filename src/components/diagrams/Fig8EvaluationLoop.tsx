@@ -1,11 +1,11 @@
 import { useEffect, useId, useState } from 'react'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 import { onActivateKeyDown } from './internal/a11y'
+import { WrapText } from './internal/WrapText'
 
 interface Stage {
   label: string
   box: { x: number; y: number; width: number; height: number }
-  fill: string
   description: string
 }
 
@@ -13,25 +13,21 @@ const STAGES: Stage[] = [
   {
     label: 'Build a test set',
     box: { x: 245, y: 15, width: 150, height: 46 },
-    fill: '#fff',
     description: 'Collect real questions with known-good answers so results are measurable.',
   },
   {
     label: 'Run evaluation',
     box: { x: 460, y: 90, width: 150, height: 46 },
-    fill: '#fff',
     description: 'Run the agent against every test question automatically.',
   },
   {
     label: 'Review results',
     box: { x: 245, y: 162, width: 150, height: 46 },
-    fill: '#fff',
     description: 'Look at what passed, what failed, and why.',
   },
   {
     label: 'Fix & improve',
     box: { x: 30, y: 90, width: 150, height: 46 },
-    fill: '#F2B33D',
     description:
       'Adjust instructions, knowledge, or topics based on what you learned, then run it again.',
   },
@@ -98,20 +94,21 @@ export function Fig8EvaluationLoop() {
                   width={stage.box.width}
                   height={stage.box.height}
                   rx="10"
-                  fill={stage.fill}
+                  fill={isActive ? '#F2B33D' : '#fff'}
                   stroke={isActive ? '#6B5BD2' : '#0E8C86'}
                   strokeWidth={isActive ? 4 : 2}
-                  style={{ transition: 'stroke 200ms ease, stroke-width 200ms ease' }}
+                  style={{
+                    transition: 'fill 300ms ease, stroke 300ms ease, stroke-width 300ms ease',
+                  }}
                 />
-                <text
+                <WrapText
                   x={stage.box.x + stage.box.width / 2}
                   y={stage.box.y + stage.box.height / 2 + 5}
-                  textAnchor="middle"
-                  className="st"
-                  fontWeight="600"
+                  width={stage.box.width}
+                  fontWeight={600}
                 >
                   {stage.label}
-                </text>
+                </WrapText>
               </g>
             )
           })}

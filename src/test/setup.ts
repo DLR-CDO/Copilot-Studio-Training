@@ -50,4 +50,11 @@ beforeEach(() => {
       dispatchEvent: () => false,
     }),
   })
+
+  // jsdom does not implement scrolling.
+  Object.defineProperty(window, 'scrollTo', {
+    writable: true,
+    configurable: true,
+    value: vi.fn(),
+  })
 })
