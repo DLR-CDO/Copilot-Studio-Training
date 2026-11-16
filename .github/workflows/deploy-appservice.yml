@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -29,9 +33,18 @@ jobs:
         # App Service hosts at site root — do not set GITHUB_PAGES base path
         run: npm run build
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+      - name: Azure login (OIDC, no stored password)
+        uses: azure/login@v2
         with:
-          app-name: copilotstudio-academy
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: dist
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Package and deploy to Azure Web App
+        run: |
+          (cd dist && zip -qr "$RUNNER_TEMP/site.zip" .)
+          az webapp deploy \
+            --resource-group rg-copilotstudio-training \
+            --name copilotstudio-academy \
+            --type zip \
+            --src-path "$RUNNER_TEMP/site.zip"
