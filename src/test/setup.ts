@@ -29,6 +29,15 @@ class MemoryStorage implements Storage {
 }
 
 beforeEach(() => {
+  // Server tests run with `@vitest-environment node`, which has no window.
+  if (typeof window === 'undefined') return
+
+  // No course server in UI tests, so the app runs with browser-only progress.
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => new Response('Not found', { status: 404 })),
+  )
+
   Object.defineProperty(globalThis, 'localStorage', {
     value: new MemoryStorage(),
     configurable: true,

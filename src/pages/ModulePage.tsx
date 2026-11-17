@@ -19,14 +19,14 @@ import { GoDeeper } from '../components/module/GoDeeper'
 import { ModuleFooterNav } from '../components/module/ModuleFooterNav'
 import { ModuleMiniMap } from '../components/module/ModuleMiniMap'
 import { NotesBox } from '../components/module/NotesBox'
-import { Quiz } from '../components/module/Quiz'
+import { Quiz, type QuizResult } from '../components/module/Quiz'
 import { Celebration } from '../components/module/Celebration'
 import { Callout } from '../components/ui/Callout'
 
 export function ModulePage() {
   const { id } = useParams()
   const moduleId = Number(id)
-  const { state, updateModule } = useLearner()
+  const { state, updateModule, recordQuizResult } = useLearner()
   const [celebrate, setCelebrate] = useState(false)
 
   // The page is keyed by module id, so this runs once per module visit.
@@ -82,13 +82,10 @@ export function ModulePage() {
   )
 
   const onQuizResult = useCallback(
-    ({ score }: { score: number; passed: boolean }) => {
-      updateModule(moduleId, {
-        quizBestScore: Math.max(progress.quizBestScore, score),
-        quizAttempts: progress.quizAttempts + 1,
-      })
+    (result: QuizResult) => {
+      void recordQuizResult(moduleId, result)
     },
-    [moduleId, progress.quizBestScore, progress.quizAttempts, updateModule],
+    [moduleId, recordQuizResult],
   )
 
   const onMarkComplete = useCallback(() => {

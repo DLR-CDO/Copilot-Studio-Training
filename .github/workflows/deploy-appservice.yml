@@ -31,7 +31,7 @@ jobs:
 
       - name: Build
         # App Service hosts at site root — do not set GITHUB_PAGES base path
-        run: npm run build
+        run: npm run build && npm run build:server
 
       - name: Azure login (OIDC, no stored password)
         uses: azure/login@v2
@@ -40,11 +40,32 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Check the site is configured before deploying
+        # The server refuses to start without these, so fail here instead of taking the site down.
+        run: |
+          names=$(az webapp config appsettings list \
+            --resource-group rg-copilotstudio-training --name copilotstudio-academy \
+            --query "[].name" -o tsv)
+          for required in AZURE_STORAGE_CONNECTION_STRING ADMIN_EMAILS ALLOWED_TENANT_ID; do
+            echo "$names" | grep -qx "$required" || { echo "::error::App setting $required is missing"; exit 1; }
+          done
+          site_id=$(az webapp show \
+            --resource-group rg-copilotstudio-training --name copilotstudio-academy --query id -o tsv)
+          enabled=$(az rest --method get \
+            --url "https://management.azure.com${site_id}/config/authsettingsV2?api-version=2023-12-01" \
+            --query "properties.platform.enabled" -o tsv)
+          [ "$enabled" = "true" ] || { echo "::error::App Service Authentication is not turned on"; exit 1; }
+
       - name: Package and deploy to Azure Web App
         run: |
-          (cd dist && zip -qr "$RUNNER_TEMP/site.zip" .)
+          zip -qr "$RUNNER_TEMP/site.zip" dist server-dist
+          az webapp config set \
+            --resource-group rg-copilotstudio-training \
+            --name copilotstudio-academy \
+            --startup-file "node /home/site/wwwroot/server-dist/index.mjs"
           az webapp deploy \
             --resource-group rg-copilotstudio-training \
             --name copilotstudio-academy \
             --type zip \
+            --clean true \
             --src-path "$RUNNER_TEMP/site.zip"

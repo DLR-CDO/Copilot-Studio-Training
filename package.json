@@ -11,10 +11,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview",
-    "build:pages": "GITHUB_PAGES=true npm run build"
+    "build:pages": "GITHUB_PAGES=true npm run build",
+    "build:server": "vite build --config vite.server.config.ts",
+    "start": "node server-dist/index.mjs",
+    "start:mock": "npm run build && npm run build:server && AUTH_MODE=mock node server-dist/index.mjs"
   },
   "dependencies": {
+    "@azure/data-tables": "^13.3.2",
     "flexsearch": "^0.8.212",
+    "pdf-lib": "^1.17.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.13.1"

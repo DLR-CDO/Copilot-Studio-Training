@@ -10,9 +10,18 @@ interface TopBarProps {
 }
 
 export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarProps) {
-  const { state, setTheme } = useLearner()
+  const { state, setTheme, session } = useLearner()
   const ratio = overallCompletionRatio(state)
   const isDark = state.theme === 'dark'
+  const user = session.mode === 'server' ? session.user : null
+  const navItems = [
+    { to: '/', label: 'Home' },
+    { to: '/progress', label: 'Progress' },
+    ...(user ? [{ to: '/certificate', label: 'My Certificate' }] : []),
+    { to: '/glossary', label: 'Glossary' },
+    { to: '/cheatsheet', label: 'Cheat sheet' },
+    { to: '/resources', label: 'Resources' },
+  ]
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-card/95 backdrop-blur print:hidden">
@@ -68,6 +77,20 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
         </button>
 
         <ProgressRing ratio={ratio} size={40} />
+
+        {user ? (
+          <div className="min-w-0 max-w-[8rem] shrink text-right sm:max-w-[14rem]">
+            <p className="truncate text-sm font-semibold" title={user.email}>
+              {user.name}
+            </p>
+            <a
+              href={user.logoutUrl}
+              className="font-mono text-[11px] uppercase tracking-wide text-muted hover:text-ink"
+            >
+              Sign out
+            </a>
+          </div>
+        ) : null}
       </div>
 
       <nav
@@ -75,13 +98,7 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
         aria-label="Site sections"
       >
         <ul className="mx-auto flex max-w-[1400px] flex-wrap gap-x-4 gap-y-1 font-mono text-xs uppercase tracking-wide">
-          {[
-            { to: '/', label: 'Home' },
-            { to: '/progress', label: 'Progress' },
-            { to: '/glossary', label: 'Glossary' },
-            { to: '/cheatsheet', label: 'Cheat sheet' },
-            { to: '/resources', label: 'Resources' },
-          ].map((item) => (
+          {navItems.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
@@ -94,6 +111,14 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
               </NavLink>
             </li>
           ))}
+          {user?.isAdmin ? (
+            <li>
+              {/* Server-rendered page, so a full navigation rather than a router link. */}
+              <a href="/admin/completions" className="text-muted hover:text-ink">
+                Admin
+              </a>
+            </li>
+          ) : null}
         </ul>
       </nav>
     </header>

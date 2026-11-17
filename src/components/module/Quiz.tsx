@@ -1,15 +1,25 @@
 import { useCallback, useMemo, useState, type FormEvent } from 'react'
 import type { QuizQuestion } from '../../content/types'
 import { PASSING_SCORE } from '../../content/types'
-import { scoreOrderQuestion } from '../../lib/progress'
-import { shuffleQuiz, type ShuffledQuizQuestion } from '../../lib/quiz'
+import {
+  scoreQuizSubmission,
+  shuffleQuiz,
+  type QuizAnswers,
+  type ShuffledQuizQuestion,
+} from '../../lib/quiz'
 import { Callout } from '../ui/Callout'
+
+export interface QuizResult {
+  score: number
+  passed: boolean
+  answers: QuizAnswers
+}
 
 interface QuizProps {
   questions: QuizQuestion[]
   locked: boolean
   bestScore: number
-  onResult: (result: { score: number; passed: boolean }) => void
+  onResult: (result: QuizResult) => void
 }
 
 /** Full quiz UI for a module: all questions at once, one submit, immediate feedback, retakes reshuffle. */
@@ -51,7 +61,7 @@ export function Quiz({ questions, locked, bestScore, onResult }: QuizProps) {
 
 interface QuizAttemptProps {
   questions: QuizQuestion[]
-  onResult: (result: { score: number; passed: boolean }) => void
+  onResult: (result: QuizResult) => void
   onRetake: () => void
 }
 
@@ -94,29 +104,39 @@ function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
       e.preventDefault()
       if (submitted || !allAnswered) return
 
-      const nextResults: Record<string, boolean> = {}
+      const answers: QuizAnswers = {}
       for (const q of shuffled) {
+        const original = originalById.get(q.id)
         if (q.type === 'multiple-choice') {
-          nextResults[q.id] = mcAnswers[q.id] === q.correctIndex
+          const picked = mcAnswers[q.id]
+          answers[q.id] =
+            picked != null && original?.type === 'multiple-choice'
+              ? original.options.indexOf(q.options[picked] ?? '')
+              : null
         } else if (q.type === 'true-false') {
-          nextResults[q.id] = tfAnswers[q.id] === q.correct
+          answers[q.id] = tfAnswers[q.id] ?? null
         } else {
-          const original = originalById.get(q.id)
-          const learnerOrder = orderAnswers[q.id] ?? []
-          nextResults[q.id] =
-            original?.type === 'order'
-              ? scoreOrderQuestion(learnerOrder, original.correctOrder)
-              : false
+          answers[q.id] = orderAnswers[q.id] ?? []
         }
       }
 
-      const score = Object.values(nextResults).filter(Boolean).length
+      const { score, results: nextResults } = scoreQuizSubmission(questions, answers)
       const passed = score >= PASSING_SCORE
       setResults(nextResults)
       setSubmitted(true)
-      onResult({ score, passed })
+      onResult({ score, passed, answers })
     },
-    [submitted, allAnswered, shuffled, mcAnswers, tfAnswers, orderAnswers, originalById, onResult],
+    [
+      submitted,
+      allAnswered,
+      shuffled,
+      questions,
+      mcAnswers,
+      tfAnswers,
+      orderAnswers,
+      originalById,
+      onResult,
+    ],
   )
 
   const score = submitted ? Object.values(results).filter(Boolean).length : 0

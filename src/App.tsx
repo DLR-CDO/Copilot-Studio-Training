@@ -6,6 +6,7 @@ import { GlossaryPage } from './pages/GlossaryPage'
 import { CheatSheetPage } from './pages/CheatSheetPage'
 import { ProgressPage } from './pages/ProgressPage'
 import { ResourcesPage } from './pages/ResourcesPage'
+import { CertificatePage } from './pages/CertificatePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { LearnerProvider } from './lib/LearnerProvider'
 
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/cheatsheet" element={<CheatSheetPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/certificate" element={<CertificatePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

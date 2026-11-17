@@ -65,3 +65,31 @@ export function shuffleQuiz(
     return q
   })
 }
+
+/**
+ * Answers keyed by question id, always relative to the *original* (unshuffled) question:
+ * option index for multiple-choice, boolean for true-false, original step indices for order.
+ */
+export type QuizAnswers = Record<string, unknown>
+
+/** Score a submission against the original questions. Malformed answers count as wrong. */
+export function scoreQuizSubmission(
+  questions: QuizQuestion[],
+  answers: QuizAnswers,
+): { score: number; results: Record<string, boolean> } {
+  const results: Record<string, boolean> = {}
+  for (const q of questions) {
+    const answer = answers[q.id]
+    if (q.type === 'multiple-choice') {
+      results[q.id] = answer === q.correctIndex
+    } else if (q.type === 'true-false') {
+      results[q.id] = answer === q.correct
+    } else {
+      results[q.id] =
+        Array.isArray(answer) &&
+        answer.length === q.correctOrder.length &&
+        answer.every((value, index) => value === q.correctOrder[index])
+    }
+  }
+  return { score: Object.values(results).filter(Boolean).length, results }
+}

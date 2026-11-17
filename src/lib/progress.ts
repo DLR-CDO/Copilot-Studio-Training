@@ -59,7 +59,7 @@ export function canMarkModuleComplete(
   const remaining: string[] = []
 
   if (!isQuizPassed(progress)) {
-    remaining.push('Pass the knowledge check (4 of 5)')
+    remaining.push(`Pass the knowledge check (${PASSING_SCORE} of 5)`)
   }
 
   for (const id of options.checklistIds) {

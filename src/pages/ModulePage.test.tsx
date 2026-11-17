@@ -18,6 +18,7 @@ describe('ModulePage navigation', () => {
   it('starts the next module quiz blank and scrolls to the top', async () => {
     const user = userEvent.setup()
     renderAt('/module/1')
+    await screen.findByRole('button', { name: /submit answers/i })
 
     const quiz = document.getElementById('quiz')!
     const radios = Array.from(quiz.querySelectorAll<HTMLInputElement>('input[type="radio"]'))

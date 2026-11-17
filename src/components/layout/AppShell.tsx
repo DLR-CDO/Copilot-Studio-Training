@@ -10,7 +10,7 @@ export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const { state, setFreeRoam, setTheme, dismissNotice } = useLearner()
+  const { state, setFreeRoam, setTheme, dismissNotice, syncError } = useLearner()
 
   useHashHighlight()
 
@@ -44,6 +44,14 @@ export function AppShell() {
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          {syncError ? (
+            <div
+              role="alert"
+              className="mb-4 rounded-block border border-red bg-red-soft px-4 py-3 text-sm"
+            >
+              {syncError}
+            </div>
+          ) : null}
           {state.notice ? (
             <div
               role="status"

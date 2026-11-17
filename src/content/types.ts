@@ -122,5 +122,8 @@ export interface LearnerState {
 }
 
 export const STORAGE_KEY = 'agent-academy-v1'
-export const PASSING_SCORE = 4
+/** Percent needed to pass each module quiz, and therefore the course. The one place to change it. */
+export const PASSING_PERCENT = 80
+export const QUESTIONS_PER_QUIZ = 5
+export const PASSING_SCORE = Math.ceil((QUESTIONS_PER_QUIZ * PASSING_PERCENT) / 100)
 export const MODULE_COUNT = 10

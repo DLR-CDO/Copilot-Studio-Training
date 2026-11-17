@@ -1,4 +1,5 @@
 dist
+server-dist
 coverage
 node_modules
 copilot-studio-training-guide.html
