@@ -23,7 +23,7 @@ App settings (Static Web App → Settings → Environment variables; never commi
 | `AZURE_STORAGE_CONNECTION_STRING` | Table Storage connection (secret) |
 | `ADMIN_EMAILS` | Comma-separated admin emails for the CSV export |
 | `ALLOWED_EMAIL_DOMAIN` | `digitalrealty.com` |
-| `PUBLIC_BASE_URL` | Site URL used in certificate verification links |
+| `PUBLIC_BASE_URL` | Address printed in certificate verification links (`https://copilotstudio-academy.azurewebsites.net`) |
 
 Run the full app locally with mock sign-in and in-memory storage:
 
@@ -33,7 +33,7 @@ npm run start:mock   # http://localhost:8080 — switch users at /.auth/login/aa
 
 Without the API (`npm run dev`, or any static host), progress falls back to `localStorage` and no certificates are issued.
 
-The App Service `copilotstudio-academy` still serves the previous static build at https://copilotstudio-academy.azurewebsites.net; it is no longer deployed to.
+**Address to share:** https://copilotstudio-academy.azurewebsites.net. The App Service `copilotstudio-academy` runs only `redirect/redirect.cjs` (startup command `node /home/site/wwwroot/redirect.cjs`), which sends every path to the Static Web App named in its `REDIRECT_TARGET` app setting. Certificate verification links use this address (`PUBLIC_BASE_URL`), so keep the App Service running for as long as certificates are valid. When a custom domain is added to the Static Web App, change `REDIRECT_TARGET` to it so old links keep working.
 
 ## Stack
 
