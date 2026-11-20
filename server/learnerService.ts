@@ -32,7 +32,11 @@ export class ValidationError extends Error {
   }
 }
 
+export const MAX_NAME_CHARS = 80
+
 export interface ProgressSnapshot {
+  /** Name the learner entered for their certificate; empty until they enter one. */
+  name: string
   state: LearnerState
   completion: CompletionResult
   certificate: CertificateRecord | null
@@ -57,7 +61,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function newLearnerRecord(user: SignedInUser, now: Date): LearnerRecord {
   return {
     email: user.email,
-    name: user.name,
+    name: '',
     scores: {},
     attempts: {},
     passedAt: {},
@@ -128,14 +132,28 @@ export class LearnerService {
     return { ...snapshot, score, passed }
   }
 
+  /** The certificate name can change until a certificate is issued, then it is locked. */
+  async setName(user: SignedInUser, raw: unknown): Promise<ProgressSnapshot> {
+    const name = normalizeName(raw)
+    return this.update(user, (record, now) => {
+      if (name !== record.name && hasValidCertificate(record, now)) {
+        throw new ValidationError(
+          'Your name is locked because your certificate has been issued.',
+          409,
+        )
+      }
+      record.name = name
+    })
+  }
+
   async listCertificates(): Promise<CertificateRecord[]> {
     const all = await this.store.listCertificates()
     return all.sort((a, b) => b.completedAt.localeCompare(a.completedAt))
   }
 
   /**
-   * Read, change, and save one learner's record with optimistic concurrency. Also refreshes the
-   * name from sign-in, restarts the cycle after expiry, and issues a certificate when earned.
+   * Read, change, and save one learner's record with optimistic concurrency. Also restarts the
+   * cycle after expiry, and issues a certificate once it is earned and a name has been entered.
    */
   private async update(
     user: SignedInUser,
@@ -146,11 +164,10 @@ export class LearnerService {
       const existing = await this.store.getLearner(user.email)
       const record = existing ? structuredClone(existing.value) : newLearnerRecord(user, now)
 
-      record.name = user.name
       restartCycleIfExpired(record, now)
       change(record, now)
       const completion = evaluateCompletion(record.scores, this.quizSizes)
-      const issued = completion.complete ? issueIfDue(record, user, completion, now) : null
+      const issued = completion.complete && record.name ? issueIfDue(record, completion, now) : null
 
       if (!existing || JSON.stringify(record) !== JSON.stringify(existing.value)) {
         record.updatedAt = now.toISOString()
@@ -164,6 +181,7 @@ export class LearnerService {
       }
 
       return {
+        name: record.name,
         state: toLearnerState(record),
         completion,
         certificate: await this.findCertificate(record, issued),
@@ -200,23 +218,39 @@ function restartCycleIfExpired(record: LearnerRecord, now: Date): void {
   record.cycleStart = now.toISOString()
 }
 
-function issueIfDue(
-  record: LearnerRecord,
-  user: SignedInUser,
-  completion: CompletionResult,
-  now: Date,
-): CertificateRecord | null {
-  const hasValid =
+function hasValidCertificate(record: LearnerRecord, now: Date): boolean {
+  return (
     record.certificateId != null &&
     record.certificateExpiresAt != null &&
     !isExpired(record.certificateExpiresAt, now)
-  if (hasValid) return null
+  )
+}
+
+export function normalizeName(raw: unknown): string {
+  if (typeof raw !== 'string') throw new ValidationError('Name must be text.')
+  const name = raw.normalize('NFC').replace(/\s+/g, ' ').trim()
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f<>]/.test(name)) {
+    throw new ValidationError('Name contains characters that are not allowed.')
+  }
+  if (name.length < 2 || name.length > MAX_NAME_CHARS) {
+    throw new ValidationError(`Name must be between 2 and ${MAX_NAME_CHARS} characters.`)
+  }
+  return name
+}
+
+function issueIfDue(
+  record: LearnerRecord,
+  completion: CompletionResult,
+  now: Date,
+): CertificateRecord | null {
+  if (hasValidCertificate(record, now)) return null
 
   const completedAt = now.toISOString()
   const certificate: CertificateRecord = {
     id: newCertificateId(),
-    name: user.name,
-    email: user.email,
+    name: record.name,
+    email: record.email,
     course: COURSE_NAME,
     completedAt,
     expiresAt: certificateExpiration(now).toISOString(),

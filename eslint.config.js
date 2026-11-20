@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import prettier from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'server-dist', 'coverage'] },
+  { ignores: ['dist', 'server-dist', 'api-dist', 'coverage'] },
   {
     files: ['server/**/*.ts'],
     languageOptions: { globals: globals.node },

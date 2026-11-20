@@ -1,23 +1,15 @@
-export interface MockUser {
-  name: string
-  email: string
-}
-
 export interface ServerConfig {
-  port: number
-  staticDir: string
-  authMode: 'easyauth' | 'mock'
-  /** True when App Service Authentication is switched on for this site. */
-  easyAuthEnabled: boolean
-  allowedTenantId?: string
+  /** `swa`: identity comes from Azure Static Web Apps. `mock`: local development only. */
+  authMode: 'swa' | 'mock'
+  /** Only accounts whose sign-in email ends in @<domain> may use the course. */
+  allowedEmailDomain: string
   storageConnectionString?: string
   adminEmails: Set<string>
   publicBaseUrl?: string
-  mockUsers: MockUser[]
+  mockUsers: string[]
 }
 
-const DEFAULT_MOCK_USERS =
-  'Dev Learner <dev.learner@example.com>;Second Learner <second.learner@example.com>'
+const DEFAULT_MOCK_USERS = 'learner.one@example.com;learner.two@example.com;outsider@contoso.test'
 
 export function parseEmailList(raw: string | undefined): Set<string> {
   return new Set(
@@ -28,21 +20,12 @@ export function parseEmailList(raw: string | undefined): Set<string> {
   )
 }
 
-/** "Name <email>;Name <email>" → MockUser[] */
-export function parseMockUsers(raw: string): MockUser[] {
-  return raw
-    .split(';')
-    .map((entry) => /^\s*(.+?)\s*<([^<>\s]+@[^<>\s]+)>\s*$/.exec(entry))
-    .filter((m): m is RegExpExecArray => m != null)
-    .map((m) => ({ name: m[1]!, email: m[2]!.toLowerCase() }))
-}
+export function loadConfig(env: NodeJS.ProcessEnv): ServerConfig {
+  const runningInAzure = Boolean(env.WEBSITE_SITE_NAME || env.FUNCTIONS_WORKER_RUNTIME)
+  const authMode = env.AUTH_MODE === 'mock' ? 'mock' : 'swa'
 
-export function loadConfig(env: NodeJS.ProcessEnv, staticDir: string): ServerConfig {
-  const onAppService = Boolean(env.WEBSITE_SITE_NAME)
-  const authMode = env.AUTH_MODE === 'mock' ? 'mock' : 'easyauth'
-
-  if (authMode === 'mock' && onAppService) {
-    throw new Error('AUTH_MODE=mock is for local development only and cannot run on App Service.')
+  if (authMode === 'mock' && runningInAzure) {
+    throw new Error('AUTH_MODE=mock is for local development only and cannot run in Azure.')
   }
 
   const storageConnectionString = env.AZURE_STORAGE_CONNECTION_STRING?.trim() || undefined
@@ -50,17 +33,15 @@ export function loadConfig(env: NodeJS.ProcessEnv, staticDir: string): ServerCon
     throw new Error('AZURE_STORAGE_CONNECTION_STRING is not set.')
   }
 
+  const defaultDomain = authMode === 'mock' ? 'example.com' : 'digitalrealty.com'
   return {
-    port: Number(env.PORT) || 8080,
-    staticDir,
     authMode,
-    easyAuthEnabled: env.WEBSITE_AUTH_ENABLED?.toLowerCase() === 'true',
-    allowedTenantId: env.ALLOWED_TENANT_ID?.trim().toLowerCase() || undefined,
+    allowedEmailDomain: (env.ALLOWED_EMAIL_DOMAIN?.trim() || defaultDomain)
+      .toLowerCase()
+      .replace(/^@/, ''),
     storageConnectionString,
     adminEmails: parseEmailList(env.ADMIN_EMAILS),
-    publicBaseUrl:
-      env.PUBLIC_BASE_URL?.replace(/\/+$/, '') ||
-      (env.WEBSITE_HOSTNAME ? `https://${env.WEBSITE_HOSTNAME}` : undefined),
-    mockUsers: parseMockUsers(env.MOCK_USERS ?? DEFAULT_MOCK_USERS),
+    publicBaseUrl: env.PUBLIC_BASE_URL?.trim().replace(/\/+$/, '') || undefined,
+    mockUsers: [...parseEmailList(env.MOCK_USERS ?? DEFAULT_MOCK_USERS)],
   }
 }

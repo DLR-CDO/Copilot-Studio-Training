@@ -1,5 +1,4 @@
-import { COURSE_NAME, formatCertificateDate, isExpired } from '../src/lib/completion'
-import type { MockUser } from './config'
+import { COURSE_NAME } from '../src/lib/completion'
 import type { CertificateRecord } from './store'
 
 export function escapeHtml(value: string): string {
@@ -42,78 +41,11 @@ function layout(title: string, body: string): string {
 </html>`
 }
 
-export type VerifyResult =
-  | { kind: 'empty' }
-  | { kind: 'invalid'; query: string }
-  | { kind: 'not-found'; query: string }
-  | { kind: 'found'; query: string; certificate: CertificateRecord; now: Date }
-
-/** Public page. Shows only name, course, completion date, and status — never email or score. */
-export function renderVerifyPage(result: VerifyResult): string {
-  const query = result.kind === 'empty' ? '' : result.query
-  let outcome = ''
-  if (result.kind === 'invalid') {
-    outcome = `<div class="card error" role="alert">That doesn't look like a certificate ID. IDs look like DR-CSA-XXXX-XXXX-XXXX.</div>`
-  } else if (result.kind === 'not-found') {
-    outcome = `<div class="card error" role="alert">No certificate was found with that ID.</div>`
-  } else if (result.kind === 'found') {
-    const c = result.certificate
-    const expired = isExpired(c.expiresAt, result.now)
-    outcome = `<div class="card" role="status">
-  <dl>
-    <dt>Learner</dt><dd>${escapeHtml(c.name)}</dd>
-    <dt>Course</dt><dd>${escapeHtml(c.course)}</dd>
-    <dt>Completed</dt><dd>${escapeHtml(formatCertificateDate(c.completedAt))}</dd>
-    <dt>Status</dt><dd class="${expired ? 'expired' : 'valid'}">${expired ? 'Expired' : 'Valid'}</dd>
-  </dl>
-</div>`
-  }
-
-  return layout(
-    'Verify a certificate',
-    `<p class="eyebrow">Digital University</p>
-<h1>Verify a certificate</h1>
-<form method="get" action="/verify">
-  <label for="id" class="muted" style="width:100%">Certificate ID</label>
-  <input id="id" name="id" value="${escapeHtml(query)}" placeholder="DR-CSA-XXXX-XXXX-XXXX" autocomplete="off" maxlength="40" required>
-  <button type="submit">Verify</button>
-</form>
-${outcome}`,
-  )
-}
-
-export function renderSignedOutPage(): string {
-  return layout(
-    'Signed out',
-    `<p class="eyebrow">Digital University</p>
-<h1>You're signed out</h1>
-<p><a class="button" href="/">Sign in again</a></p>`,
-  )
-}
-
-export function renderAdminPage(count: number): string {
-  return layout(
-    'Completions',
-    `<p class="eyebrow">Admin</p>
-<h1>Course completions</h1>
-<p>${count} certificate${count === 1 ? '' : 's'} issued.</p>
-<p><a class="button" href="/admin/completions.csv" download>Download CSV</a></p>
-<p class="muted">Columns: name, email, completion date, expiration date, score, certificate ID.</p>`,
-  )
-}
-
-export function renderForbiddenPage(message: string): string {
-  return layout(
-    'Not allowed',
-    `<h1>Not allowed</h1><p>${escapeHtml(message)}</p><p><a href="/">Back to the course</a></p>`,
-  )
-}
-
-export function renderMockLoginPage(users: MockUser[], returnTo: string): string {
-  const items = users
+export function renderMockLoginPage(emails: string[], returnTo: string): string {
+  const items = emails
     .map(
-      (u, i) =>
-        `<li><a href="/.auth/login/mock?user=${i}&amp;post_login_redirect_uri=${encodeURIComponent(returnTo)}">${escapeHtml(u.name)} (${escapeHtml(u.email)})</a></li>`,
+      (email, i) =>
+        `<li><a href="/.auth/login/mock?user=${i}&amp;post_login_redirect_uri=${encodeURIComponent(returnTo)}">${escapeHtml(email)}</a></li>`,
     )
     .join('')
   return layout(

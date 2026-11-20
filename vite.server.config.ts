@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 
-// Bundles the Node server and its dependencies into one file, so App Service needs no npm install.
+// Bundles the local development server (npm run start:mock) into one file.
 export default defineConfig({
   publicDir: false,
   build: {

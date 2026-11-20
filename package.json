@@ -12,8 +12,8 @@
     "test:watch": "vitest",
     "preview": "vite preview",
     "build:pages": "GITHUB_PAGES=true npm run build",
+    "build:api": "vite build --config vite.api.config.ts",
     "build:server": "vite build --config vite.server.config.ts",
-    "start": "node server-dist/index.mjs",
     "start:mock": "npm run build && npm run build:server && AUTH_MODE=mock node server-dist/index.mjs"
   },
   "dependencies": {

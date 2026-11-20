@@ -1,9 +1,79 @@
+import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { MODULE_NAV } from '../content/moduleNav'
 import { CERTIFICATE_PDF_URL } from '../lib/api'
 import { COURSE_NAME, formatCertificateDate } from '../lib/completion'
 import { getModuleProgress } from '../lib/progress'
 import { useLearner } from '../lib/useLearner'
+
+function NameForm({ current, ready }: { current: string; ready: boolean }) {
+  const { saveName } = useLearner()
+  const [draft, setDraft] = useState(current)
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [error, setError] = useState<string | null>(null)
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault()
+    setStatus('saving')
+    setError(null)
+    try {
+      await saveName(draft)
+      setStatus('saved')
+    } catch (err) {
+      setStatus('idle')
+      setError(err instanceof Error ? err.message : 'Your name could not be saved.')
+    }
+  }
+
+  return (
+    <section
+      aria-labelledby="name-heading"
+      className={`mt-6 rounded-card border bg-card p-5 ${ready ? 'border-teal' : 'border-line'}`}
+    >
+      <h2 id="name-heading" className="font-display text-lg font-bold">
+        {ready ? 'Enter your name to receive your certificate' : 'Name on your certificate'}
+      </h2>
+      <p className="mt-1 text-sm text-muted">
+        {ready
+          ? 'You passed every quiz. Your certificate is issued as soon as you save your name.'
+          : 'Enter your name as it should appear on your certificate. You can change it until the certificate is issued.'}
+      </p>
+      <form onSubmit={onSubmit} className="mt-4 flex flex-wrap items-end gap-3">
+        <label className="flex min-w-[16rem] flex-1 flex-col gap-1 text-sm">
+          <span className="font-semibold">Full name</span>
+          <input
+            value={draft}
+            onChange={(e) => {
+              setDraft(e.target.value)
+              setStatus('idle')
+            }}
+            maxLength={80}
+            required
+            autoComplete="name"
+            className="rounded-inner border border-line bg-paper px-3 py-2"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={status === 'saving' || draft.trim().length < 2}
+          className="rounded-pill bg-violet px-5 py-2.5 font-display text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+        >
+          {status === 'saving' ? 'Saving…' : ready ? 'Save and issue certificate' : 'Save name'}
+        </button>
+      </form>
+      {status === 'saved' ? (
+        <p className="mt-2 text-sm text-teal" role="status">
+          Saved.
+        </p>
+      ) : null}
+      {error ? (
+        <p className="mt-2 text-sm text-red" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </section>
+  )
+}
 
 export function CertificatePage() {
   const { state, session, serverStatus } = useLearner()
@@ -20,7 +90,7 @@ export function CertificatePage() {
     )
   }
 
-  const { certificate, completion, passingPercent } = serverStatus
+  const { certificate, completion, passingPercent, name } = serverStatus
   const valid = certificate != null && !certificate.expired
 
   return (
@@ -67,6 +137,8 @@ export function CertificatePage() {
           ) : null}
         </section>
       ) : null}
+
+      {!valid ? <NameForm current={name} ready={completion.complete && !name} /> : null}
 
       {!valid ? (
         <section aria-labelledby="requirements-heading" className="mt-8">

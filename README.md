@@ -2,29 +2,38 @@
 
 Interactive, self-paced training site that teaches non-technical business users how to build agents in **Microsoft Copilot Studio**. Course content is sourced from `copilot-studio-training-guide.html` in the repo root.
 
-Progress, quiz scores, checklists, and notes persist in the browser under `localStorage` key `agent-academy-v1`. No backend or auth required — the static build runs fully offline after first load (fonts fall back to Segoe UI if Google Fonts is unavailable).
+## Live site (Azure Static Web Apps)
 
+**https://jolly-smoke-0f957960f.7.azurestaticapps.net**
 
-## Live site (Azure)
+Static Web App `copilotstudio-training` (Free plan) in resource group `rg-copilotstudio-training` (subscription: SalesGPT Demo). Deploys on every push to `main` via `.github/workflows/deploy-swa.yml` (lint, test, build site and API, deploy).
 
-**https://copilotstudio-academy.azurewebsites.net**
+- **Sign-in:** Static Web Apps' built-in Microsoft sign-in (no app registration needed). Every page except `/verify` and `/signed-out` requires sign-in, and the API only accepts accounts whose email ends in `@digitalrealty.com` (`ALLOWED_EMAIL_DOMAIN`). GitHub sign-in is blocked in `public/staticwebapp.config.json`.
+- **Name on the certificate:** Static Web Apps does not pass the account's display name, so learners type it once on **My Certificate**. It is tied to their signed-in email and locks once the certificate is issued (it unlocks again after the certificate expires).
+- **API:** `server/` runs as one Azure Function (`server/functions.ts`, bundled to `api-dist/` by `npm run build:api`) behind `/api/*`.
+- **Storage:** Azure Table Storage account `stcopilotacademy`, tables `Learners` and `Certificates`.
+- **Completion rule:** pass all 10 module quizzes at `PASSING_PERCENT` (80%, `src/content/types.ts`). The final score is the average of best quiz scores. Certificates expire after 12 months; a retake then issues a new ID.
+- **Public verification:** `/verify?id=DR-CSA-XXXX-XXXX-XXXX` shows only name, course, completion date, and valid/expired.
+- **Admin export:** `/admin/completions` (CSV of every certificate) for emails listed in `ADMIN_EMAILS`.
 
-Azure App Service Web App: `copilotstudio-academy` (Linux B1) in resource group `rg-copilotstudio-training` (subscription: SalesGPT Demo). Deploys on every push to `main` via `.github/workflows/deploy-appservice.yml`.
+App settings (Static Web App → Settings → Environment variables; never commit these):
 
-Also available (older Static Web Apps Free hostname): https://jolly-smoke-0f957960f.7.azurestaticapps.net
+| Setting | Purpose |
+| --- | --- |
+| `AZURE_STORAGE_CONNECTION_STRING` | Table Storage connection (secret) |
+| `ADMIN_EMAILS` | Comma-separated admin emails for the CSV export |
+| `ALLOWED_EMAIL_DOMAIN` | `digitalrealty.com` |
+| `PUBLIC_BASE_URL` | Site URL used in certificate verification links |
 
-## Live site (GitHub Pages)
-
-**https://nabihsabeh85.github.io/Copilot-Studio-Training/**
-
-Deploys automatically on every push to `main` via `.github/workflows/deploy-pages.yml`.
-
-Local GitHub Pages build preview:
+Run the full app locally with mock sign-in and in-memory storage:
 
 ```bash
-npm run build:pages && npx serve dist
+npm run start:mock   # http://localhost:8080 — switch users at /.auth/login/aad
 ```
 
+Without the API (`npm run dev`, or any static host), progress falls back to `localStorage` and no certificates are issued.
+
+The App Service `copilotstudio-academy` still serves the previous static build at https://copilotstudio-academy.azurewebsites.net; it is no longer deployed to.
 
 ## Stack
 

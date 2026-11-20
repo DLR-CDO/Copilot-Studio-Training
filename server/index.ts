@@ -10,45 +10,33 @@ import { log } from './log'
 import { MemoryStore, type Store } from './store'
 import { TableStore } from './tableStore'
 
-// Bundled to server-dist/index.mjs; the built site sits next to it in dist/.
+// Local development only. In production the API runs as Azure Functions on Static Web Apps.
 const staticDir =
   process.env.STATIC_DIR ?? resolve(dirname(fileURLToPath(import.meta.url)), '../dist')
-const logoPath = join(staticDir, 'assets', 'digital-realty-logo.png')
+const port = Number(process.env.PORT) || 8080
 
 async function main(): Promise<void> {
-  const config = loadConfig(process.env, staticDir)
+  const config = loadConfig(process.env)
+  if (config.authMode !== 'mock') {
+    throw new Error(
+      'The local server only runs with AUTH_MODE=mock. Production sign-in is handled by Azure Static Web Apps.',
+    )
+  }
 
   let store: Store
   if (config.storageConnectionString) {
     store = await TableStore.connect(config.storageConnectionString)
   } else {
-    log.warn('No AZURE_STORAGE_CONNECTION_STRING; using in-memory storage (local mock mode only).')
+    log.warn('No AZURE_STORAGE_CONNECTION_STRING; using in-memory storage.')
     store = new MemoryStore()
   }
 
-  if (config.authMode === 'easyauth' && !config.easyAuthEnabled) {
-    log.error('App Service Authentication is off; every signed-in route will refuse access.')
-  }
-  if (config.adminEmails.size === 0)
-    log.warn('ADMIN_EMAILS is empty; nobody can export completions.')
-
-  let warnedLogo = false
-  const loadLogo = async (): Promise<Uint8Array | null> => {
-    try {
-      return await readFile(logoPath)
-    } catch {
-      if (!warnedLogo) log.warn('Logo not found; certificates use a placeholder.', { logoPath })
-      warnedLogo = true
-      return null
-    }
-  }
-
+  const logoPath = join(staticDir, 'assets', 'digital-realty-logo.png')
+  const loadLogo = () => readFile(logoPath).catch(() => null)
   const service = new LearnerService(store, quizzesByModule)
-  createServer(createRequestHandler({ config, service, store, loadLogo })).listen(
-    config.port,
-    () => {
-      log.info('Server listening', { port: config.port, authMode: config.authMode })
-    },
+  createServer(createRequestHandler({ config, service, store, loadLogo, staticDir })).listen(
+    port,
+    () => log.info('Local server listening', { port }),
   )
 }
 

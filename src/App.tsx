@@ -8,6 +8,9 @@ import { ProgressPage } from './pages/ProgressPage'
 import { ResourcesPage } from './pages/ResourcesPage'
 import { CertificatePage } from './pages/CertificatePage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { VerifyPage } from './pages/VerifyPage'
+import { SignedOutPage } from './pages/SignedOutPage'
+import { AdminPage } from './pages/AdminPage'
 import { LearnerProvider } from './lib/LearnerProvider'
 
 /** Remounts the module page per module so quiz answers and other local state start fresh. */
@@ -16,7 +19,7 @@ function ModuleRoute() {
   return <ModulePage key={id} />
 }
 
-export default function App() {
+function Course() {
   return (
     <LearnerProvider>
       <Routes>
@@ -28,9 +31,21 @@ export default function App() {
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/certificate" element={<CertificatePage />} />
+          <Route path="/admin/completions" element={<AdminPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </LearnerProvider>
+  )
+}
+
+export default function App() {
+  return (
+    <Routes>
+      {/* Public pages: no sign-in and no learner data. */}
+      <Route path="/verify" element={<VerifyPage />} />
+      <Route path="/signed-out" element={<SignedOutPage />} />
+      <Route path="/*" element={<Course />} />
+    </Routes>
   )
 }

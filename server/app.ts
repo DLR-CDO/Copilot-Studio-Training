@@ -2,42 +2,19 @@ import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { extname, resolve, sep } from 'node:path'
-import { PASSING_PERCENT } from '../src/content/types'
-import { isExpired } from '../src/lib/completion'
-import {
-  LOGOUT_URL,
-  MOCK_COOKIE,
-  getSignedInUser,
-  isAllowedTenant,
-  loginUrl,
-  safeRedirectPath,
-  type SignedInUser,
-} from './auth'
-import { certificateContent, renderCertificatePdf, verifyUrlFor } from './certificatePdf'
-import type { ServerConfig } from './config'
-import { CERTIFICATE_ID_PATTERN, ValidationError, type LearnerService } from './learnerService'
+import { handleApi, MAX_BODY_BYTES, type ApiDeps, type ApiRequest } from './api'
+import { MOCK_COOKIE, safeRedirectPath } from './auth'
 import { log } from './log'
-import {
-  completionsCsv,
-  renderAdminPage,
-  renderForbiddenPage,
-  renderMockLoginPage,
-  renderSignedOutPage,
-  renderVerifyPage,
-} from './pages'
-import type { CertificateRecord, Store } from './store'
+import { renderMockLoginPage } from './pages'
 
-export interface AppDeps {
-  config: ServerConfig
-  service: LearnerService
-  store: Store
-  loadLogo: () => Promise<Uint8Array | null>
-  now?: () => Date
+/**
+ * Local development server: stands in for Azure Static Web Apps by serving the built site,
+ * emulating /.auth sign-in with mock users, and passing /api/* to the same handler that
+ * production runs as an Azure Function.
+ */
+export interface DevServerDeps extends ApiDeps {
+  staticDir: string
 }
-
-const MAX_BODY_BYTES = 64 * 1024
-const PAGE_CSP =
-  "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
 
 const CONTENT_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -54,29 +31,9 @@ const CONTENT_TYPES: Record<string, string> = {
   '.txt': 'text/plain; charset=utf-8',
 }
 
-function send(
-  res: ServerResponse,
-  status: number,
-  body: string | Uint8Array,
-  headers: Record<string, string>,
-): void {
-  res.writeHead(status, headers)
-  res.end(body)
-}
-
-function sendJson(res: ServerResponse, status: number, body: unknown): void {
-  send(res, status, JSON.stringify(body), {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-store',
-  })
-}
-
-function sendPage(res: ServerResponse, status: number, html: string): void {
-  send(res, status, html, {
-    'Content-Type': 'text/html; charset=utf-8',
-    'Content-Security-Policy': PAGE_CSP,
-    'Cache-Control': 'no-store',
-  })
+function sendText(res: ServerResponse, status: number, text: string): void {
+  res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' })
+  res.end(text)
 }
 
 function redirect(res: ServerResponse, location: string, cookie?: string): void {
@@ -84,62 +41,26 @@ function redirect(res: ServerResponse, location: string, cookie?: string): void 
   res.end()
 }
 
-async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+async function readBody(req: IncomingMessage): Promise<string | null> {
   const chunks: Buffer[] = []
   let size = 0
   for await (const chunk of req as AsyncIterable<Buffer>) {
     size += chunk.length
-    if (size > MAX_BODY_BYTES) throw new ValidationError('Request is too large.', 413)
+    if (size > MAX_BODY_BYTES) return null
     chunks.push(chunk)
   }
-  try {
-    const parsed: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'))
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) throw new Error()
-    return parsed as Record<string, unknown>
-  } catch {
-    throw new ValidationError('Request body must be a JSON object.')
+  return Buffer.concat(chunks).toString('utf8')
+}
+
+function flatHeaders(req: IncomingMessage): Record<string, string | undefined> {
+  const headers: Record<string, string | undefined> = {}
+  for (const [key, value] of Object.entries(req.headers)) {
+    headers[key] = Array.isArray(value) ? value.join(', ') : value
   }
+  return headers
 }
 
-/** Blocks cross-site form posts and scripted requests from other origins. */
-function isSameOriginJson(req: IncomingMessage): boolean {
-  if (!(req.headers['content-type'] ?? '').toLowerCase().startsWith('application/json'))
-    return false
-  const origin = req.headers.origin
-  if (origin) {
-    try {
-      return new URL(origin).host === req.headers.host
-    } catch {
-      return false
-    }
-  }
-  const site = req.headers['sec-fetch-site']
-  return site == null || site === 'same-origin'
-}
-
-function baseUrl(req: IncomingMessage, config: ServerConfig): string {
-  return config.publicBaseUrl ?? `http://${req.headers.host ?? 'localhost'}`
-}
-
-function certificateSummary(
-  cert: CertificateRecord | null,
-  req: IncomingMessage,
-  deps: AppDeps,
-): Record<string, unknown> | null {
-  if (!cert) return null
-  return {
-    id: cert.id,
-    name: cert.name,
-    course: cert.course,
-    completedAt: cert.completedAt,
-    expiresAt: cert.expiresAt,
-    scorePercent: cert.scorePercent,
-    expired: isExpired(cert.expiresAt, deps.now?.() ?? new Date()),
-    verifyUrl: verifyUrlFor(baseUrl(req, deps.config), cert.id),
-  }
-}
-
-export function createRequestHandler(deps: AppDeps) {
+export function createRequestHandler(deps: DevServerDeps) {
   return (req: IncomingMessage, res: ServerResponse): void => {
     handle(req, res, deps).catch((err: unknown) => {
       log.error('Request failed', {
@@ -147,183 +68,65 @@ export function createRequestHandler(deps: AppDeps) {
         path: req.url?.split('?')[0],
         error: err instanceof Error ? err.message : String(err),
       })
-      if (!res.headersSent) sendJson(res, 500, { error: 'Something went wrong. Please try again.' })
+      if (!res.headersSent) sendText(res, 500, 'Something went wrong.')
       else res.end()
     })
   }
 }
 
-async function handle(req: IncomingMessage, res: ServerResponse, deps: AppDeps): Promise<void> {
-  const { config } = deps
+async function handle(req: IncomingMessage, res: ServerResponse, deps: DevServerDeps) {
   const url = new URL(req.url ?? '/', 'http://localhost')
   const path = url.pathname
   const method = req.method ?? 'GET'
 
-  res.setHeader('X-Content-Type-Options', 'nosniff')
-  res.setHeader('Referrer-Policy', 'same-origin')
-  res.setHeader('X-Frame-Options', 'DENY')
+  if (path.startsWith('/.auth/')) return handleMockAuth(res, url, deps)
 
-  // Public routes — no sign-in.
-  if (path === '/healthz') return send(res, 200, 'ok', { 'Content-Type': 'text/plain' })
-  if (path === '/verify' && (method === 'GET' || method === 'HEAD')) {
-    return handleVerify(res, url, deps)
-  }
-  if (path === '/signed-out') return sendPage(res, 200, renderSignedOutPage())
-  if (config.authMode === 'mock' && path.startsWith('/.auth/'))
-    return handleMockAuth(res, url, config)
-
-  const user = getSignedInUser(req, config)
-  if (!user) {
-    if (path.startsWith('/api/')) {
-      return sendJson(res, 401, { error: 'Sign in required.', loginUrl: loginUrl('/') })
+  if (path.startsWith('/api/')) {
+    const body = await readBody(req)
+    if (body === null) return sendText(res, 413, 'Request is too large.')
+    const apiReq: ApiRequest = {
+      method,
+      path,
+      query: url.searchParams,
+      headers: flatHeaders(req),
+      body,
     }
-    return redirect(res, loginUrl(`${path}${url.search}`))
-  }
-  if (config.authMode === 'easyauth' && !isAllowedTenant(user, config)) {
-    return sendPage(
-      res,
-      403,
-      renderForbiddenPage('This course is only for Digital Realty accounts.'),
-    )
-  }
-  const isAdmin = config.adminEmails.has(user.email)
-
-  try {
-    if (path.startsWith('/api/')) return await handleApi(req, res, url, user, isAdmin, deps)
-  } catch (err) {
-    if (err instanceof ValidationError) return sendJson(res, err.status, { error: err.message })
-    throw err
+    const out = await handleApi(apiReq, deps)
+    res.writeHead(out.status, out.headers)
+    return void res.end(out.body)
   }
 
-  if (path === '/admin/completions' || path === '/admin/completions.csv') {
-    if (!isAdmin) {
-      return sendPage(res, 403, renderForbiddenPage('Only course admins can export completions.'))
-    }
-    const certificates = await deps.service.listCertificates()
-    if (path.endsWith('.csv')) {
-      const day = (deps.now?.() ?? new Date()).toISOString().slice(0, 10)
-      return send(res, 200, completionsCsv(certificates), {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="completions-${day}.csv"`,
-        'Cache-Control': 'no-store',
-      })
-    }
-    return sendPage(res, 200, renderAdminPage(certificates.length))
-  }
-
-  return serveStatic(req, res, path, config.staticDir)
+  return serveStatic(req, res, path, deps.staticDir)
 }
 
-async function handleVerify(res: ServerResponse, url: URL, deps: AppDeps): Promise<void> {
-  const query = (url.searchParams.get('id') ?? '').trim().toUpperCase().slice(0, 40)
-  if (!query) return sendPage(res, 200, renderVerifyPage({ kind: 'empty' }))
-  if (!CERTIFICATE_ID_PATTERN.test(query)) {
-    return sendPage(res, 200, renderVerifyPage({ kind: 'invalid', query }))
-  }
-  const certificate = await deps.store.getCertificate(query)
-  if (!certificate) return sendPage(res, 200, renderVerifyPage({ kind: 'not-found', query }))
-  return sendPage(
-    res,
-    200,
-    renderVerifyPage({ kind: 'found', query, certificate, now: deps.now?.() ?? new Date() }),
-  )
-}
-
-/** Stand-in for /.auth/* so sign-in and sign-out can be exercised without Azure. */
-function handleMockAuth(res: ServerResponse, url: URL, config: ServerConfig): void {
+/** Stand-in for Static Web Apps' /.auth/* endpoints. */
+function handleMockAuth(res: ServerResponse, url: URL, deps: DevServerDeps): void {
+  const users = deps.config.mockUsers
   const cookie = (value: string) => `${MOCK_COOKIE}=${value}; Path=/; HttpOnly; SameSite=Lax`
+  const returnTo = (param: string) => {
+    const raw = url.searchParams.get(param)
+    try {
+      // Static Web Apps accepts absolute URLs on the same site; keep only the path here.
+      const parsed = raw ? new URL(raw, 'http://localhost') : null
+      return safeRedirectPath(parsed ? `${parsed.pathname}${parsed.search}` : null)
+    } catch {
+      return '/'
+    }
+  }
+
   if (url.pathname === '/.auth/login/aad') {
-    const returnTo = safeRedirectPath(url.searchParams.get('post_login_redirect_uri'))
-    return sendPage(res, 200, renderMockLoginPage(config.mockUsers, returnTo))
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+    return void res.end(renderMockLoginPage(users, returnTo('post_login_redirect_uri')))
   }
   if (url.pathname === '/.auth/login/mock') {
     const index = Number(url.searchParams.get('user'))
-    if (!Number.isInteger(index) || !config.mockUsers[index])
-      return sendJson(res, 400, { error: 'Unknown user.' })
-    const returnTo = safeRedirectPath(url.searchParams.get('post_login_redirect_uri'))
-    return redirect(res, returnTo, cookie(String(index)))
+    if (!Number.isInteger(index) || !users[index]) return sendText(res, 400, 'Unknown user.')
+    return redirect(res, returnTo('post_login_redirect_uri'), cookie(String(index)))
   }
   if (url.pathname === '/.auth/logout') {
-    return redirect(
-      res,
-      safeRedirectPath(url.searchParams.get('post_logout_redirect_uri')),
-      cookie('none'),
-    )
+    return redirect(res, returnTo('post_logout_redirect_uri'), cookie('none'))
   }
-  return sendJson(res, 404, { error: 'Not found.' })
-}
-
-async function handleApi(
-  req: IncomingMessage,
-  res: ServerResponse,
-  url: URL,
-  user: SignedInUser,
-  isAdmin: boolean,
-  deps: AppDeps,
-): Promise<void> {
-  const { service } = deps
-  const method = req.method ?? 'GET'
-  const path = url.pathname
-
-  if (method !== 'GET' && !isSameOriginJson(req)) {
-    return sendJson(res, 403, { error: 'Requests must come from the course site as JSON.' })
-  }
-
-  if (path === '/api/me' && method === 'GET') {
-    return sendJson(res, 200, {
-      name: user.name,
-      email: user.email,
-      isAdmin,
-      logoutUrl: LOGOUT_URL,
-    })
-  }
-
-  if (path === '/api/progress' && method === 'GET') {
-    const snapshot = await service.getProgress(user)
-    return sendJson(res, 200, {
-      state: snapshot.state,
-      completion: snapshot.completion,
-      passingPercent: PASSING_PERCENT,
-      certificate: certificateSummary(snapshot.certificate, req, deps),
-    })
-  }
-
-  if (path === '/api/progress' && method === 'PUT') {
-    const body = await readJsonBody(req)
-    await service.saveUiState(user, body.state)
-    res.writeHead(204, { 'Cache-Control': 'no-store' })
-    return void res.end()
-  }
-
-  const quizMatch = /^\/api\/quiz\/(\d{1,2})$/.exec(path)
-  if (quizMatch && method === 'POST') {
-    const body = await readJsonBody(req)
-    const outcome = await service.submitQuiz(user, Number(quizMatch[1]), body.answers)
-    return sendJson(res, 200, {
-      score: outcome.score,
-      passed: outcome.passed,
-      state: outcome.state,
-      completion: outcome.completion,
-      certificate: certificateSummary(outcome.certificate, req, deps),
-    })
-  }
-
-  if (path === '/api/certificate/pdf' && method === 'GET') {
-    // Always the signed-in learner's own certificate; there is no ID parameter to tamper with.
-    const { certificate } = await service.getProgress(user)
-    if (!certificate) return sendJson(res, 404, { error: 'No certificate has been issued yet.' })
-    const pdf = await renderCertificatePdf(
-      certificateContent(certificate, verifyUrlFor(baseUrl(req, deps.config), certificate.id)),
-      await deps.loadLogo(),
-    )
-    return send(res, 200, pdf, {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="certificate-${certificate.id}.pdf"`,
-      'Cache-Control': 'no-store',
-    })
-  }
-
-  return sendJson(res, 404, { error: 'Not found.' })
+  return sendText(res, 404, 'Not found')
 }
 
 async function serveStatic(
@@ -333,36 +136,31 @@ async function serveStatic(
   staticDir: string,
 ): Promise<void> {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
-    return send(res, 405, 'Method not allowed', { 'Content-Type': 'text/plain' })
+    return sendText(res, 405, 'Method not allowed')
   }
 
   let decoded: string
   try {
     decoded = decodeURIComponent(path)
   } catch {
-    return send(res, 400, 'Bad request', { 'Content-Type': 'text/plain' })
+    return sendText(res, 400, 'Bad request')
   }
 
   const root = resolve(staticDir)
   const filePath = resolve(root, `.${decoded}`)
   if (filePath !== root && !filePath.startsWith(root + sep)) {
-    return send(res, 404, 'Not found', { 'Content-Type': 'text/plain' })
+    return sendText(res, 404, 'Not found')
   }
 
   const file = await stat(filePath).catch(() => null)
-  if (file?.isFile()) {
-    const hashed = /-[A-Za-z0-9_-]{8,}\.[a-z0-9]+$/.test(filePath)
-    return streamFile(req, res, filePath, file.size, {
-      'Cache-Control': hashed ? 'private, max-age=31536000, immutable' : 'private, max-age=3600',
-    })
-  }
-  if (extname(decoded)) return send(res, 404, 'Not found', { 'Content-Type': 'text/plain' })
+  if (file?.isFile()) return streamFile(req, res, filePath, file.size)
+  if (extname(decoded)) return sendText(res, 404, 'Not found')
 
   // Client-side routes fall back to the SPA shell.
   const indexPath = resolve(root, 'index.html')
   const index = await stat(indexPath).catch(() => null)
-  if (!index) return send(res, 404, 'Site has not been built', { 'Content-Type': 'text/plain' })
-  return streamFile(req, res, indexPath, index.size, { 'Cache-Control': 'no-cache' })
+  if (!index) return sendText(res, 404, 'Site has not been built')
+  return streamFile(req, res, indexPath, index.size)
 }
 
 function streamFile(
@@ -370,12 +168,11 @@ function streamFile(
   res: ServerResponse,
   filePath: string,
   size: number,
-  headers: Record<string, string>,
 ): void {
   res.writeHead(200, {
     'Content-Type': CONTENT_TYPES[extname(filePath).toLowerCase()] ?? 'application/octet-stream',
     'Content-Length': String(size),
-    ...headers,
+    'Cache-Control': 'no-cache',
   })
   if (req.method === 'HEAD') return void res.end()
   createReadStream(filePath).pipe(res)

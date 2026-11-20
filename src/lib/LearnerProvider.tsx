@@ -17,12 +17,15 @@ import {
   type Session,
 } from './learnerContextValue'
 import {
+  AccessDeniedError,
   SignInRequiredError,
   fetchProgress,
   fetchSession,
   redirectToSignIn,
+  saveCertificateName,
   saveProgress,
   submitQuiz,
+  type ServerProgress,
 } from './api'
 import type { QuizResult } from '../components/module/Quiz'
 
@@ -42,6 +45,15 @@ function withServerQuizScores(local: LearnerState, server: LearnerState): Learne
     }
   }
   return { ...local, modules }
+}
+
+function toServerStatus(progress: ServerProgress): ServerStatus {
+  return {
+    name: progress.name,
+    completion: progress.completion,
+    certificate: progress.certificate,
+    passingPercent: progress.passingPercent,
+  }
 }
 
 function errorMessage(err: unknown): string {
@@ -72,14 +84,21 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         const progress = await fetchProgress()
         if (cancelled) return
         setState(progress.state)
-        setServerStatus({
-          completion: progress.completion,
-          certificate: progress.certificate,
-          passingPercent: progress.passingPercent,
-        })
+        setServerStatus(toServerStatus(progress))
         setSession({ mode: 'server', user })
       } catch (err) {
         if (err instanceof SignInRequiredError) return redirectToSignIn()
+        if (err instanceof AccessDeniedError) {
+          if (!cancelled) {
+            setSession({
+              mode: 'denied',
+              message: err.message,
+              email: err.email,
+              logoutUrl: err.logoutUrl,
+            })
+          }
+          return
+        }
         if (!cancelled) setSession({ mode: 'error', message: errorMessage(err) })
       }
     }
@@ -169,11 +188,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       try {
         const saved = await submitQuiz(moduleId, result.answers)
         setState((prev) => withServerQuizScores(prev, saved.state))
-        setServerStatus((prev) => ({
-          completion: saved.completion,
-          certificate: saved.certificate,
-          passingPercent: prev?.passingPercent ?? 0,
-        }))
+        setServerStatus(toServerStatus(saved))
         setSyncError(null)
       } catch (err) {
         handleSyncError(err)
@@ -181,6 +196,15 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     },
     [session.mode, handleSyncError],
   )
+
+  const saveName = useCallback(async (name: string) => {
+    try {
+      setServerStatus(toServerStatus(await saveCertificateName(name)))
+    } catch (err) {
+      if (err instanceof SignInRequiredError) redirectToSignIn()
+      throw err
+    }
+  }, [])
 
   const resetProgress = useCallback(() => {
     if (session.mode !== 'server') {
@@ -211,6 +235,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       setTheme,
       updateModule,
       recordQuizResult,
+      saveName,
       resetProgress,
       dismissNotice,
     }),
@@ -223,10 +248,30 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       setTheme,
       updateModule,
       recordQuizResult,
+      saveName,
       resetProgress,
       dismissNotice,
     ],
   )
+
+  if (session.mode === 'denied') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-paper px-6 text-center">
+        <div role="alert">
+          <p className="font-display text-lg font-bold">{session.message}</p>
+          {session.email ? (
+            <p className="mt-2 text-sm text-muted">You are signed in as {session.email}.</p>
+          ) : null}
+          <a
+            href={session.logoutUrl}
+            className="mt-4 inline-flex rounded-pill bg-violet px-5 py-2.5 font-display text-sm font-semibold text-white"
+          >
+            Sign out and use your work account
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   if (session.mode === 'loading' || session.mode === 'error') {
     return (

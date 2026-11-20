@@ -1,5 +1,6 @@
 export interface LearnerRecord {
   email: string
+  /** Typed by the learner for their certificate; empty until entered. */
   name: string
   /** Best quiz score per module id, for the current certification cycle. */
   scores: Record<string, number>

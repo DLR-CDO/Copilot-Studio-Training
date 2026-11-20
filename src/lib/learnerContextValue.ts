@@ -10,8 +10,12 @@ export type Session =
   | { mode: 'local' }
   | { mode: 'server'; user: SessionUser }
   | { mode: 'error'; message: string }
+  /** Signed in with an account outside the allowed email domain. */
+  | { mode: 'denied'; message: string; email: string; logoutUrl: string }
 
 export interface ServerStatus {
+  /** Name for the certificate, entered by the learner; empty until entered. */
+  name: string
   completion: CompletionResult
   certificate: CertificateSummary | null
   passingPercent: number
@@ -26,6 +30,8 @@ export interface LearnerContextValue {
   setTheme: (value: ThemeMode) => void
   updateModule: (moduleId: number, patch: Partial<ModuleProgress>) => void
   recordQuizResult: (moduleId: number, result: QuizResult) => Promise<void>
+  /** Rejects with a message to show the learner if the name is not accepted. */
+  saveName: (name: string) => Promise<void>
   resetProgress: () => void
   dismissNotice: () => void
 }

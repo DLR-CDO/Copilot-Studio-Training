@@ -12,13 +12,15 @@ import {
 import { MemoryStore } from './store'
 import { answersFor } from './testing'
 
-const alice: SignedInUser = { name: 'Alice Learner', email: 'alice@example.com' }
-const bob: SignedInUser = { name: 'Bob Learner', email: 'bob@example.com' }
+const alice: SignedInUser = { email: 'alice@example.com' }
+const bob: SignedInUser = { email: 'bob@example.com' }
 
-function setup(start = '2026-11-17T15:00:00Z') {
+/** Alice has entered her certificate name; Bob has not. */
+async function setup(start = '2026-11-17T15:00:00Z') {
   const clock = { now: new Date(start) }
   const store = new MemoryStore()
   const service = new LearnerService(store, quizzesByModule, () => clock.now)
+  await service.setName(alice, 'Alice Learner')
   return { clock, store, service }
 }
 
@@ -28,7 +30,7 @@ async function passAll(service: LearnerService, user: SignedInUser, correct = 5)
 
 describe('LearnerService', () => {
   it('issues no certificate while any quiz is failed', async () => {
-    const { service, store } = setup()
+    const { service, store } = await setup()
     for (let id = 1; id <= 9; id += 1) await service.submitQuiz(alice, id, answersFor(id, 5))
     const failed = await service.submitQuiz(alice, 10, answersFor(10, 3))
 
@@ -38,8 +40,8 @@ describe('LearnerService', () => {
     expect((await store.getLearner(alice.email))!.value.completionStatus).toBe('in-progress')
   })
 
-  it('issues a certificate with the signed-in name, dates, and score once every quiz passes', async () => {
-    const { service, store } = setup()
+  it('issues a certificate with the entered name, dates, and score once every quiz passes', async () => {
+    const { service, store } = await setup()
     for (let id = 1; id <= 9; id += 1) await service.submitQuiz(alice, id, answersFor(id, 5))
     const outcome = await service.submitQuiz(alice, 10, answersFor(10, 4))
 
@@ -60,7 +62,7 @@ describe('LearnerService', () => {
   })
 
   it('keeps the same certificate on later visits and retakes while it is valid', async () => {
-    const { service, store } = setup()
+    const { service, store } = await setup()
     await passAll(service, alice, 4)
     const first = (await service.getProgress(alice)).certificate!
     await service.submitQuiz(alice, 3, answersFor(3, 5))
@@ -69,7 +71,7 @@ describe('LearnerService', () => {
   })
 
   it('keeps each learner to their own progress and certificate', async () => {
-    const { service } = setup()
+    const { service } = await setup()
     await passAll(service, alice)
     await service.saveUiState(alice, {
       version: 1,
@@ -88,7 +90,7 @@ describe('LearnerService', () => {
   })
 
   it('returns the same saved progress from any device', async () => {
-    const { service } = setup()
+    const { service } = await setup()
     await service.submitQuiz(alice, 2, answersFor(2, 5))
     await service.saveUiState(alice, { version: 1, modules: { '2': { tryItDone: true } } })
     const laterSession = await service.getProgress({ ...alice })
@@ -100,7 +102,7 @@ describe('LearnerService', () => {
   })
 
   it('ignores quiz scores sent in saved UI state', async () => {
-    const { service } = setup()
+    const { service } = await setup()
     await service.saveUiState(alice, {
       version: 1,
       modules: { '1': { quizBestScore: 5, quizAttempts: 9 } },
@@ -110,7 +112,7 @@ describe('LearnerService', () => {
   })
 
   it('requires a full retake after expiry and then issues a new certificate ID', async () => {
-    const { service, store, clock } = setup()
+    const { service, store, clock } = await setup()
     await passAll(service, alice)
     const original = (await service.getProgress(alice)).certificate!
 
@@ -131,18 +133,60 @@ describe('LearnerService', () => {
   })
 
   it('rejects unknown modules and malformed answers', async () => {
-    const { service } = setup()
+    const { service } = await setup()
     await expect(service.submitQuiz(alice, 11, {})).rejects.toBeInstanceOf(ValidationError)
     await expect(service.submitQuiz(alice, 1, ['x'])).rejects.toBeInstanceOf(ValidationError)
     await expect(service.saveUiState(alice, 'nope')).rejects.toBeInstanceOf(ValidationError)
   })
 
   it('rejects UI state too large for Table Storage', async () => {
-    const { service } = setup()
+    const { service } = await setup()
     const notes = 'x'.repeat(31_000)
     await expect(
       service.saveUiState(alice, { version: 1, modules: { '1': { notes } } }),
     ).rejects.toMatchObject({ status: 413 })
+  })
+})
+
+describe('certificate name', () => {
+  it('waits for a name before issuing, then issues as soon as one is entered', async () => {
+    const { service, store } = await setup()
+    await passAll(service, bob)
+    const before = await service.getProgress(bob)
+    expect(before.completion.complete).toBe(true)
+    expect(before.certificate).toBeNull()
+    expect(await store.listCertificates()).toHaveLength(0)
+
+    const after = await service.setName(bob, '  Bob   Learner ')
+    expect(after.name).toBe('Bob Learner')
+    expect(after.certificate!.name).toBe('Bob Learner')
+    expect(after.certificate!.email).toBe('bob@example.com')
+  })
+
+  it('can change before the certificate is issued but is locked afterwards', async () => {
+    const { service } = await setup()
+    await service.setName(alice, 'Alice Q. Learner')
+    await passAll(service, alice)
+    expect((await service.getProgress(alice)).certificate!.name).toBe('Alice Q. Learner')
+
+    await expect(service.setName(alice, 'Someone Else')).rejects.toMatchObject({ status: 409 })
+    // Saving the same name again is harmless.
+    await expect(service.setName(alice, 'Alice Q. Learner')).resolves.toBeTruthy()
+  })
+
+  it('unlocks once the certificate expires', async () => {
+    const { service, clock } = await setup()
+    await passAll(service, alice)
+    clock.now = new Date('2027-11-18T09:00:00Z')
+    expect((await service.setName(alice, 'Alice Renamed')).name).toBe('Alice Renamed')
+  })
+
+  it('rejects empty, overlong, or markup names', async () => {
+    const { service } = await setup()
+    for (const bad of ['', ' a ', 'x'.repeat(81), '<b>Bold</b>', 'Tab\u0007Bell', 42]) {
+      await expect(service.setName(bob, bad)).rejects.toBeInstanceOf(ValidationError)
+    }
+    expect((await service.setName(bob, 'José Núñez-O’Brien')).name).toBe('José Núñez-O’Brien')
   })
 })
 

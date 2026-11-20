@@ -3,7 +3,6 @@ import type { CompletionResult } from './completion'
 import type { QuizAnswers } from './quiz'
 
 export interface SessionUser {
-  name: string
   email: string
   isAdmin: boolean
   logoutUrl: string
@@ -21,24 +20,46 @@ export interface CertificateSummary {
 }
 
 export interface ServerProgress {
+  /** Name the learner entered for their certificate; empty until entered. */
+  name: string
   state: LearnerState
   completion: CompletionResult
   passingPercent: number
   certificate: CertificateSummary | null
 }
 
-export interface QuizSubmission {
+export interface QuizSubmission extends ServerProgress {
   score: number
   passed: boolean
-  state: LearnerState
-  completion: CompletionResult
-  certificate: CertificateSummary | null
 }
 
+export type VerifyResult =
+  | {
+      kind: 'found'
+      name: string
+      course: string
+      completedAt: string
+      status: 'valid' | 'expired'
+    }
+  | { kind: 'not-found' | 'invalid' | 'error'; message: string }
+
 export const CERTIFICATE_PDF_URL = '/api/certificate/pdf'
+export const ADMIN_CSV_URL = '/api/admin/completions.csv'
 
 /** Thrown when the sign-in session has ended; the caller should send the learner to sign in. */
 export class SignInRequiredError extends Error {}
+
+/** Signed in with an account outside the allowed email domain. */
+export class AccessDeniedError extends Error {
+  readonly email: string
+  readonly logoutUrl: string
+
+  constructor(message: string, email: string, logoutUrl: string) {
+    super(message)
+    this.email = email
+    this.logoutUrl = logoutUrl
+  }
+}
 
 function isJson(res: Response): boolean {
   return (res.headers.get('content-type') ?? '').includes('application/json')
@@ -62,8 +83,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 /**
- * The signed-in learner, or null when the site is served without the course server
- * (GitHub Pages, Static Web Apps, `vite dev`), in which case progress stays in the browser.
+ * The signed-in learner, or null when the site is served without the course API
+ * (`vite dev`, static hosting), in which case progress stays in the browser.
  */
 export async function fetchSession(): Promise<SessionUser | null> {
   try {
@@ -72,16 +93,24 @@ export async function fetchSession(): Promise<SessionUser | null> {
       headers: { Accept: 'application/json' },
     })
     if (res.status === 401) throw new SignInRequiredError('Sign in required')
+    if (res.status === 403 && isJson(res)) {
+      const body = (await res.json()) as { error?: string; email?: string; logoutUrl?: string }
+      throw new AccessDeniedError(
+        body.error ?? 'This account cannot use the course.',
+        body.email ?? '',
+        body.logoutUrl ?? '/.auth/logout',
+      )
+    }
     if (!res.ok || !isJson(res)) return null
     return (await res.json()) as SessionUser
   } catch (err) {
-    if (err instanceof SignInRequiredError) throw err
+    if (err instanceof SignInRequiredError || err instanceof AccessDeniedError) throw err
     return null
   }
 }
 
 export function redirectToSignIn(): void {
-  const returnTo = `${window.location.pathname}${window.location.search}`
+  const returnTo = `${window.location.origin}${window.location.pathname}${window.location.search}`
   window.location.assign(`/.auth/login/aad?post_login_redirect_uri=${encodeURIComponent(returnTo)}`)
 }
 
@@ -95,3 +124,31 @@ export const submitQuiz = (moduleId: number, answers: QuizAnswers) =>
     method: 'POST',
     body: JSON.stringify({ answers }),
   })
+
+export const saveCertificateName = (name: string) =>
+  request<ServerProgress>('/api/profile', { method: 'PUT', body: JSON.stringify({ name }) })
+
+/** Public: no sign-in needed. */
+export async function verifyCertificate(id: string): Promise<VerifyResult> {
+  try {
+    const res = await fetch(`/api/verify?id=${encodeURIComponent(id)}`, {
+      headers: { Accept: 'application/json' },
+    })
+    const body = isJson(res) ? ((await res.json()) as Record<string, unknown>) : {}
+    const message = typeof body.error === 'string' ? body.error : 'Verification is unavailable.'
+    if (res.ok) {
+      return {
+        kind: 'found',
+        name: String(body.name ?? ''),
+        course: String(body.course ?? ''),
+        completedAt: String(body.completedAt ?? ''),
+        status: body.status === 'valid' ? 'valid' : 'expired',
+      }
+    }
+    if (res.status === 404) return { kind: 'not-found', message }
+    if (res.status === 400) return { kind: 'invalid', message }
+    return { kind: 'error', message }
+  } catch {
+    return { kind: 'error', message: 'Verification is unavailable. Check your connection.' }
+  }
+}

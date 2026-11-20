@@ -10,7 +10,7 @@ interface TopBarProps {
 }
 
 export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarProps) {
-  const { state, setTheme, session } = useLearner()
+  const { state, setTheme, session, serverStatus } = useLearner()
   const ratio = overallCompletionRatio(state)
   const isDark = state.theme === 'dark'
   const user = session.mode === 'server' ? session.user : null
@@ -21,6 +21,7 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
     { to: '/glossary', label: 'Glossary' },
     { to: '/cheatsheet', label: 'Cheat sheet' },
     { to: '/resources', label: 'Resources' },
+    ...(user?.isAdmin ? [{ to: '/admin/completions', label: 'Admin' }] : []),
   ]
 
   return (
@@ -81,7 +82,7 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
         {user ? (
           <div className="min-w-0 max-w-[8rem] shrink text-right sm:max-w-[14rem]">
             <p className="truncate text-sm font-semibold" title={user.email}>
-              {user.name}
+              {serverStatus?.name || user.email}
             </p>
             <a
               href={user.logoutUrl}
@@ -111,14 +112,6 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
               </NavLink>
             </li>
           ))}
-          {user?.isAdmin ? (
-            <li>
-              {/* Server-rendered page, so a full navigation rather than a router link. */}
-              <a href="/admin/completions" className="text-muted hover:text-ink">
-                Admin
-              </a>
-            </li>
-          ) : null}
         </ul>
       </nav>
     </header>
