@@ -236,15 +236,13 @@ const m5Screenshots: Screenshot[] = [
 const m6Screenshots: Screenshot[] = [
   {
     id: 'm6-shot-1',
-    src: 'images/06-child-agent.png',
-    width: 936,
-    height: 522,
-    alt: 'A child agent’s Details page showing the error “Missing required property Description” under an empty Description field.',
+    src: 'images/06-child-agent-details.png',
+    width: 1024,
+    height: 604,
+    alt: 'Child agent Details section with Name, When will this be used, and Description fields',
     caption: 'Child agent Details: the description is required before the agent can be saved.',
-    authorNotes:
-      'Annotate: the missing Description error — routing depends on a crisp one-line job description',
     afterStep: 'm6-step-4',
-    capturedAt: '2026-11-16',
+    capturedAt: '2026-11-21',
   },
 ]
 
@@ -262,14 +260,14 @@ const m7Screenshots: Screenshot[] = [
   },
   {
     id: 'm7-shot-2',
-    src: 'images/07-model-dropdown-2.png',
-    width: 936,
-    height: 534,
-    alt: 'The model dropdown open, listing models with Preview and Experimental tags circled and labeled “not for production”.',
-    caption: 'The model dropdown open. Preview and Experimental tags mean not for production.',
-    authorNotes: 'Annotate: circle Preview / Experimental tags — not for production',
+    src: 'images/07-overview-two-warnings.png',
+    width: 1024,
+    height: 604,
+    alt: 'Practice Agent Overview page showing the Details card and the 2 Warnings badge',
+    caption:
+      "The Overview page with the 2 Warnings badge. The two warnings are 'no end-user authentication' and 'the agent searches the web'. Both are expected for a practice agent, so you don't need to fix them.",
     afterStep: 'm7-step-7',
-    capturedAt: '2026-11-16',
+    capturedAt: '2026-11-21',
   },
   {
     id: 'm7-shot-generative-ai',
@@ -309,11 +307,12 @@ const m8Screenshots: Screenshot[] = [
   },
   {
     id: 'm8-shot-test-set',
-    src: 'images/08-test-set.png',
+    src: 'images/08-office-faq-test-set.png',
     width: 1024,
-    height: 650,
-    alt: 'An evaluation’s Review data set with six questions and their expected responses, above the Select test methods area showing Answer quality and Add test method.',
-    caption: 'A test set with questions and expected responses, ready for test methods.',
+    height: 604,
+    alt: 'Office FAQ test set with 10 questions and three test methods selected',
+    caption:
+      "The Office FAQ test set, with three test methods: Answer quality, Content safety and Meaning match. Content safety appears as Violent in the methods row. That's its default category.",
     afterStep: 'm8-step-10',
     capturedAt: '2026-11-21',
   },
@@ -329,21 +328,23 @@ const m8Screenshots: Screenshot[] = [
   },
   {
     id: 'm8-shot-run-results',
-    src: 'images/08-run-results.png',
+    src: 'images/08-office-faq-run.png',
     width: 1024,
-    height: 610,
-    alt: 'A finished evaluation run with an overall score of 100%, listing each question, the agent response and an Answer quality Pass result.',
-    caption: 'A finished run: the overall score, and a result for each question.',
+    height: 604,
+    alt: 'Completed evaluation run showing an 80% overall score and per-method scores',
+    caption:
+      'Overall score 80%. Each method’s score sits above its column: Answer quality 70%, Violent 100%, Meaning match 70%.',
     afterStep: 'm8-step-12',
     capturedAt: '2026-11-21',
   },
   {
     id: 'm8-shot-results',
-    src: 'images/08-results.png',
+    src: 'images/08-office-faq-result.png',
     width: 1024,
-    height: 598,
-    alt: 'An evaluation result opened for one question, showing the agent response next to the expected response, with the Meaning match result marked Fail and its explanation.',
-    caption: 'One low-scoring answer opened: the Meaning match check failed and explains why.',
+    height: 604,
+    alt: 'Evaluation results for one question, with Meaning match marked Fail with a score of 25',
+    caption:
+      "Here, What are the office opening hours? failed Meaning match (25) because the agent's answer didn't give the hours in the expected response.",
     afterStep: 'm8-step-13',
     capturedAt: '2026-11-21',
   },
@@ -395,6 +396,7 @@ const m9Screenshots: Screenshot[] = [
 ]
 
 const m10Screenshots: Screenshot[] = [
+  // TODO: replace with module10-step05.png (date range dropdown open)
   {
     id: 'm10-shot-date-range',
     src: 'images/10-date-range.png',
@@ -407,11 +409,12 @@ const m10Screenshots: Screenshot[] = [
   },
   {
     id: 'm10-shot-summary',
-    src: 'images/10-monitor.png',
+    src: 'images/10-monitor-traffic.png',
     width: 1024,
-    height: 650,
-    alt: 'The Monitor page with the Overview, Billing and Savings summary cards highlighted, and the Conversation outcomes chart with its Resolved, Escalated, Abandoned and Unengaged legend.',
-    caption: 'The Monitor page: summary cards, and the Conversation outcomes chart below them.',
+    height: 604,
+    alt: 'Monitor page showing summary cards and the Conversation outcomes chart',
+    caption:
+      'This screenshot comes from an agent with real traffic. Your numbers will be different and may stay at 0 for up to an hour after your first conversations.',
     afterStep: 'm10-step-6',
     capturedAt: '2026-11-21',
   },
@@ -1538,7 +1541,7 @@ export const modules: Module[] = [
       openPracticeAgent(),
       [t('Select the '), ui('Agents'), t(' tab in the row of tabs along the top of the page.')],
       // VERIFY IN UI
-      verifyStep([t('Select '), ui('+ New agent'), t(', then select '), ui('Child agent'), t('.')]),
+      verifyStep([t('Select '), ui('+ Add'), t(', then choose '), ui('New child agent'), t('.')]),
       verifyStep(
         [t('Fill in the Details section at the top of the new child agent page.')],
         [
@@ -1560,7 +1563,9 @@ export const modules: Module[] = [
             [
               t('In '),
               ui('Description'),
-              t(', write one crisp line about the child agent’s narrow job. It is required.'),
+              t(
+                ', write one crisp line about the child agent’s narrow job. Description is required. You can’t save the child agent until you fill it in.',
+              ),
             ],
             true,
           ),
@@ -2048,7 +2053,9 @@ export const modules: Module[] = [
           'Add 10 realistic, made-up questions like the ones users would ask, each with the answer you expect, then select ',
         ),
         ui('Save'),
-        t('.'),
+        t(
+          '. The example below, the Office FAQ test set, has 10 made-up office FAQ questions, for example opening hours, password resets and expense reports, each with an expected response.',
+        ),
       ]),
       // VERIFY IN UI
       verifyStep([
@@ -2064,12 +2071,14 @@ export const modules: Module[] = [
       ]),
       // VERIFY IN UI
       verifyStep([
-        t('Wait until the run shows as complete, then select the run to open its results.'),
+        t(
+          'Wait until the run shows as complete, then select the run to open its results. A 10-question run takes about 2–3 minutes. The run gets its name automatically: the test set name plus a timestamp, for example Office FAQ test set 261121_1648. The results show an overall score, and each method shows its own score above its column.',
+        ),
       ]),
       // VERIFY IN UI
       verifyStep([
         t(
-          'Read the results question by question, and open your worst-scoring answer to see why it failed.',
+          'Read the results question by question, and open your worst-scoring answer to see why it failed. Select a question to open its results.',
         ),
       ]),
       [t('Fix the description or instructions behind it, then re-run the test set and compare.')],
@@ -2081,6 +2090,7 @@ export const modules: Module[] = [
     tips: [
       'Nothing ships untested: evaluation before publishing, every time. A 10-question test set is the minimum bar.',
       'The Activity tab lists your sessions too, but it can take a while to show new ones. For a question you just asked, use the activity map in the test pane.',
+      'Failed questions show you which knowledge sources to add to your agent.',
       'If the right answer is a polite refusal, Answer quality may flag it, because it checks whether the agent tried to answer. Use a Custom test method that describes the refusal you expect.',
     ],
     screenshots: m8Screenshots,
