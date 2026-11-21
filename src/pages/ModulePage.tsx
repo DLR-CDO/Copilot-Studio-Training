@@ -25,6 +25,7 @@ import { MODULE_QUIZ_SIZE, passPercentFor } from '../lib/assessments'
 import { Celebration } from '../components/module/Celebration'
 import { Callout } from '../components/ui/Callout'
 import { formatMinutes, freshnessLine } from '../lib/moduleMeta'
+import { BeforeYouStart } from '../components/module/BeforeYouStart'
 
 export function ModulePage() {
   const { id } = useParams()
@@ -180,6 +181,8 @@ export function ModulePage() {
             </h2>
             <ModuleDiagram id={mod.diagram} />
           </section>
+
+          {mod.id === 1 ? <BeforeYouStart defaultOpen /> : null}
 
           <BuildStepper
             steps={mod.buildSteps}

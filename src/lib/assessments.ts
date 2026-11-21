@@ -1,7 +1,7 @@
 import { MODULE_COUNT, PASSING_PERCENT, type QuizScope } from '../content/types'
 
 /** Questions drawn from a module's bank for each attempt. */
-export const MODULE_QUIZ_SIZE = 8
+export const MODULE_QUIZ_SIZE = 10
 /** Most true/false questions allowed in one module attempt. */
 export const MODULE_QUIZ_MAX_TRUE_FALSE = 2
 /** Fewest scenario questions in one module attempt. */

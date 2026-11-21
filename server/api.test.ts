@@ -233,12 +233,12 @@ describe('learner data', () => {
       alice,
     )
     const body = parse(res)
-    expect(body.result).toMatchObject({ percent: 25, passed: false, correctCount: 2, total: 8 })
+    expect(body.result).toMatchObject({ percent: 20, passed: false, correctCount: 2, total: 10 })
     expect(Object.keys(body.result.results).sort()).toEqual(
       view.questions.map((q: { id: string }) => q.id).sort(),
     )
     expect(body.attempts).toHaveLength(1)
-    expect(body.state.modules['1']).toMatchObject({ quizBestPercent: 25, quizAttempts: 1 })
+    expect(body.state.modules['1']).toMatchObject({ quizBestPercent: 20, quizAttempts: 1 })
   })
 
   it('keeps the final assessment closed until every module quiz is passed', async () => {

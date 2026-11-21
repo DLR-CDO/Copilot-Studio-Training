@@ -228,6 +228,34 @@ const m10ScreenshotsToCapture: ScreenshotRequest[] = [
   },
 ]
 
+/** Access to request before Module 1, so a business user does not get stuck mid-course. */
+export const BEFORE_YOU_START: { item: string; neededFor: string }[] = [
+  {
+    item: 'A Copilot Studio user licence. A trial lets you build and test, but it cannot publish an agent.',
+    neededFor: 'All modules; publishing in Module 10',
+  },
+  {
+    item: 'Access to a DEV environment where you can create agents.',
+    neededFor: 'Module 1 onwards',
+  },
+  {
+    item: 'Permission to create solutions in that DEV environment, in Power Apps under Solutions. Your Power Platform admin knows which security role gives this.',
+    neededFor: 'Module 1',
+  },
+  {
+    item: 'The Office 365 Outlook connector allowed by the data policy for DEV.',
+    neededFor: 'Module 5',
+  },
+  {
+    item: 'Publishing and the Demo website channel allowed in DEV.',
+    neededFor: 'Module 10',
+  },
+  {
+    item: 'Optional: view access to the analytics of a live agent, for example through the Analytics Viewer role from its owner.',
+    neededFor: 'Module 9, if you want to do it before publishing your own agent',
+  },
+]
+
 /** In dependency order: each check relies on the one before it. */
 export const PRE_PUBLISH_CHECKS = [
   'Right environment: you are publishing the right agent, from the right environment',
@@ -1723,6 +1751,11 @@ export const modules: Module[] = [
         [t('Turning analytics into fixes for conversational '), kw('agents', 'agent')],
         [t('Autonomous '), kw('agent', 'agent'), t(' health, where it applies')],
         [t('A simple weekly ritual: what to check, what "bad" looks like, who to tell')],
+        [
+          t(
+            'Analytics only count real conversations with a published agent. Chats in the test pane never show up',
+          ),
+        ],
       ]),
     ],
     goodToKnow: [
@@ -1738,23 +1771,35 @@ export const modules: Module[] = [
       ]),
     ],
     buildSteps: buildSteps(9, [
+      {
+        id: 'm9-step-pick-agent',
+        tokens: [
+          t(
+            'Pick a published agent you can open: a live agent you own or co-own, or one whose owner has shared its analytics with you. Your practice agent is not published until Module 10, and test pane chats never show up in analytics. If you have no live agent yet, turn on ',
+          ),
+          ui('Free roam'),
+          t(
+            ' in Settings, do Module 10, chat with your agent a few times on the demo website, then come back here.',
+          ),
+        ],
+      },
       [
         t('Check that the '),
         ui('globe icon'),
-        t(' in the bottom left corner shows the environment of a published agent. Then select '),
+        t(' in the bottom left corner shows the environment of that agent. Then select '),
         ui('Agents'),
-        t(' in the left navigation, and select that agent. Its Overview page opens.'),
+        t(' in the left navigation, and select the agent. Its Overview page opens.'),
       ],
       // VERIFY IN UI
       verifyStep([
         t('Find '),
-        ui('Analytics'),
+        ui('Monitor'),
         t(
-          ' in the row of tabs along the top of the page. On a narrow screen it may be under the overflow menu at the right end.',
+          ' in the row of tabs along the top of the page (older screens call it Analytics). On a narrow screen it may be under the overflow menu at the right end.',
         ),
       ]),
       // VERIFY IN UI
-      verifyStep([t('Select '), ui('Analytics'), t('. The analytics summary opens.')]),
+      verifyStep([t('Select '), ui('Monitor'), t('. The analytics summary opens.')]),
       // VERIFY IN UI
       verifyStep([
         t(
@@ -1775,7 +1820,7 @@ export const modules: Module[] = [
     screenshots: [],
     screenshotsToCapture: m9ScreenshotsToCapture,
     tryIt:
-      "Open the analytics page of any live agent and name one thing you'd improve based on what you see.",
+      "Open the Monitor page of a live agent you can access (or your own, after Module 10) and name one thing you'd improve based on what you see.",
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-summary',

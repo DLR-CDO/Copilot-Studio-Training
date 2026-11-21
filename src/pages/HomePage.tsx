@@ -14,6 +14,7 @@ import { ModuleBadge } from '../components/ui/ModuleBadge'
 import { MODULE_COUNT } from '../content/types'
 import { HarnessBanner } from '../components/module/Harness'
 import { totalMinutes } from '../lib/moduleMeta'
+import { BeforeYouStart } from '../components/module/BeforeYouStart'
 
 export function HomePage() {
   const { state } = useLearner()
@@ -59,8 +60,8 @@ export function HomePage() {
         <div className="mt-8 rounded-card border border-teal bg-teal-soft p-5">
           <h2 className="font-display text-lg font-bold">Welcome to Agent Academy</h2>
           <p className="mt-2 text-sm text-muted">
-            Your progress saves automatically in this browser. Start with Module 1 — no coding
-            required.
+            Your progress saves automatically. Check the access list below, then start with Module 1
+            — no coding required.
           </p>
           <Link
             to="/module/1"
@@ -76,7 +77,7 @@ export function HomePage() {
             <h2 className="font-display text-lg font-bold">Continue where you left off</h2>
             <p className="mt-1 text-sm text-muted">
               {completed} of {MODULE_COUNT} modules complete
-              {avg != null ? ` · Quiz average ${avg.toFixed(1)}/5` : ''}
+              {avg != null ? ` · Quiz average ${Math.round(avg)}%` : ''}
             </p>
             <Link
               to={`/module/${resumeId}`}
@@ -87,6 +88,8 @@ export function HomePage() {
           </div>
         </div>
       )}
+
+      <BeforeYouStart defaultOpen={isFirstVisit} className="mt-6" />
 
       <section className="mt-12" aria-labelledby="journey-heading">
         <h2 id="journey-heading" className="mb-4 font-display text-[22px] font-bold">

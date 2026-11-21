@@ -1919,13 +1919,13 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'Put the steps of the weekly review in order.',
       steps: [
         'Name one thing to improve',
-        "Open the agent's Analytics page",
+        "Open the agent's Monitor page",
         'Set the date range to the last 7 days',
         'Read sessions, engagement, resolution, and escalation',
       ],
       correctOrder: [1, 2, 3, 0],
       explanation:
-        'Open Analytics, set the week, read the numbers, then decide on one improvement.',
+        'Open the Monitor page, set the week, read the numbers, then decide on one improvement.',
       sourceUrl: src.analytics,
     },
     {
@@ -1970,6 +1970,23 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'Knowing who to tell turns a finding into a fix, which is why it is part of the ritual.',
       sourceUrl: src.effectiveness,
+    },
+    {
+      id: 'm9-q16',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You chatted with your unpublished practice agent in the test pane 20 times, but the Monitor page shows no sessions. Why?',
+      options: [
+        'Test pane conversations are not included in analytics',
+        'Analytics take a month to appear',
+        'You need a preview model to see analytics',
+        'The agent has too much knowledge',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The Monitor page only covers real conversations. Activity in the test pane never shows up, so review a published agent.',
+      sourceUrl: src.analytics,
     },
   ],
 

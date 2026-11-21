@@ -41,7 +41,7 @@ describe('ModulePage navigation', () => {
       await user.click(radios.find((r) => r.name === name)!)
     }
     await user.click(screen.getByRole('button', { name: /submit answers/i }))
-    await screen.findByText(/You scored \d of 8/)
+    await screen.findByText(/You scored \d of 10/)
     expect(screen.queryByRole('button', { name: /submit answers/i })).not.toBeInTheDocument()
 
     window.scrollTo = vi.fn()
@@ -69,6 +69,13 @@ describe('ModulePage navigation', () => {
     expect(details).not.toHaveAttribute('open')
     expect(details).toHaveTextContent(/not on the quiz/)
     expect(details).toHaveTextContent(/WhatsApp/)
+  })
+
+  it('lists the access to request before building, open on Module 1', async () => {
+    renderAt('/module/1')
+    const summary = await screen.findByText('Before you start: what to ask IT for')
+    expect(summary.closest('details')).toHaveAttribute('open')
+    expect(summary.closest('details')).toHaveTextContent(/trial .* cannot publish/i)
   })
 
   it('points the last module at the final assessment', async () => {

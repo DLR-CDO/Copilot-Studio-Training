@@ -93,7 +93,7 @@ function freshFirst(bank: QuizQuestion[], lastIds: ReadonlySet<string>, rng: Rng
   ]
 }
 
-/** 8 questions: at least 2 scenarios, at most 2 true/false, fewest repeats from the last attempt. */
+/** `MODULE_QUIZ_SIZE` questions: at least 2 scenarios, at most 2 true/false, fewest repeats from the last attempt. */
 export function drawModuleQuiz(
   bank: QuizQuestion[],
   lastIds: ReadonlySet<string>,

@@ -74,6 +74,13 @@ describe('question banks', () => {
   })
 })
 
+describe('pass marks', () => {
+  it('are a whole number of questions, so 80% means exactly 80%', () => {
+    expect((MODULE_QUIZ_SIZE * FINAL_ASSESSMENT.passPercent) % 100).toBe(0)
+    expect((FINAL_ASSESSMENT_SIZE * FINAL_ASSESSMENT.passPercent) % 100).toBe(0)
+  })
+})
+
 describe('draws', () => {
   it.each(banks)('module $id always draws a valid quiz', ({ bank }) => {
     let last = new Set<string>()

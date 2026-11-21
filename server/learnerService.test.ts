@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 import { quizzesByModule } from '../src/content/quizzes'
-import { FINAL_ASSESSMENT } from '../src/lib/assessments'
+import { FINAL_ASSESSMENT, MODULE_QUIZ_SIZE } from '../src/lib/assessments'
 import { CERT_TITLE } from '../src/lib/completion'
 import type { SignedInUser } from './auth'
 import {
@@ -55,10 +55,10 @@ async function passAll(service: LearnerService, user: SignedInUser) {
 }
 
 describe('module quiz attempts', () => {
-  it('sends 8 questions without answers, with at most 2 true/false and at least 2 scenarios', async () => {
+  it('sends 10 questions without answers, with at most 2 true/false and at least 2 scenarios', async () => {
     const { service } = await setup()
     const view = await service.startQuiz(alice, '3')
-    expect(view.questions).toHaveLength(8)
+    expect(view.questions).toHaveLength(10)
     expect(view.passPercent).toBe(80)
     const json = JSON.stringify(view)
     for (const secret of [
@@ -85,28 +85,31 @@ describe('module quiz attempts', () => {
     const retake = await service.startQuiz(alice, '2')
     expect(retake.attemptId).not.toBe(first.attemptId)
     const before = new Set(first.questions.map((q) => q.id))
-    // A bank of 15 leaves 7 unseen, so at most one question repeats.
-    expect(retake.questions.filter((q) => before.has(q.id)).length).toBeLessThanOrEqual(1)
+    // Unseen questions are used first, so only the shortfall repeats.
+    const bankSize = quizzesByModule[2]!.length
+    expect(retake.questions.filter((q) => before.has(q.id)).length).toBe(
+      2 * MODULE_QUIZ_SIZE - bankSize,
+    )
   })
 
   it('grades on the server and returns explanations, sources, and a timestamped attempt', async () => {
     const { service } = await setup()
-    const outcome = await take(service, alice, '1', 6)
-    expect(outcome).toMatchObject({ percent: 75, passed: false, correctCount: 6, total: 8 })
+    const outcome = await take(service, alice, '1', 7)
+    expect(outcome).toMatchObject({ percent: 70, passed: false, correctCount: 7, total: 10 })
     const results = Object.values(outcome.results)
-    expect(results.filter((r) => r.correct)).toHaveLength(6)
+    expect(results.filter((r) => r.correct)).toHaveLength(7)
     for (const r of results) {
       expect(r.explanation).not.toBe('')
       expect(r.sourceUrl).toMatch(/^https:\/\/learn\.microsoft\.com\//)
     }
     expect(outcome.attemptLog).toEqual([
-      { scope: '1', at: '2026-11-17T15:00:00.000Z', percent: 75, passed: false },
+      { scope: '1', at: '2026-11-17T15:00:00.000Z', percent: 70, passed: false },
     ])
-    expect(outcome.state.modules['1']).toMatchObject({ quizBestPercent: 75, quizAttempts: 1 })
+    expect(outcome.state.modules['1']).toMatchObject({ quizBestPercent: 70, quizAttempts: 1 })
 
-    const passed = await take(service, alice, '1', 7)
-    expect(passed).toMatchObject({ percent: 87, passed: true })
-    expect(passed.state.modules['1']).toMatchObject({ quizBestPercent: 87, quizAttempts: 2 })
+    const passed = await take(service, alice, '1', 8)
+    expect(passed).toMatchObject({ percent: 80, passed: true })
+    expect(passed.state.modules['1']).toMatchObject({ quizBestPercent: 80, quizAttempts: 2 })
   })
 
   it('refuses a submission for an attempt that is not open', async () => {
@@ -284,7 +287,7 @@ describe('saved progress', () => {
 
   it('returns the same saved progress from any device', async () => {
     const { service } = await setup()
-    await take(service, alice, '2', 8)
+    await take(service, alice, '2', MODULE_QUIZ_SIZE)
     await service.saveUiState(alice, { version: 1, modules: { '2': { tryItDone: true } } })
     const laterSession = await service.getProgress({ ...alice })
     expect(laterSession.state.modules['2']).toMatchObject({

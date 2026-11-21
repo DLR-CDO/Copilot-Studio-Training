@@ -38,7 +38,7 @@ function renderQuiz() {
     <LearnerProvider>
       <Quiz
         scope="1"
-        summary="8 questions · pass mark 80%"
+        summary="10 questions · pass mark 80%"
         locked={false}
         bestPercent={0}
         attempts={0}
@@ -74,9 +74,9 @@ describe('Quiz accessibility', () => {
     await answerEverything(user)
     await user.click(screen.getByRole('button', { name: 'Submit answers' }))
     await waitFor(() =>
-      expect(screen.getByRole('status')).toHaveTextContent(/You scored \d of 8 \(\d+%\)/),
+      expect(screen.getByRole('status')).toHaveTextContent(/You scored \d of 10 \(\d+%\)/),
     )
-    expect(screen.getAllByRole('link', { name: 'Source on Microsoft Learn' })).toHaveLength(8)
+    expect(screen.getAllByRole('link', { name: 'Source on Microsoft Learn' })).toHaveLength(10)
     expect(await seriousViolations(container)).toEqual([])
 
     await user.click(screen.getByRole('button', { name: 'Retake with new questions' }))
@@ -92,7 +92,7 @@ describe('Quiz accessibility', () => {
     const bank = [...quizzesByModule[1]!]
       .filter((q) => q.type !== 'true-false')
       .sort((a, b) => Number(b.type === 'order') - Number(a.type === 'order'))
-      .slice(0, 8)
+      .slice(0, 10)
     installFakeServer({ ...quizzesByModule, 1: bank })
     const user = userEvent.setup()
     renderQuiz()
