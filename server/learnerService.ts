@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import type {
+  AdminLearnerRow,
   AttemptLogEntry,
   LearnerState,
   QuestionResult,
@@ -270,6 +271,13 @@ export class LearnerService {
     return all.sort((a, b) => a.email.localeCompare(b.email))
   }
 
+  /** Every learner's progress for the admin dashboard, most recently active first. */
+  async adminOverview(): Promise<AdminLearnerRow[]> {
+    const now = this.now()
+    const rows = (await this.store.listLearners()).map((r) => toAdminRow(r, now))
+    return rows.sort((a, b) => b.lastActivity.localeCompare(a.lastActivity))
+  }
+
   private assertScope(scope: QuizScope): void {
     const known =
       scope === FINAL_ASSESSMENT.scope ||
@@ -404,6 +412,58 @@ function attemptView(id: string, scope: QuizScope, questions: QuizQuestion[]): Q
 }
 
 /** A finished cooldown starts a fresh count of failures. */
+export function toAdminRow(record: LearnerRecord, now: Date): AdminLearnerRow {
+  const completion = evaluateCompletion(record.bestPercent)
+  const modules = Array.from({ length: MODULE_COUNT }, (_, i) => {
+    const id = String(i + 1)
+    const bestPercent = record.bestPercent[id] ?? 0
+    return {
+      id: i + 1,
+      bestPercent,
+      attempts: record.attempts[id] ?? 0,
+      passed: isPercentPassing(bestPercent, id),
+    }
+  })
+  const finalScope = FINAL_ASSESSMENT.scope
+  const final = {
+    bestPercent: record.bestPercent[finalScope] ?? 0,
+    attempts: record.attempts[finalScope] ?? 0,
+    passed: completion.assessmentPassed,
+    cooldownUntil: currentCooldown(record.cooldowns[finalScope], now).until,
+  }
+  const certificate =
+    record.certificateId && record.completedAt && record.certificateExpiresAt
+      ? {
+          id: record.certificateId,
+          issuedAt: record.completedAt,
+          expiresAt: record.certificateExpiresAt,
+        }
+      : null
+  const anyAttempt = Object.values(record.attempts).some((n) => n > 0)
+  const status = certificate
+    ? isExpired(certificate.expiresAt, now)
+      ? 'expired'
+      : 'certified'
+    : completion.modulesComplete
+      ? 'ready-for-final'
+      : anyAttempt
+        ? 'in-progress'
+        : 'not-started'
+  const lastAttempt = record.attemptLog.at(-1)?.at ?? ''
+  return {
+    name: record.name,
+    email: record.email,
+    status,
+    modulesPassed: completion.passedModules.length,
+    currentModule: completion.remainingModules[0] ?? null,
+    modules,
+    final,
+    startedAt: record.cycleStart,
+    lastActivity: lastAttempt > record.updatedAt ? lastAttempt : record.updatedAt,
+    certificate,
+  }
+}
+
 function currentCooldown(
   cooldown: Cooldown | undefined,
   now: Date,

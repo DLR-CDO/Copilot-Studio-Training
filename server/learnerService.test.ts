@@ -7,6 +7,7 @@ import type { SignedInUser } from './auth'
 import {
   CERTIFICATE_ID_PATTERN,
   LearnerService,
+  toAdminRow,
   ValidationError,
   newCertificateId,
 } from './learnerService'
@@ -364,5 +365,57 @@ describe('newCertificateId', () => {
     for (const id of ids) expect(id).toMatch(CERTIFICATE_ID_PATTERN)
     expect(newCertificateId(() => new Uint8Array(12))).toBe('DR-CSF-0000-0000-0000')
     expect(newCertificateId(() => new Uint8Array(12), 'DR-CSP')).toBe('DR-CSP-0000-0000-0000')
+  })
+})
+
+describe('admin overview', () => {
+  it('labels where each learner is, from not started to certified', async () => {
+    const { service } = await setup()
+    await service.getProgress(alice)
+    expect((await service.adminOverview())[0]).toMatchObject({ status: 'not-started' })
+
+    await take(service, alice, '1', 5)
+    expect((await service.adminOverview())[0]).toMatchObject({
+      status: 'in-progress',
+      modulesPassed: 0,
+      currentModule: 1,
+    })
+
+    for (let id = 1; id <= 10; id += 1) await take(service, alice, String(id), MODULE_QUIZ_SIZE)
+    expect((await service.adminOverview())[0]).toMatchObject({
+      status: 'ready-for-final',
+      modulesPassed: 10,
+      currentModule: null,
+    })
+
+    await take(service, alice, FINAL_ASSESSMENT.scope, 20)
+    await service.setName(alice, 'Alice Learner')
+    const [row] = await service.adminOverview()
+    expect(row).toMatchObject({ status: 'certified', final: { passed: true, bestPercent: 100 } })
+    expect(row!.certificate?.id).toMatch(CERTIFICATE_ID_PATTERN)
+  })
+
+  it('marks an expired certificate', () => {
+    const row = toAdminRow(
+      {
+        email: 'old@example.com',
+        name: 'Old',
+        bestPercent: {},
+        attempts: {},
+        passedAt: {},
+        attemptLog: [],
+        pending: {},
+        lastQuestionIds: {},
+        cooldowns: {},
+        cycleStart: '2025-01-01T00:00:00.000Z',
+        completionStatus: 'complete',
+        completedAt: '2025-01-02T00:00:00.000Z',
+        certificateId: 'X',
+        certificateExpiresAt: '2026-01-02T00:00:00.000Z',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      },
+      new Date('2026-11-17T00:00:00Z'),
+    )
+    expect(row.status).toBe('expired')
   })
 })

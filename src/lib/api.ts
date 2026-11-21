@@ -1,4 +1,5 @@
 import type {
+  AdminLearnerRow,
   AttemptLogEntry,
   LearnerState,
   QuestionResult,
@@ -75,6 +76,7 @@ export type VerifyResult =
 
 export const CERTIFICATE_PDF_URL = '/api/certificate/pdf'
 export const ADMIN_CSV_URL = '/api/admin/completions.csv'
+export const ADMIN_LEARNERS_CSV_URL = '/api/admin/learners.csv'
 
 /** Thrown when the sign-in session has ended; the caller should send the learner to sign in. */
 export class SignInRequiredError extends Error {}
@@ -164,6 +166,9 @@ export const submitQuiz = (scope: QuizScope, attemptId: string, answers: QuizAns
 
 export const saveCertificateName = (name: string) =>
   request<ServerProgress>('/api/profile', { method: 'PUT', body: JSON.stringify({ name }) })
+
+export const fetchAdminLearners = () =>
+  request<{ learners: AdminLearnerRow[] }>('/api/admin/learners').then((r) => r.learners)
 
 /** Public: no sign-in needed. */
 export async function verifyCertificate(id: string): Promise<VerifyResult> {

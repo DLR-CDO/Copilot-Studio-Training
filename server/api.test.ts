@@ -343,3 +343,47 @@ describe('/api/admin/learners.csv', () => {
     expect(progress.state.modules['2'].quizAttempts).toBe(1)
   })
 })
+
+describe('/api/admin/learners', () => {
+  it('shows each learner’s progress to admins only, without their notes or answers', async () => {
+    await sendJson('PUT', '/api/profile', { name: 'Alice Learner' }, alice)
+    await sendJson(
+      'PUT',
+      '/api/progress',
+      { state: { version: 1, modules: { '1': { notes: 'private note' } } } },
+      alice,
+    )
+    await takeQuiz('1', 3, alice)
+    await takeQuiz('1', 8, alice)
+    await takeQuiz('2', 8, alice)
+    await get('/api/progress', bob)
+
+    expect((await get('/api/admin/learners', alice)).status).toBe(403)
+    const res = await get('/api/admin/learners', admin)
+    expect(res.status).toBe(200)
+    expect(res.headers['Cache-Control']).toBe('no-store')
+    const body = String(res.body)
+    expect(body).not.toContain('private note')
+    expect(body).not.toMatch(/correctIndex|questionIds|uiState/)
+
+    const { learners } = JSON.parse(body) as { learners: Record<string, unknown>[] }
+    const aliceRow = learners.find((l) => l.email === 'alice@example.com')
+    expect(aliceRow).toMatchObject({
+      name: 'Alice Learner',
+      status: 'in-progress',
+      modulesPassed: 2,
+      currentModule: 3,
+      final: { attempts: 0, passed: false, cooldownUntil: null },
+      certificate: null,
+    })
+    expect((aliceRow!.modules as { attempts: number }[]).slice(0, 2)).toMatchObject([
+      { id: 1, attempts: 2, passed: true, bestPercent: 80 },
+      { id: 2, attempts: 1, passed: true },
+    ])
+    expect(learners.find((l) => l.email === 'bob@example.com')).toMatchObject({
+      status: 'not-started',
+      modulesPassed: 0,
+      currentModule: 1,
+    })
+  })
+})

@@ -231,6 +231,11 @@ async function signedInRoute(
     }
   }
 
+  if (path === '/api/admin/learners' && method === 'GET') {
+    if (!isAdmin) return json(403, { error: 'Only course admins can see learner progress.' })
+    return json(200, { learners: await service.adminOverview() })
+  }
+
   if (path === '/api/admin/learners.csv' && method === 'GET') {
     if (!isAdmin) return json(403, { error: 'Only course admins can export learner progress.' })
     const day = (deps.now?.() ?? new Date()).toISOString().slice(0, 10)

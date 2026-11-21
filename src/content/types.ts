@@ -178,3 +178,21 @@ export const STORAGE_KEY = 'agent-academy-v1'
 /** Percent needed to pass each module quiz and the final assessment. */
 export const PASSING_PERCENT = 80
 export const MODULE_COUNT = 10
+
+export type AdminLearnerStatus =
+  'not-started' | 'in-progress' | 'ready-for-final' | 'certified' | 'expired'
+
+/** One learner as shown to course admins. Built on the server from the learner record. */
+export interface AdminLearnerRow {
+  name: string
+  email: string
+  status: AdminLearnerStatus
+  modulesPassed: number
+  /** First module whose quiz is not passed yet; null once all are passed. */
+  currentModule: number | null
+  modules: { id: number; bestPercent: number; attempts: number; passed: boolean }[]
+  final: { bestPercent: number; attempts: number; passed: boolean; cooldownUntil: string | null }
+  startedAt: string
+  lastActivity: string
+  certificate: { id: string; issuedAt: string; expiresAt: string } | null
+}

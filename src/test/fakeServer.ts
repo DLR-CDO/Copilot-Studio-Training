@@ -20,10 +20,11 @@ function headersOf(init: RequestInit | undefined): Record<string, string> {
  */
 export function installFakeServer(
   quizzes: Record<number, QuizQuestion[]> = quizzesByModule,
+  env: Record<string, string> = {},
 ): ApiDeps {
   const store = new MemoryStore()
   const deps: ApiDeps = {
-    config: loadConfig({ AUTH_MODE: 'mock' }),
+    config: loadConfig({ AUTH_MODE: 'mock', ...env }),
     store,
     service: new LearnerService(store, quizzes),
     loadLogo: async () => null,
