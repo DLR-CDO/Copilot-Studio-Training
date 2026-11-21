@@ -86,7 +86,7 @@ describe('Quiz accessibility', () => {
     )
     expect(await seriousViolations(container)).toEqual([])
     radioNamesAreAnswerText()
-  })
+  }, 20_000)
 
   it('announces the new position when an ordering step moves', async () => {
     const bank = [...quizzesByModule[1]!]

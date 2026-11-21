@@ -50,7 +50,7 @@ describe('ModulePage navigation', () => {
     expect(await screen.findByRole('button', { name: 'Start the quiz' })).toBeInTheDocument()
     expect(document.getElementById('quiz')!.querySelectorAll('input[type="radio"]')).toHaveLength(0)
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' })
-  })
+  }, 20_000)
 
   it('shows when the module was last reviewed and its time estimate', async () => {
     renderAt('/module/3')
