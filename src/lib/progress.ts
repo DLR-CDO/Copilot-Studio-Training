@@ -103,7 +103,9 @@ export function describeMissingRequirements(
     .map((id, index) => (missing.checklistIds.includes(id) ? String(index + 1) : null))
     .filter((n): n is string => n !== null)
 
-  if (numbers.length > 0) {
+  if (numbers.length > 1 && numbers.length === stepIds.length) {
+    items.push(`Tick all ${numbers.length} build steps`)
+  } else if (numbers.length > 0) {
     items.push(`Tick build step${numbers.length === 1 ? '' : 's'} ${formatEnglishList(numbers)}`)
   }
   if (missing.tryIt) items.push('Write what happened in Try it and tick I did this')

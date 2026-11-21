@@ -315,6 +315,7 @@ function QuizQuestionField({
   return (
     <fieldset
       role={question.type === 'order' ? undefined : 'radiogroup'}
+      aria-labelledby={promptId}
       className={`rounded-block border px-4 py-4 ${feedbackClass}`}
     >
       <legend id={promptId} className="mb-3 px-1 text-[15px] font-semibold leading-snug">

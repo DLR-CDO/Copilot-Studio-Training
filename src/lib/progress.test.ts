@@ -109,6 +109,18 @@ describe('missing requirements wording', () => {
       describeMissingRequirements({ checklistIds: [], tryIt: false, quiz: false }, stepIds),
     ).toEqual([])
   })
+
+  it('says "all N build steps" when none are ticked', () => {
+    const stepIds = ['m8-step-1', 'm8-step-2', 'm8-step-3']
+    expect(
+      describeMissingRequirements({ checklistIds: stepIds, tryIt: false, quiz: false }, stepIds),
+    ).toEqual(['Tick all 3 build steps'])
+    expect(
+      describeMissingRequirements({ checklistIds: ['m9-step-1'], tryIt: false, quiz: false }, [
+        'm9-step-1',
+      ]),
+    ).toEqual(['Tick build step 1'])
+  })
 })
 
 describe('quiz pass mark', () => {

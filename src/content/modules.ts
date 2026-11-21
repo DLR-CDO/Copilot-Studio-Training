@@ -1719,7 +1719,7 @@ export const modules: Module[] = [
         [
           t('Creating a '),
           kw('test set', 'test-set'),
-          t(': real questions paired with expected answers'),
+          t(': realistic, made-up questions paired with expected answers'),
         ],
         [
           t(
@@ -1870,7 +1870,9 @@ export const modules: Module[] = [
       verifyStep([t('Enter a '), ui('Description'), t(' that says what the test set checks.')]),
       // VERIFY IN UI
       verifyStep([
-        t('Add 10 real user questions, each with the answer you expect, then select '),
+        t(
+          'Add 10 realistic, made-up questions like the ones users would ask, each with the answer you expect, then select ',
+        ),
         ui('Save'),
         t('.'),
       ]),
@@ -1907,7 +1909,7 @@ export const modules: Module[] = [
     screenshots: [],
     screenshotsToCapture: m8ScreenshotsToCapture,
     tryIt:
-      'Write a 10-question test set from real user questions, run an evaluation, and fix your worst-scoring answer.',
+      'Write a 10-question test set of realistic, made-up questions like the ones users would ask, run an evaluation, and fix your worst-scoring answer.',
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-test-bot',
@@ -1931,7 +1933,7 @@ export const modules: Module[] = [
       },
     ]),
     checklist: [
-      'Wrote a 10-question test set from real user questions',
+      'Wrote a 10-question test set of realistic, made-up questions',
       'Ran an evaluation with General quality, Compare meaning, and Content safety, and read the results',
       'Can explain the difference between content safety (a test) and content moderation (a filter)',
       'Found my worst-scoring answer',

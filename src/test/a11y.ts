@@ -43,6 +43,9 @@ export function expectQuestionGroupsNamed(expectedCount: number) {
     const question = visibleText(legend)
     expect(question).toMatch(/^\d+\. .{10,}/)
     expect(fieldset).toHaveAccessibleName(question)
+    // A role on a fieldset can stop browsers naming it from its legend, so the link is explicit.
+    expect(legend.id).not.toBe('')
+    expect(fieldset).toHaveAttribute('aria-labelledby', legend.id)
     const answers = fieldset.querySelectorAll('input[type="radio"]')
     if (answers.length > 0) {
       expect(fieldset).toHaveAttribute('role', 'radiogroup')

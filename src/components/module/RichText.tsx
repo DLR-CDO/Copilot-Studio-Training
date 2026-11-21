@@ -60,7 +60,7 @@ function KeywordChip({ text, termId }: { text: string; termId?: string }) {
         <span
           id={panelId}
           role="tooltip"
-          className="absolute bottom-full left-0 z-20 mb-2 w-64 rounded-inner border border-line bg-card p-3 text-left text-sm shadow-lg"
+          className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-64 rounded-inner border border-line bg-card p-3 text-left text-sm shadow-lg"
         >
           <span className="block font-display font-semibold">{term.term}</span>
           <span className="mt-1 block text-muted">{term.definition}</span>

@@ -2155,14 +2155,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'What is a test set?',
       options: [
-        'Real questions paired with expected answers',
+        'Realistic questions paired with expected answers',
         'A list of connectors the agent is allowed to use',
         'A group of child agents that are tested together',
         'The pre-publish checklist, written as questions',
       ],
       correctIndex: 0,
       explanation:
-        'A test set pairs real questions with expected answers so you can check the agent the same way every time.',
+        'A test set pairs realistic, made-up questions with expected answers so you can check the agent the same way every time.',
       sourceUrl: src.evalCreate,
     },
     {
@@ -2214,13 +2214,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'What makes a good test set question?',
       options: [
-        'A real user question, with the answer you expect',
+        'A realistic question users would ask, with its answer',
         'A question only you would ask, to catch edge cases',
         'A question with no right answer, to see how it copes',
         'The same question repeated ten times to check consistency',
       ],
       correctIndex: 0,
-      explanation: 'Real user questions with expected answers test what people will actually ask.',
+      explanation:
+        'Realistic, made-up questions like the ones users would ask test what people will actually ask, without using real data.',
       sourceUrl: src.evalCreate,
     },
     {
@@ -2284,14 +2285,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       scenario: true,
       prompt: 'Your test set has three questions, all written by you. What is wrong with it?',
       options: [
-        'It is too small and does not use real user questions',
+        'It is too small and may not reflect what users ask',
         'Nothing; three questions are enough if you wrote them',
         'It should only contain questions with yes or no answers',
         'Test sets must be written by an admin, not by makers',
       ],
       correctIndex: 0,
       explanation:
-        'The minimum bar is 10 questions, and they should come from real users so they reflect what people really ask.',
+        'The minimum bar is 10 questions, written to sound like what users really ask. Make them up; never paste real customer or employee data.',
       sourceUrl: src.evalCreate,
     },
     {
@@ -2324,13 +2325,13 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'Put the steps for creating and running a test set in order.',
       steps: [
         'Run the evaluation',
-        'Add 10 real questions with expected answers',
+        'Add 10 realistic questions with expected answers',
         'Create a new test set with a name and description',
         'Read the results question by question',
       ],
       correctOrder: [2, 1, 0, 3],
       explanation:
-        'Create the test set, fill it with real questions and expected answers, run it, then read the results.',
+        'Create the test set, fill it with realistic questions and expected answers, run it, then read the results.',
       sourceUrl: src.evalCreate,
     },
     {
