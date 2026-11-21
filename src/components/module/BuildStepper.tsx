@@ -1,5 +1,10 @@
-import type { BuildStep } from '../../content/types'
+import { useId } from 'react'
+import type { BuildStep, InlineToken } from '../../content/types'
 import { RichText } from './RichText'
+
+function plainText(tokens: InlineToken[]): string {
+  return tokens.map((token) => token.text).join('')
+}
 
 interface BuildStepperProps {
   steps: BuildStep[]
@@ -13,6 +18,7 @@ export function BuildStepper({ steps, checked, onToggle, completed = false }: Bu
   const done = steps.filter((s) => checked[s.id]).length
   const newSteps = steps.length - done
   const ratio = steps.length === 0 ? 0 : done / steps.length
+  const idPrefix = useId()
 
   return (
     <section id="build" className="scroll-mt-28">
@@ -40,6 +46,7 @@ export function BuildStepper({ steps, checked, onToggle, completed = false }: Bu
       <ol className="space-y-3">
         {steps.map((step, index) => {
           const isChecked = checked[step.id] === true
+          const hasSubsteps = (step.substeps?.length ?? 0) > 0
           return (
             <li
               key={step.id}
@@ -54,26 +61,34 @@ export function BuildStepper({ steps, checked, onToggle, completed = false }: Bu
               >
                 {index + 1}
               </span>
-              <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
+              <div className="flex min-w-0 flex-1 items-start gap-3">
                 <input
+                  id={`${idPrefix}-${step.id}`}
                   type="checkbox"
-                  className="mt-1 size-4 accent-teal"
+                  value={plainText(step.tokens)}
+                  aria-describedby={hasSubsteps ? `${idPrefix}-${step.id}-substeps` : undefined}
+                  className="mt-1 size-4 shrink-0 cursor-pointer accent-teal"
                   checked={isChecked}
                   onChange={(e) => onToggle(step.id, e.target.checked)}
                 />
-                <span className="min-w-0 text-[15px] leading-relaxed">
-                  <RichText tokens={step.tokens} />
-                  {step.substeps && step.substeps.length > 0 ? (
-                    <ol className="mt-2 list-[lower-alpha] space-y-1.5 pl-5">
-                      {step.substeps.map((sub, subIndex) => (
+                <div className="min-w-0 text-[15px] leading-relaxed">
+                  <label htmlFor={`${idPrefix}-${step.id}`} className="cursor-pointer">
+                    <RichText tokens={step.tokens} inLabel />
+                  </label>
+                  {hasSubsteps ? (
+                    <ol
+                      id={`${idPrefix}-${step.id}-substeps`}
+                      className="mt-2 list-[lower-alpha] space-y-1.5 pl-5"
+                    >
+                      {step.substeps!.map((sub, subIndex) => (
                         <li key={subIndex} data-verify={sub.verify ? 'true' : undefined}>
                           <RichText tokens={sub.tokens} />
                         </li>
                       ))}
                     </ol>
                   ) : null}
-                </span>
-              </label>
+                </div>
+              </div>
             </li>
           )
         })}

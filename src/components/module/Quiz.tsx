@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { QuizAttemptView, QuizScope } from '../../content/types'
 import type { QuizOutcome } from '../../lib/api'
 import { arrangeForDisplay, type DisplayQuestion, type QuizAnswers } from '../../lib/quiz'
@@ -308,18 +308,24 @@ function QuizQuestionField({
     : correct
       ? 'border-teal bg-teal-soft/40'
       : 'border-red bg-red-soft/40'
-  const promptId = `${question.id}-prompt`
+  const fieldId = useId()
+  const promptId = `${fieldId}-prompt`
+  const groupName = `${fieldId}-answer`
 
   return (
-    <fieldset className={`rounded-block border px-4 py-4 ${feedbackClass}`}>
+    <fieldset
+      role={question.type === 'order' ? undefined : 'radiogroup'}
+      className={`rounded-block border px-4 py-4 ${feedbackClass}`}
+    >
       <legend id={promptId} className="mb-3 px-1 text-[15px] font-semibold leading-snug">
         {index + 1}. {question.prompt}
       </legend>
 
       {question.type === 'multiple-choice' ? (
-        <div className="space-y-2" role="radiogroup" aria-labelledby={promptId}>
+        <div className="space-y-2">
           {optionOrder.map((optionIndex) => {
-            const optionId = `${question.id}-opt-${optionIndex}`
+            const optionId = `${fieldId}-opt-${optionIndex}`
+            const optionText = question.options[optionIndex] ?? ''
             const selected = choice === optionIndex
             return (
               <label
@@ -332,15 +338,14 @@ function QuizQuestionField({
                 <input
                   id={optionId}
                   type="radio"
-                  name={question.id}
-                  value={String(optionIndex)}
-                  aria-labelledby={`${optionId}-text`}
+                  name={groupName}
+                  value={optionText}
                   className="mt-0.5 size-4 accent-violet"
                   checked={selected}
                   disabled={graded}
                   onChange={() => onChoice(optionIndex)}
                 />
-                <span id={`${optionId}-text`}>{question.options[optionIndex]}</span>
+                {optionText}
               </label>
             )
           })}
@@ -348,13 +353,14 @@ function QuizQuestionField({
       ) : null}
 
       {question.type === 'true-false' ? (
-        <div className="flex gap-3" role="radiogroup" aria-labelledby={promptId}>
+        <div className="flex gap-3">
           {[true, false].map((value) => {
-            const optionId = `${question.id}-${value}`
+            const optionId = `${fieldId}-${value}`
+            const optionText = value ? 'True' : 'False'
             const selected = truth === value
             return (
               <label
-                key={String(value)}
+                key={optionText}
                 htmlFor={optionId}
                 className={`flex cursor-pointer items-center gap-2 rounded-inner border px-4 py-2 text-sm ${
                   selected ? 'border-violet bg-violet-soft' : 'border-line bg-card'
@@ -363,15 +369,14 @@ function QuizQuestionField({
                 <input
                   id={optionId}
                   type="radio"
-                  name={question.id}
-                  value={String(value)}
-                  aria-labelledby={`${optionId}-text`}
+                  name={groupName}
+                  value={optionText}
                   className="size-4 accent-violet"
                   checked={selected}
                   disabled={graded}
                   onChange={() => onTruth(value)}
                 />
-                <span id={`${optionId}-text`}>{value ? 'True' : 'False'}</span>
+                {optionText}
               </label>
             )
           })}

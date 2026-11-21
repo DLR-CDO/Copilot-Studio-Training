@@ -1,38 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import axe from 'axe-core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { quizzesByModule } from '../../content/quizzes'
 import { LearnerProvider } from '../../lib/LearnerProvider'
+import { expectQuestionGroupsNamed, seriousViolations } from '../../test/a11y'
 import { installFakeServer } from '../../test/fakeServer'
 import { Quiz } from './Quiz'
 
-async function seriousViolations(container: HTMLElement) {
-  // jsdom has no layout, so contrast can't be measured here.
-  const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } })
-  return results.violations
-    .filter((v) => v.impact === 'critical' || v.impact === 'serious')
-    .map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)
-}
+const allAnswers = new Set(
+  Object.values(quizzesByModule).flatMap((bank) =>
+    bank.flatMap((q) => (q.type === 'multiple-choice' ? q.options : [])),
+  ),
+)
 
-function radioNamesAreAnswerText() {
+function radiosNamedByAnswerText() {
   for (const radio of screen.getAllByRole('radio')) {
-    const name = radio.getAttribute('aria-labelledby')
-    const text = name ? document.getElementById(name)?.textContent?.trim() : ''
-    expect(text, 'every option has its answer text as its name').toBeTruthy()
-    expect(text).not.toBe('on')
-  }
-}
-
-function answerGroupsNamedByQuestion() {
-  const groups = [
-    ...screen.getAllByRole('group'),
-    ...screen.queryAllByRole('radiogroup'),
-    ...screen.queryAllByRole('list').filter((list) => list.closest('fieldset')),
-  ]
-  expect(groups.length).toBeGreaterThanOrEqual(10)
-  for (const group of groups) {
-    expect(group).toHaveAccessibleName(/^\d+\. .+/)
+    const name = (radio as HTMLInputElement).labels![0]!.textContent!.trim()
+    expect(allAnswers.has(name) || name === 'True' || name === 'False', name).toBe(true)
+    expect(radio).toHaveAccessibleName(name)
   }
 }
 
@@ -80,8 +65,8 @@ describe('Quiz accessibility', () => {
     await startQuiz(user)
 
     expect(await seriousViolations(container)).toEqual([])
-    radioNamesAreAnswerText()
-    answerGroupsNamedByQuestion()
+    expectQuestionGroupsNamed(10)
+    radiosNamedByAnswerText()
     expect(screen.getByText('Answer all questions to submit.')).toBeInTheDocument()
 
     await answerEverything(user)
@@ -98,7 +83,8 @@ describe('Quiz accessibility', () => {
       expect(screen.getByRole('heading', { name: 'Knowledge check' })).toHaveFocus(),
     )
     expect(await seriousViolations(container)).toEqual([])
-    radioNamesAreAnswerText()
+    expectQuestionGroupsNamed(10)
+    radiosNamedByAnswerText()
   }, 20_000)
 
   it('announces the new position when an ordering step moves', async () => {
@@ -110,7 +96,7 @@ describe('Quiz accessibility', () => {
     const user = userEvent.setup()
     renderQuiz()
     await startQuiz(user)
-    answerGroupsNamedByQuestion()
+    expectQuestionGroupsNamed(10)
     const down = screen.getAllByRole('button', { name: /down$/ })[0]!
     await user.click(down)
     expect(document.body.textContent).toMatch(/Moved ".+" to position 2 of \d+\./)

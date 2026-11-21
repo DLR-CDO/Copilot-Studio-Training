@@ -1896,7 +1896,10 @@ export const modules: Module[] = [
       ]),
       [t('Fix the description or instructions behind it, then re-run the test set and compare.')],
     ]),
-    watchOuts: [],
+    watchOuts: [
+      'Never use real customer or employee data in test questions or expected answers. Write realistic, made-up examples instead.',
+      "Don't lower content moderation to make a test pass. Leave it at High unless your admin agrees to a change.",
+    ],
     tips: [
       'Nothing ships untested: evaluation before publishing, every time. A 10-question test set is the minimum bar.',
       'If the right answer is a polite refusal, General quality may flag it, because it checks whether the agent tried to answer. Use a Custom test method that describes the refusal you expect.',

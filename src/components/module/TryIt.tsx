@@ -31,9 +31,14 @@ export function TryIt({ text, done, reflection, onToggle, onReflection }: TryItP
           placeholder="For example: it cited the right file for 4 of 5 questions."
           className="mt-1 w-full rounded-block border border-line bg-card px-3 py-2 text-sm outline-none focus:border-violet"
         />
-        <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm font-medium has-disabled:cursor-not-allowed has-disabled:text-muted">
+        <label
+          htmlFor="try-it-done"
+          className="mt-2 flex cursor-pointer items-center gap-2 text-sm font-medium has-disabled:cursor-not-allowed has-disabled:text-muted"
+        >
           <input
+            id="try-it-done"
             type="checkbox"
+            value="I did this"
             className="size-4 accent-sun"
             checked={done}
             disabled={!done && !written}

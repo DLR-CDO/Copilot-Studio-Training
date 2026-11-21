@@ -1,24 +1,36 @@
-import { useId, useState } from 'react'
+import { Fragment, useId, useState } from 'react'
 import type { InlineToken } from '../../content/types'
 import { getGlossaryTerm } from '../../content/glossary'
 import { Pill } from '../ui/Pill'
 
+const chipClass =
+  'mx-0.5 inline-block rounded-pill border border-teal/40 bg-teal-soft px-2 py-0.5 font-medium text-teal'
+
 interface RichTextProps {
   tokens: InlineToken[]
+  /** Render glossary terms as plain chips, for text inside a <label>, which must not hold buttons. */
+  inLabel?: boolean
 }
 
-export function RichText({ tokens }: RichTextProps) {
+export function RichText({ tokens, inLabel = false }: RichTextProps) {
   return (
     <span>
       {tokens.map((token, i) => {
         if (token.type === 'text') {
-          return <span key={i}>{token.text}</span>
+          return <Fragment key={i}>{token.text}</Fragment>
         }
         if (token.type === 'ui') {
           return (
             <Pill key={i} variant="ui">
               {token.text}
             </Pill>
+          )
+        }
+        if (inLabel) {
+          return (
+            <span key={i} className={chipClass}>
+              {token.text}
+            </span>
           )
         }
         return <KeywordChip key={i} text={token.text} termId={token.termId} />
@@ -36,7 +48,7 @@ function KeywordChip({ text, termId }: { text: string; termId?: string }) {
     <span className="relative inline-block">
       <button
         type="button"
-        className="mx-0.5 inline-block rounded-pill border border-teal/40 bg-teal-soft px-2 py-0.5 font-medium text-teal hover:border-teal"
+        className={`${chipClass} hover:border-teal`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
