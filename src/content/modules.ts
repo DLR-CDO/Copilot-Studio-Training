@@ -54,7 +54,7 @@ function buildSteps(moduleNum: number, steps: (InlineToken[] | StepDef)[]): Buil
 /** First step for every module after Module 1: get from the home screen to the practice agent. */
 const openPracticeAgent = (): InlineToken[] => [
   t('Check that the '),
-  ui('globe icon'),
+  ui('environment name'),
   t(' in the bottom left corner shows DEV. Then select '),
   ui('Agents'),
   t(' in the left navigation, and select your practice agent.'),
@@ -97,6 +97,7 @@ const m1Screenshots: Screenshot[] = [
     caption:
       'AI Enablement Assistant Overview in CDO - DEV, with instructions visible and the test pane open on the right.',
     authorNotes: 'Annotate: 1) left navigation, 2) instructions box, 3) test pane',
+    afterStep: 'm1-step-4',
     capturedAt: '2026-08-04',
   },
   {
@@ -128,8 +129,9 @@ const m2Screenshots: Screenshot[] = [
     width: 936,
     height: 528,
     alt: 'The Switch environment menu open over the Copilot Studio home page, listing the current environment and other environments.',
-    caption: 'Switch environment menu, opened from the globe icon at the bottom left.',
+    caption: 'Switch environment menu, opened from the environment name at the bottom left.',
     authorNotes: 'Annotate: circle the current environment name, add "always check this first"',
+    afterStep: 'm2-step-2',
     capturedAt: '2026-11-16',
   },
 ]
@@ -144,6 +146,7 @@ const m3Screenshots: Screenshot[] = [
     caption:
       'The Add knowledge dialog for AI Enablement Assistant (CDO - DEV), showing upload, SharePoint, and featured source options.',
     authorNotes: 'Annotate: highlight SharePoint / file upload as the everyday starting sources',
+    afterStep: 'm3-step-3',
     capturedAt: '2026-08-04',
   },
   {
@@ -154,6 +157,7 @@ const m3Screenshots: Screenshot[] = [
     alt: 'A test pane answer with its reference expanded, and a callout pointing to the cited source document.',
     caption: 'Always check the source the agent cites.',
     authorNotes: 'Annotate: arrow to the citation with "always check the source"',
+    afterStep: 'm3-step-10',
     capturedAt: '2026-11-16',
   },
   {
@@ -177,8 +181,9 @@ const m4Screenshots: Screenshot[] = [
     height: 463,
     alt: 'The Topics list with All, Custom and System filters, showing each topic’s type, trigger and Enabled toggle.',
     caption:
-      'The Topics list for AI Enablement Assistant showing custom topics (Greeting, Goodbye) and system topics.',
+      'The Topics list for AI Enablement Assistant, with filters for Custom (4) and System (9) topics.',
     authorNotes: 'Annotate: Custom vs System filters, and the Enabled toggles',
+    afterStep: 'm4-step-2',
     capturedAt: '2026-08-04',
   },
   {
@@ -204,6 +209,7 @@ const m5Screenshots: Screenshot[] = [
     caption:
       'A connector tool’s Details page. The Description field is how the agent decides when to use it.',
     authorNotes: 'Annotate: highlight the description field, "this is how the agent decides"',
+    afterStep: 'm5-step-10',
     capturedAt: '2026-11-16',
   },
   {
@@ -228,6 +234,7 @@ const m6Screenshots: Screenshot[] = [
     caption: 'Child agent Details: the description is required before the agent can be saved.',
     authorNotes:
       'Annotate: the missing Description error — routing depends on a crisp one-line job description',
+    afterStep: 'm6-step-4',
     capturedAt: '2026-11-16',
   },
 ]
@@ -241,6 +248,7 @@ const m7Screenshots: Screenshot[] = [
     alt: 'The agent Overview page with the “Select your agent’s model” dropdown below the description.',
     caption: 'The model dropdown on the Overview page, under "Select your agent’s model".',
     authorNotes: "Annotate: model choice sits next to instructions — this is the agent's brain",
+    afterStep: 'm7-step-6',
     capturedAt: '2026-11-16',
   },
   {
@@ -251,6 +259,7 @@ const m7Screenshots: Screenshot[] = [
     alt: 'The model dropdown open, listing models with Preview and Experimental tags circled and labeled “not for production”.',
     caption: 'The model dropdown open. Preview and Experimental tags mean not for production.',
     authorNotes: 'Annotate: circle Preview / Experimental tags — not for production',
+    afterStep: 'm7-step-7',
     capturedAt: '2026-11-16',
   },
   {
@@ -283,7 +292,8 @@ const m8Screenshots: Screenshot[] = [
     width: 1024,
     height: 598,
     alt: 'The Evaluation tab listing one test set with its last run status, with an arrow pointing to the New evaluation button in the top right corner.',
-    caption: 'The Evaluation tab. Start a new test set from the button in the top right corner.',
+    caption:
+      'The Evaluation tab. Start a new test set with + New evaluation in the top right corner.',
     afterStep: 'm8-step-6',
     capturedAt: '2026-11-21',
   },
@@ -313,8 +323,8 @@ const m9Screenshots: Screenshot[] = [
   {
     id: 'm9-shot-authentication',
     src: 'images/09-authentication.png',
-    width: 1024,
-    height: 598,
+    width: 640,
+    height: 280,
     alt: 'Settings, Security, Authentication page with No authentication selected, above the Authenticate with Microsoft and Authenticate manually options.',
     caption:
       'Settings > Security > Authentication with No authentication selected, as the demo website needs.',
@@ -511,8 +521,8 @@ export const modules: Module[] = [
         t(
           'Before you do anything, make sure you are in the correct environment, which is the DEV environment. Do not do anything until it is selected. To change it, click the ',
         ),
-        ui('globe icon'),
-        t(' in the bottom left corner, above your name, and select the DEV environment.'),
+        ui('environment name'),
+        t(' in the bottom left corner, for example CDO - DEV, and select the DEV environment.'),
       ],
       {
         id: 'm1-step-solution',
@@ -735,7 +745,7 @@ export const modules: Module[] = [
         [
           t('How to check and switch your '),
           kw('environment', 'environment'),
-          t(': the globe icon in the bottom left corner, above your name'),
+          t(': the environment name in the bottom left corner'),
         ],
         [
           t('What admins control per '),
@@ -770,12 +780,14 @@ export const modules: Module[] = [
     buildSteps: buildSteps(2, [
       [
         t('Look at the bottom left corner of Copilot Studio. The '),
-        ui('globe icon'),
-        t(' above your name shows the environment you are in.'),
+        ui('environment name'),
+        t(
+          ' there, next to a building icon, shows the environment you are in, for example CDO - DEV.',
+        ),
       ],
       [
         t('Click the '),
-        ui('globe icon'),
+        ui('environment name'),
         t(' to open the '),
         ui('Switch environment'),
         t(' menu.'),
@@ -800,7 +812,7 @@ export const modules: Module[] = [
     ],
     screenshots: m2Screenshots,
     tryIt:
-      "Click the globe icon in the bottom left corner, above your name. Say out loud which environment you're in, and switch to DEV if you're not already there.",
+      "Click the environment name in the bottom left corner. Say out loud which environment you're in, and switch to DEV if you're not already there.",
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/environments-first-run-experience',
@@ -820,7 +832,7 @@ export const modules: Module[] = [
       },
     ]),
     checklist: [
-      'Opened the Switch environment menu from the globe icon in the bottom left corner',
+      'Opened the Switch environment menu from the environment name in the bottom left corner',
       'Confirmed I am in DEV',
       'Confirmed my practice agent lives in Dev',
       'Know who to ask about data policy and preview model questions',
@@ -1081,7 +1093,7 @@ export const modules: Module[] = [
       // VERIFY IN UI
       verifyStep([
         t("Select '"),
-        ui('+ New topic'),
+        ui('+ Add a topic'),
         t("', give it a name, and add a short description."),
       ]),
       // VERIFY IN UI
@@ -1570,6 +1582,15 @@ export const modules: Module[] = [
           // VERIFY IN UI
           sub(
             [
+              t('You will also see '),
+              ui('Outputs'),
+              t(', for details the child agent hands back to the parent. Leave it for now.'),
+            ],
+            true,
+          ),
+          // VERIFY IN UI
+          sub(
+            [
               t('For each tool, open it and scroll to '),
               ui('Completion'),
               t(' to choose what the agent does when it finishes using the tool.'),
@@ -1857,14 +1878,14 @@ export const modules: Module[] = [
         ],
         [
           t(
-            'Choosing test methods: start with General quality, and add Compare meaning when you have expected answers',
+            'Choosing test methods: start with Answer quality, and add Meaning match when you have expected answers',
           ),
         ],
         [t('The improvement loop: fix descriptions and instructions, re-run, compare')],
       ]),
       para([
         t(
-          'Every test set starts with General quality. It needs no expected answers, and it scores each answer on four things. A high-quality answer must pass all four:',
+          'Every test set starts with Answer quality. It needs no expected answers, and it scores each answer on four things. A high-quality answer must pass all four:',
         ),
       ]),
       list([
@@ -1899,20 +1920,16 @@ export const modules: Module[] = [
         headers: ['Test method', 'What it checks', 'Test set type'],
         rows: [
           [
-            'General quality',
+            'Answer quality',
             'How good the response is overall. Every test set starts with it.',
             'Single response or conversation',
           ],
           [
-            'Compare meaning',
+            'Meaning match',
             'How closely the meaning matches your expected answer',
             'Single response',
           ],
-          [
-            'Text similarity',
-            'How closely the wording matches your expected answer',
-            'Single response',
-          ],
+          ['Text match', 'How closely the wording matches your expected answer', 'Single response'],
           [
             'Exact match',
             'Whether the answer matches your expected answer exactly',
@@ -1945,17 +1962,17 @@ export const modules: Module[] = [
       list([
         [
           t(
-            'You can add up to five test methods to one evaluation. Compare meaning, Text similarity, and Exact match need an expected answer on every question.',
+            'You can add up to five test methods to one evaluation. Meaning match, Text match, and Exact match need an expected answer on every question.',
           ),
         ],
         [
           t(
-            'Text similarity can miss a change in meaning: two answers can share most words and still disagree. Prefer Compare meaning for policy answers.',
+            'Text match can miss a change in meaning: two answers can share most words and still disagree. Prefer Meaning match for policy answers.',
           ),
         ],
         [
           t(
-            'The newer evaluation screen calls Tool use Capability use, and offers Classification, which labels answers by instructions you write, much like Custom. The methods you see can vary by environment.',
+            'Microsoft Learn still uses older names for three methods: General quality (Answer quality), Compare meaning (Meaning match), and Text similarity (Text match). The methods you see can vary by environment.',
           ),
         ],
       ]),
@@ -1992,7 +2009,7 @@ export const modules: Module[] = [
         t(' tab in the row of tabs along the top of the page.'),
       ]),
       // VERIFY IN UI
-      verifyStep([t('Select '), ui('+ New test set'), t('.')]),
+      verifyStep([t('Select '), ui('+ New evaluation'), t(' in the top right corner.')]),
       // VERIFY IN UI
       verifyStep([t('Enter a '), ui('Name'), t(' for the test set.')]),
       // VERIFY IN UI
@@ -2007,13 +2024,15 @@ export const modules: Module[] = [
       ]),
       // VERIFY IN UI
       verifyStep([
-        t('Select '),
-        ui('Add test method'),
+        t('Under '),
+        ui('Select test methods'),
         t(
-          '. Keep General quality, which scores how good each answer is overall. Add Compare meaning, which checks each answer against the one you expect, and Content safety, which fails any harmful answer. Set a pass score if a method asks for one, then select ',
+          ', open the list of test methods. Keep Answer quality, which scores how good each answer is overall. Add Meaning match, which checks each answer against the one you expect, and Content safety, which fails any harmful answer. Select ',
         ),
-        ui('Evaluate'),
-        t(' to start the run.'),
+        ui('Next'),
+        t(', set a pass score if a method asks for one, then select '),
+        ui('Run'),
+        t(' in the top right corner to start the run.'),
       ]),
       // VERIFY IN UI
       verifyStep([
@@ -2033,7 +2052,7 @@ export const modules: Module[] = [
     ],
     tips: [
       'Nothing ships untested: evaluation before publishing, every time. A 10-question test set is the minimum bar.',
-      'If the right answer is a polite refusal, General quality may flag it, because it checks whether the agent tried to answer. Use a Custom test method that describes the refusal you expect.',
+      'If the right answer is a polite refusal, Answer quality may flag it, because it checks whether the agent tried to answer. Use a Custom test method that describes the refusal you expect.',
     ],
     screenshots: m8Screenshots,
     tryIt:
@@ -2062,7 +2081,7 @@ export const modules: Module[] = [
     ]),
     checklist: [
       'Wrote a 10-question test set of realistic, made-up questions',
-      'Ran an evaluation with General quality, Compare meaning, and Content safety, and read the results',
+      'Ran an evaluation with Answer quality, Meaning match, and Content safety, and read the results',
       'Can explain the difference between content safety (a test) and content moderation (a filter)',
       'Found my worst-scoring answer',
       'Fixed a description or instruction and re-ran the test',
@@ -2387,13 +2406,13 @@ export const modules: Module[] = [
       // VERIFY IN UI
       verifyStep([
         t(
-          'Use the date range picker in the top right corner of the Monitor page to choose the last 7 days.',
+          'Use the date range picker in the top left corner of the Monitor page to choose the last 7 days.',
         ),
       ]),
       // VERIFY IN UI
       verifyStep([
         t(
-          'Review the sessions, engagement, resolution, and escalation numbers in the summary cards.',
+          'Review the sessions and engagement in the summary cards, and the resolved and escalated conversations in the Conversation outcomes chart below them.',
         ),
       ]),
       [t('Name one thing you would improve based on what you see.')],

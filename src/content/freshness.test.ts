@@ -92,14 +92,12 @@ describe('screenshots', () => {
   const shots = modules.flatMap((m) => m.screenshots.map((shot) => ({ m, shot })))
 
   it.each(shots.map(({ m, shot }) => ({ id: shot.id, m, shot })))(
-    '$id has its image, alt text, and a real step to follow',
+    '$id has its image, alt text, and sits after a real step',
     ({ m, shot }) => {
       expect(existsSync(join(process.cwd(), 'public', shot.src)), shot.src).toBe(true)
       expect(shot.src).not.toMatch(/^\/|^https?:/)
       expect(shot.alt.length).toBeGreaterThan(20)
-      if (shot.afterStep) {
-        expect(m.buildSteps.map((s) => s.id)).toContain(shot.afterStep)
-      }
+      expect(m.buildSteps.map((s) => s.id)).toContain(shot.afterStep)
     },
   )
 })

@@ -57,7 +57,9 @@ export function HelpPage() {
         </h2>
         <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px]">
           <li>The module and step number, for example "Module 3, step 4".</li>
-          <li>The environment name shown by the globe icon in Copilot Studio.</li>
+          <li>
+            The environment name in the bottom left corner of Copilot Studio, for example CDO - DEV.
+          </li>
           <li>What you expected to see, and what you saw instead.</li>
           <li>A screenshot, if it helps, with anything confidential blurred out.</li>
         </ul>

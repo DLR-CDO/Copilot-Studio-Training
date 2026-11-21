@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -76,6 +76,20 @@ describe('ModulePage navigation', () => {
     const stepItem = image.closest('#build li')!
     expect(stepItem).toHaveTextContent(/Read the activity map from top to bottom/)
     expect(document.getElementById('screenshots')).toBeNull()
+  })
+
+  it('opens a screenshot full size and closes it with Escape', async () => {
+    const user = userEvent.setup()
+    renderAt('/module/2')
+    const opener = await screen.findByRole('button', { name: /Switch environment menu/ })
+    await user.click(opener)
+    const dialog = screen.getByRole('dialog', {
+      name: 'Switch environment menu, opened from the environment name at the bottom left.',
+    })
+    expect(within(dialog).getByRole('button', { name: 'Close' })).toHaveFocus()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(opener).toHaveFocus()
   })
 
   it('shows when the module was last reviewed and its time estimate', async () => {

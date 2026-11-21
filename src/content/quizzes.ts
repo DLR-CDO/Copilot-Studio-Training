@@ -121,7 +121,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       ],
       correctIndex: 1,
       explanation:
-        'Before you do anything, make sure you are in the DEV environment. To change it, select the globe icon in the bottom left corner, above your name.',
+        'Before you do anything, make sure you are in the DEV environment. To change it, select the environment name in the bottom left corner.',
       sourceUrl: src.environments,
     },
     {
@@ -187,7 +187,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       ],
       correctIndex: 0,
       explanation:
-        'Agents are built in DEV. Check the globe icon in the bottom left corner and switch to DEV before you create anything.',
+        'Agents are built in DEV. Check the environment name in the bottom left corner and switch to DEV before you create anything.',
       sourceUrl: src.environments,
     },
     {
@@ -410,13 +410,13 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'Where do you check and switch your current environment in Copilot Studio?',
       options: [
         'The Channels page, in the row of tabs along the top',
-        'The globe icon in the bottom left corner, above your name',
+        'The environment name in the bottom left corner',
         'The Settings page, under Security, next to Authentication',
         'The Overview page, in the Details card at the top',
       ],
       correctIndex: 1,
       explanation:
-        'Select the globe icon in the bottom left corner, above your name, to open the Switch environment menu.',
+        'Select the environment name in the bottom left corner to open the Switch environment menu.',
       sourceUrl: src.environments,
     },
     {
@@ -525,7 +525,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'You come back to Copilot Studio after a long weekend to keep working on your practice agent. What do you check before editing anything?',
       options: [
-        'That the globe icon shows the DEV environment',
+        'That the environment name shows DEV',
         'That the agent was published since your last visit',
         'That analytics show new sessions from the weekend',
         'That the test pane is empty before you start',
@@ -569,10 +569,11 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm2-q14',
       type: 'true-false',
-      prompt: 'The globe icon above your name shows the environment you are in right now.',
+      prompt:
+        'The environment name in the bottom left corner shows the environment you are in right now.',
       correct: true,
       explanation:
-        'The globe icon in the bottom left corner shows your current environment, and selecting it lets you switch.',
+        'The environment name in the bottom left corner shows your current environment, and selecting it lets you switch.',
       sourceUrl: src.environments,
     },
     {
@@ -643,7 +644,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Building it inside a solution',
         'Copying its instructions into a new agent',
         'Publishing it to the demo website',
-        'Switching the globe icon to Test',
+        'Switching the environment to Test',
       ],
       correctIndex: 0,
       explanation:
@@ -2172,14 +2173,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'Your new test set has an expected answer for every question. Which test methods fit best?',
       options: [
-        'General quality plus Compare meaning',
+        'Answer quality plus Meaning match',
         'Exact match only, so wording must be identical',
         'Content safety only, since it checks every answer',
         'Tool use only, because it covers knowledge too',
       ],
       correctIndex: 0,
       explanation:
-        'General quality scores how good each answer is overall, and every test set starts with it. Compare meaning checks each answer against the one you expect, which fits when you have expected answers.',
+        'Answer quality scores how good each answer is overall, and every test set starts with it. Meaning match checks each answer against the one you expect, which fits when you have expected answers.',
       sourceUrl: src.evalOverview,
     },
     {
@@ -2352,7 +2353,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm8-q17',
       type: 'multiple-choice',
-      prompt: 'Which four things does General quality check?',
+      prompt: 'Which four things does Answer quality check?',
       options: [
         'Relevance, groundedness, completeness, and abstention',
         'Speed, cost, answer length, and tone of voice',
@@ -2361,7 +2362,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       ],
       correctIndex: 0,
       explanation:
-        'General quality checks relevance, groundedness, completeness, and abstention. An answer must pass all four to be high quality.',
+        'Answer quality checks relevance, groundedness, completeness, and abstention. An answer must pass all four to be high quality.',
       sourceUrl: src.evalOverview,
     },
     {
@@ -2384,7 +2385,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       scenario: true,
       prompt:
-        'Your agent should politely refuse salary questions, but General quality keeps flagging those refusals. What do you do?',
+        'Your agent should politely refuse salary questions, but Answer quality keeps flagging those refusals. What do you do?',
       options: [
         'Add a Custom test method that describes the expected refusal',
         'Delete those questions so the test set always passes',
@@ -2393,7 +2394,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       ],
       correctIndex: 0,
       explanation:
-        'General quality checks whether the agent tried to answer, so it can flag a correct refusal. A Custom method with your own criteria can treat the refusal as a pass.',
+        'Answer quality checks whether the agent tried to answer, so it can flag a correct refusal. A Custom method with your own criteria can treat the refusal as a pass.',
       sourceUrl: src.evalOverview,
     },
     {
@@ -2416,14 +2417,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'Which test methods need an expected answer on every question?',
       options: [
-        'Compare meaning, Text similarity, and Exact match',
-        'General quality, Content safety, and Custom',
-        'Keyword match, Tool use, General quality, and Custom',
-        'Only General quality',
+        'Meaning match, Text match, and Exact match',
+        'Answer quality, Content safety, and Custom',
+        'Keyword match, Tool use, Answer quality, and Custom',
+        'Only Answer quality',
       ],
       correctIndex: 0,
       explanation:
-        'Compare meaning, Text similarity, and Exact match compare the agent’s answer with the one you expect, so each question needs one.',
+        'Meaning match, Text match, and Exact match compare the agent’s answer with the one you expect, so each question needs one.',
       sourceUrl: src.evalOverview,
     },
   ],
