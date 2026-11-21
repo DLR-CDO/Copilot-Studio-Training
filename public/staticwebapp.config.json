@@ -19,9 +19,6 @@
     "rewrite": "/index.html",
     "exclude": ["/assets/*", "/screenshots/*", "/*.svg", "/*.png", "/*.ico", "/*.css", "/*.js"]
   },
-  "forwardingGateway": {
-    "allowedForwardedHosts": ["copilotstudio-academy.azurewebsites.net"]
-  },
   "platform": {
     "apiRuntime": "node:20"
   },
