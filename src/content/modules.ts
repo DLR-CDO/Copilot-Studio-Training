@@ -317,16 +317,6 @@ const m8Screenshots: Screenshot[] = [
     capturedAt: '2026-11-21',
   },
   {
-    id: 'm8-shot-test-methods',
-    src: 'images/08-test-methods.png',
-    width: 1024,
-    height: 598,
-    alt: 'A test set with three questions and an expected response column, and the Select test method window open, listing Answer quality, Content safety, Tool use, Meaning match, Text match, Keyword match, Exact match and Custom.',
-    caption: 'A test set with its questions, and the Select test method window.',
-    afterStep: 'm8-step-11',
-    capturedAt: '2026-11-21',
-  },
-  {
     id: 'm8-shot-run-results',
     src: 'images/08-office-faq-run.png',
     width: 1024,
