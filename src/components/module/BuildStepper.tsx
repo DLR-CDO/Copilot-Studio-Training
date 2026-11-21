@@ -1,6 +1,7 @@
 import { useId } from 'react'
-import type { BuildStep, InlineToken } from '../../content/types'
+import type { BuildStep, InlineToken, Screenshot } from '../../content/types'
 import { RichText } from './RichText'
+import { ScreenshotFigure } from './ScreenshotFigure'
 
 function plainText(tokens: InlineToken[]): string {
   return tokens.map((token) => token.text).join('')
@@ -12,9 +13,17 @@ interface BuildStepperProps {
   onToggle: (stepId: string, value: boolean) => void
   /** The module was completed before some of these steps existed. */
   completed?: boolean
+  /** Screenshots with `afterStep` set are shown right after that step. */
+  screenshots?: Screenshot[]
 }
 
-export function BuildStepper({ steps, checked, onToggle, completed = false }: BuildStepperProps) {
+export function BuildStepper({
+  steps,
+  checked,
+  onToggle,
+  completed = false,
+  screenshots = [],
+}: BuildStepperProps) {
   const done = steps.filter((s) => checked[s.id]).length
   const newSteps = steps.length - done
   const ratio = steps.length === 0 ? 0 : done / steps.length
@@ -47,48 +56,53 @@ export function BuildStepper({ steps, checked, onToggle, completed = false }: Bu
         {steps.map((step, index) => {
           const isChecked = checked[step.id] === true
           const hasSubsteps = (step.substeps?.length ?? 0) > 0
+          const shots = screenshots.filter((shot) => shot.afterStep === step.id)
           return (
-            <li
-              key={step.id}
-              data-verify={step.verify ? 'true' : undefined}
-              className={`flex gap-3 rounded-block border px-3 py-3 ${
-                isChecked ? 'border-teal bg-teal-soft/50' : 'border-line bg-card'
-              }`}
-            >
-              <span
-                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink font-display text-sm font-bold text-white"
-                aria-hidden="true"
+            <li key={step.id} className="space-y-3">
+              <div
+                data-verify={step.verify ? 'true' : undefined}
+                className={`flex gap-3 rounded-block border px-3 py-3 ${
+                  isChecked ? 'border-teal bg-teal-soft/50' : 'border-line bg-card'
+                }`}
               >
-                {index + 1}
-              </span>
-              <div className="flex min-w-0 flex-1 items-start gap-3">
-                <input
-                  id={`${idPrefix}-${step.id}`}
-                  type="checkbox"
-                  value={plainText(step.tokens)}
-                  aria-describedby={hasSubsteps ? `${idPrefix}-${step.id}-substeps` : undefined}
-                  className="mt-1 size-4 shrink-0 cursor-pointer accent-teal"
-                  checked={isChecked}
-                  onChange={(e) => onToggle(step.id, e.target.checked)}
-                />
-                <div className="min-w-0 text-[15px] leading-relaxed">
-                  <label htmlFor={`${idPrefix}-${step.id}`} className="cursor-pointer">
-                    <RichText tokens={step.tokens} inLabel />
-                  </label>
-                  {hasSubsteps ? (
-                    <ol
-                      id={`${idPrefix}-${step.id}-substeps`}
-                      className="mt-2 list-[lower-alpha] space-y-1.5 pl-5"
-                    >
-                      {step.substeps!.map((sub, subIndex) => (
-                        <li key={subIndex} data-verify={sub.verify ? 'true' : undefined}>
-                          <RichText tokens={sub.tokens} />
-                        </li>
-                      ))}
-                    </ol>
-                  ) : null}
+                <span
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink font-display text-sm font-bold text-white"
+                  aria-hidden="true"
+                >
+                  {index + 1}
+                </span>
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <input
+                    id={`${idPrefix}-${step.id}`}
+                    type="checkbox"
+                    value={plainText(step.tokens)}
+                    aria-describedby={hasSubsteps ? `${idPrefix}-${step.id}-substeps` : undefined}
+                    className="mt-1 size-4 shrink-0 cursor-pointer accent-teal"
+                    checked={isChecked}
+                    onChange={(e) => onToggle(step.id, e.target.checked)}
+                  />
+                  <div className="min-w-0 text-[15px] leading-relaxed">
+                    <label htmlFor={`${idPrefix}-${step.id}`} className="cursor-pointer">
+                      <RichText tokens={step.tokens} inLabel />
+                    </label>
+                    {hasSubsteps ? (
+                      <ol
+                        id={`${idPrefix}-${step.id}-substeps`}
+                        className="mt-2 list-[lower-alpha] space-y-1.5 pl-5"
+                      >
+                        {step.substeps!.map((sub, subIndex) => (
+                          <li key={subIndex} data-verify={sub.verify ? 'true' : undefined}>
+                            <RichText tokens={sub.tokens} />
+                          </li>
+                        ))}
+                      </ol>
+                    ) : null}
+                  </div>
                 </div>
               </div>
+              {shots.map((shot) => (
+                <ScreenshotFigure key={shot.id} shot={shot} />
+              ))}
             </li>
           )
         })}

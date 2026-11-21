@@ -99,6 +99,26 @@ const m1Screenshots: Screenshot[] = [
     authorNotes: 'Annotate: 1) left navigation, 2) instructions box, 3) test pane',
     capturedAt: '2026-08-04',
   },
+  {
+    id: 'm1-shot-agent-standard',
+    src: 'images/01-agent-standard.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Explore what else is possible with agents page, with an arrow pointing to the Agent (Standard) option under Build with standard orchestration.',
+    caption: 'Other ways to build: choose Agent (Standard).',
+    afterStep: 'm1-step-2',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm1-shot-new-solution',
+    src: 'images/01-new-solution.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Power Apps Solutions page with the New solution panel open on the right, showing Display name, Name, Publisher and Version fields.',
+    caption: 'The New solution panel in Power Apps. Enter a Display name and pick a Publisher.',
+    afterStep: 'm1-step-solution',
+    capturedAt: '2026-11-21',
+  },
 ]
 
 const m2Screenshots: Screenshot[] = [
@@ -136,6 +156,17 @@ const m3Screenshots: Screenshot[] = [
     authorNotes: 'Annotate: arrow to the citation with "always check the source"',
     capturedAt: '2026-11-16',
   },
+  {
+    id: 'm3-shot-knowledge-settings',
+    src: 'images/03-knowledge-settings.png',
+    width: 1024,
+    height: 598,
+    alt: 'Settings, Generative AI page scrolled to the Knowledge section, with the Allow ungrounded responses and Use information from the Web toggles highlighted, both on.',
+    caption:
+      'The Knowledge section of Generative AI settings, before you turn off Allow ungrounded responses.',
+    afterStep: 'm3-step-12',
+    capturedAt: '2026-11-21',
+  },
 ]
 
 const m4Screenshots: Screenshot[] = [
@@ -150,6 +181,17 @@ const m4Screenshots: Screenshot[] = [
     authorNotes: 'Annotate: Custom vs System filters, and the Enabled toggles',
     capturedAt: '2026-08-04',
   },
+  {
+    id: 'm4-shot-canvas',
+    src: 'images/04-topic-canvas.png',
+    width: 1024,
+    height: 598,
+    alt: 'The topic authoring canvas with a Trigger node, a Question node offering multiple choice options, and a Condition node splitting into two branches.',
+    caption:
+      'A Question node followed by a condition: the canvas splits into Condition and All other conditions.',
+    afterStep: 'm4-step-10',
+    capturedAt: '2026-11-21',
+  },
 ]
 
 const m5Screenshots: Screenshot[] = [
@@ -163,6 +205,16 @@ const m5Screenshots: Screenshot[] = [
       'A connector tool’s Details page. The Description field is how the agent decides when to use it.',
     authorNotes: 'Annotate: highlight the description field, "this is how the agent decides"',
     capturedAt: '2026-11-16',
+  },
+  {
+    id: 'm5-shot-connection',
+    src: 'images/05-add-tool-connection.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Add tool pop-up for the Get my profile (V2) action, with an arrow pointing to the green check next to the connection.',
+    caption: 'The Add tool pop-up. A green check next to Connection means you are signed in.',
+    afterStep: 'm5-step-8',
+    capturedAt: '2026-11-21',
   },
 ]
 
@@ -201,43 +253,120 @@ const m7Screenshots: Screenshot[] = [
     authorNotes: 'Annotate: circle Preview / Experimental tags — not for production',
     capturedAt: '2026-11-16',
   },
-]
-
-const m8ScreenshotsToCapture: ScreenshotRequest[] = [
   {
-    id: 'm8-shot-1',
+    id: 'm7-shot-generative-ai',
+    src: 'images/07-generative-ai-settings.png',
+    width: 1024,
+    height: 598,
+    alt: 'Settings, Generative AI page showing the Orchestration choice set to Yes, generative, and the Continue using retired models toggle set to Off in the Model section.',
     caption:
-      'The activity map for a test conversation, showing which knowledge, tools, and topics the agent used for one answer.',
-    authorNotes:
-      'Capture: open the Activity tab for a test conversation and expand one answer. Annotate: label each step the agent took, and circle the knowledge source it picked.',
-  },
-  {
-    id: 'm8-shot-2',
-    caption:
-      'The results of an evaluation run on the Evaluation page, with pass and fail results for each test question.',
-    authorNotes:
-      'Capture: the finished run with at least one failed question visible. Annotate: point to a failed case with "this is gold, it tells you what to fix".',
+      'Generative AI settings: the orchestration mode, and Continue using retired models in the Model section.',
+    afterStep: 'm7-step-retired-models',
+    capturedAt: '2026-11-21',
   },
 ]
 
-const m10ScreenshotsToCapture: ScreenshotRequest[] = [
+const m8Screenshots: Screenshot[] = [
   {
-    id: 'm10-shot-1',
+    id: 'm8-shot-activity-map',
+    src: 'images/08-activity-map.png',
+    width: 1024,
+    height: 598,
+    alt: 'The activity map for one test conversation, showing the Greeting topic with its steps: interpreting topic intent, executing topic flow and processing topic outcome.',
+    caption: 'The activity map for one test conversation: the agent picked the Greeting topic.',
+    afterStep: 'm8-step-5',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm8-shot-evaluation-tab',
+    src: 'images/08-evaluation-tab.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Evaluation tab listing one test set with its last run status, with an arrow pointing to the New evaluation button in the top right corner.',
+    caption: 'The Evaluation tab. Start a new test set from the button in the top right corner.',
+    afterStep: 'm8-step-6',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm8-shot-test-methods',
+    src: 'images/08-test-methods.png',
+    width: 1024,
+    height: 598,
+    alt: 'A test set with three questions and an expected response column, and the Select test method window open, listing Answer quality, Content safety, Tool use, Meaning match, Text match, Keyword match, Exact match and Custom.',
+    caption: 'A test set with its questions, and the Select test method window.',
+    afterStep: 'm8-step-11',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm8-shot-results',
+    src: 'images/08-results.png',
+    width: 1024,
+    height: 598,
+    alt: 'An evaluation result opened for one question, showing the agent response next to the expected response, with the Meaning match result marked Fail and its explanation.',
+    caption: 'One low-scoring answer opened: the Meaning match check failed and explains why.',
+    afterStep: 'm8-step-13',
+    capturedAt: '2026-11-21',
+  },
+]
+
+const m9Screenshots: Screenshot[] = [
+  {
+    id: 'm9-shot-authentication',
+    src: 'images/09-authentication.png',
+    width: 1024,
+    height: 598,
+    alt: 'Settings, Security, Authentication page with No authentication selected, above the Authenticate with Microsoft and Authenticate manually options.',
     caption:
-      'The Monitor page of a published agent, showing sessions, engagement, resolution, and escalation.',
-    authorNotes:
-      'Capture: the Monitor summary for the last 7 days of a published agent. Annotate: circle the resolution rate and the escalation rate.',
+      'Settings > Security > Authentication with No authentication selected, as the demo website needs.',
+    afterStep: 'm9-step-3',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm9-shot-publish',
+    src: 'images/09-publish-confirm.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Publish this agent confirmation box listing review warnings, with an arrow pointing to the Publish button.',
+    caption: 'The Publish this agent confirmation box. Select Publish again.',
+    afterStep: 'm9-step-5',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm9-shot-channels',
+    src: 'images/09-channels.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Channels page with the Demo website tile under Share a preview and the Microsoft 365 and Microsoft Teams tile under Microsoft channels highlighted.',
+    caption: 'The Channels page: Demo website and Microsoft 365 and Teams.',
+    afterStep: 'm9-step-7',
+    capturedAt: '2026-11-21',
+  },
+]
+
+const m10Screenshots: Screenshot[] = [
+  {
+    id: 'm10-shot-date-range',
+    src: 'images/10-date-range.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Monitor page with the date range picker open and Last 7 days selected.',
+    caption: 'The date range picker on the Monitor page, set to Last 7 days.',
+    afterStep: 'm10-step-5',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm10-shot-summary',
+    src: 'images/10-monitor-summary.png',
+    width: 1024,
+    height: 598,
+    alt: 'The Monitor page with the Overview, Billing and Savings summary cards and the conversation outcomes legend highlighted.',
+    caption: 'Monitor summary cards, and the conversation outcomes chart below them.',
+    afterStep: 'm10-step-6',
+    capturedAt: '2026-11-21',
   },
 ]
 
 const m9ScreenshotsToCapture: ScreenshotRequest[] = [
-  {
-    id: 'm9-shot-1',
-    caption:
-      'The Channels page after publishing, showing the Demo website tile alongside Teams + Microsoft 365 and the other channel tiles.',
-    authorNotes:
-      'Capture: the full Channels page of your published practice agent. Annotate: circle the Demo website tile with "start here for stakeholder review". public/screenshots/10-1.png exists but shows a colleague’s name in “Published by”; recapture or blur before use.',
-  },
   {
     id: 'm9-shot-2',
     caption: 'The demo website open in a browser, with the agent answering a test question.',
@@ -1906,8 +2035,7 @@ export const modules: Module[] = [
       'Nothing ships untested: evaluation before publishing, every time. A 10-question test set is the minimum bar.',
       'If the right answer is a polite refusal, General quality may flag it, because it checks whether the agent tried to answer. Use a Custom test method that describes the refusal you expect.',
     ],
-    screenshots: [],
-    screenshotsToCapture: m8ScreenshotsToCapture,
+    screenshots: m8Screenshots,
     tryIt:
       'Write a 10-question test set of realistic, made-up questions like the ones users would ask, run an evaluation, and fix your worst-scoring answer.',
     goDeeper: goDeeper([
@@ -2128,7 +2256,7 @@ export const modules: Module[] = [
       'Run the pre-publish checklist first, in order: right environment, knowledge verified, evaluation passed, sign-in checked, right channel.',
       'Use the demo website for stakeholder review before broad rollout. It is not meant for production.',
     ],
-    screenshots: [],
+    screenshots: m9Screenshots,
     screenshotsToCapture: m9ScreenshotsToCapture,
     tryIt:
       "Check your agent's sign-in setting, publish it to the demo website, and send the link to one classmate at Digital Realty for feedback. Congratulations, you've shipped an agent.",
@@ -2288,8 +2416,7 @@ export const modules: Module[] = [
     tips: [
       "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy.",
     ],
-    screenshots: [],
-    screenshotsToCapture: m10ScreenshotsToCapture,
+    screenshots: m10Screenshots,
     tryIt:
       "Chat with your published agent a few times on the demo website, open its Monitor page, and name one thing you'd improve based on what you see.",
     goDeeper: goDeeper([

@@ -42,6 +42,8 @@ export interface Screenshot {
   /** Describes the image for screen readers. */
   alt: string
   caption: string
+  /** Build step id the image illustrates; shown right after that step instead of under Screenshots. */
+  afterStep?: string
   /** Capture and annotation instructions for course authors. Never rendered. */
   authorNotes?: string
   /** ISO date the image was captured. */

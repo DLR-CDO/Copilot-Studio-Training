@@ -115,6 +115,8 @@ export function ModulePage() {
     )
   }
 
+  const gallery = mod.screenshots.filter((shot) => !shot.afterStep)
+
   const miniSections = [
     { id: 'concept', label: 'In plain words', done: true },
     { id: 'diagram', label: 'Diagram', done: true },
@@ -125,9 +127,7 @@ export function ModulePage() {
     },
     ...(mod.watchOuts.length > 0 ? [{ id: 'watch-out', label: 'Watch out', done: true }] : []),
     ...((mod.tips?.length ?? 0) > 0 ? [{ id: 'tips', label: 'Tips', done: true }] : []),
-    ...(mod.screenshots.length > 0
-      ? [{ id: 'screenshots', label: 'Screenshots', done: true }]
-      : []),
+    ...(gallery.length > 0 ? [{ id: 'screenshots', label: 'Screenshots', done: true }] : []),
     { id: 'try-it', label: 'Try it', done: progress.tryItDone },
     {
       id: 'quiz',
@@ -202,18 +202,19 @@ export function ModulePage() {
             checked={progress.buildSteps}
             onToggle={onToggleStep}
             completed={progress.completed}
+            screenshots={mod.screenshots}
           />
 
           <WatchOut items={mod.watchOuts} />
 
           <Tips items={mod.tips ?? []} />
 
-          {mod.screenshots.length > 0 ? (
+          {gallery.length > 0 ? (
             <section id="screenshots" className="scroll-mt-28 space-y-4">
               <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em]">
                 Screenshots
               </h2>
-              {mod.screenshots.map((shot) => (
+              {gallery.map((shot) => (
                 <ScreenshotFigure key={shot.id} shot={shot} />
               ))}
             </section>

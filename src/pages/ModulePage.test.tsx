@@ -70,6 +70,14 @@ describe('ModulePage navigation', () => {
     expect(tick).toBeChecked()
   })
 
+  it('shows a step screenshot right after the step it illustrates', async () => {
+    renderAt('/module/8')
+    const image = await screen.findByRole('img', { name: /activity map for one test conversation/ })
+    const stepItem = image.closest('#build li')!
+    expect(stepItem).toHaveTextContent(/Read the activity map from top to bottom/)
+    expect(document.getElementById('screenshots')).toBeNull()
+  })
+
   it('shows when the module was last reviewed and its time estimate', async () => {
     renderAt('/module/3')
     expect(
