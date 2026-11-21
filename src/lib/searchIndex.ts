@@ -52,6 +52,7 @@ function tokensToText(tokens: InlineToken[]): string {
 function conceptBlockToText(block: ConceptBlock): string {
   if (block.type === 'paragraph') return tokensToText(block.tokens)
   if (block.type === 'list') return block.items.map(tokensToText).join('. ')
+  if (block.type === 'figure') return block.shot.caption
   return [block.caption ?? '', ...block.headers, ...block.rows.flat()].filter(Boolean).join(' ')
 }
 

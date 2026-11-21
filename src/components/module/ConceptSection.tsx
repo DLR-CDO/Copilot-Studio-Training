@@ -1,5 +1,6 @@
 import type { ConceptBlock } from '../../content/types'
 import { RichText } from './RichText'
+import { ScreenshotFigure } from './ScreenshotFigure'
 import { Table } from '../ui/Table'
 
 interface ConceptSectionProps {
@@ -32,6 +33,9 @@ function ConceptBlocks({ blocks }: { blocks: ConceptBlock[] }) {
               ))}
             </ul>
           )
+        }
+        if (block.type === 'figure') {
+          return <ScreenshotFigure key={i} shot={block.shot} />
         }
         return <Table key={i} headers={block.headers} rows={block.rows} caption={block.caption} />
       })}

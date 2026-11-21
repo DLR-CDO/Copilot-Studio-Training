@@ -164,7 +164,7 @@ export const glossary: GlossaryTerm[] = [
     id: 'activity-map',
     term: 'Activity map',
     definition:
-      'A step-by-step view of one conversation on the Activity tab. It shows which knowledge, tools, and topics the agent used for each answer, and why.',
+      'A step-by-step view of one conversation, in the test pane or on the Activity tab. It shows which knowledge, tools, and topics the agent used for each answer, and why.',
   },
   {
     id: 'instructions',
@@ -210,9 +210,9 @@ export const glossary: GlossaryTerm[] = [
   },
   {
     id: 'analytics-viewer',
-    term: 'Analytics Viewer',
+    term: 'Agent viewer (previously Analytics viewer)',
     definition:
-      'A sharing role that lets one person see an agent’s Monitor page and nothing else. They can’t edit, test, publish, or share the agent. Only individuals can get it, not groups.',
+      'A sharing role that lets one person view an agent’s Analytics and Evaluation only. They can’t edit, configure, share, publish, or delete the agent. Only individuals can get it, not groups.',
   },
 ]
 

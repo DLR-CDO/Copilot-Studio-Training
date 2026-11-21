@@ -2984,29 +2984,29 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'Your manager wants to watch your agent’s numbers each week but must not change anything. What do you do?',
       options: [
-        'Share it with the Analytics Viewer role',
+        'Share it with the Agent viewer role',
         'Share it with them as an editor',
         'Send screenshots of the Monitor page',
         'Give them your Copilot Studio login',
       ],
       correctIndex: 0,
       explanation:
-        'The Analytics Viewer role gives read-only access to the agent’s analytics, without edit rights. Never share your own login.',
+        'The Agent viewer role (previously Analytics viewer) gives read-only access to the agent’s analytics, without edit rights. Never share your own login.',
       sourceUrl: src.shareAnalytics,
     },
     {
       id: 'm10-q18',
       type: 'multiple-choice',
-      prompt: 'What can someone with the Analytics Viewer role do?',
+      prompt: 'What can someone with the Agent viewer role do?',
       options: [
-        'See the Monitor page only',
+        'Analytics and Evaluation only',
         'Edit topics but not publish',
         'Publish but not edit topics',
         'Share the agent with others',
       ],
       correctIndex: 0,
       explanation:
-        'Analytics Viewers see the agent’s analytics only. They can’t edit, test, publish, or share it.',
+        'Agent viewers (previously Analytics viewers) can view Analytics and Evaluation only. They can’t edit, configure, share, publish, or delete the agent.',
       sourceUrl: src.shareAnalytics,
     },
     {
@@ -3014,12 +3014,12 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       scenario: true,
       prompt:
-        'Your analyst has Analytics Viewer but can’t open the transcripts behind a metric. What else do they need?',
+        'Your analyst has the Agent viewer role but can’t open the transcripts behind a metric. What else do they need?',
       options: [
         'The Bot Transcript Viewer security role',
         'The Environment Maker security role',
         'Editor rights on the agent',
-        'A second Analytics Viewer role',
+        'A second Agent viewer role',
       ],
       correctIndex: 0,
       explanation:
@@ -3029,7 +3029,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm10-q20',
       type: 'multiple-choice',
-      prompt: 'Can you give the Analytics Viewer role to a group?',
+      prompt: 'Can you give the Agent viewer role to a group?',
       options: [
         'No, only to individual people',
         'Yes, to any Microsoft 365 group',
@@ -3038,7 +3038,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       ],
       correctIndex: 0,
       explanation:
-        'Agent owners can share the Analytics Viewer role with individuals only, not with groups.',
+        'Agent owners can share the Agent viewer role (previously Analytics viewer) with individuals only, not with groups.',
       sourceUrl: src.shareAnalytics,
     },
     {

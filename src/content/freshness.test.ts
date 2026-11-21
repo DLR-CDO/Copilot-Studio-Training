@@ -100,4 +100,16 @@ describe('screenshots', () => {
       expect(m.buildSteps.map((s) => s.id)).toContain(shot.afterStep)
     },
   )
+
+  it('concept figures have their image and alt text', () => {
+    const figures = modules.flatMap((m) =>
+      [...m.concept, ...(m.goodToKnow ?? [])].flatMap((b) => (b.type === 'figure' ? [b.shot] : [])),
+    )
+    expect(figures.length).toBeGreaterThan(0)
+    for (const shot of figures) {
+      expect(existsSync(join(process.cwd(), 'public', shot.src)), shot.src).toBe(true)
+      expect(shot.src).not.toMatch(/^\/|^https?:/)
+      expect(shot.alt.length).toBeGreaterThan(20)
+    }
+  })
 })

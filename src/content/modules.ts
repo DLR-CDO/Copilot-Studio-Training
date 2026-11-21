@@ -14,7 +14,6 @@ import type {
   LinkItem,
   Module,
   Screenshot,
-  ScreenshotRequest,
 } from './types'
 
 const t = (text: string): InlineToken => ({ type: 'text', text })
@@ -176,15 +175,14 @@ const m3Screenshots: Screenshot[] = [
 const m4Screenshots: Screenshot[] = [
   {
     id: 'm4-shot-1',
-    src: 'screenshots/4-1.png',
+    src: 'images/04-topics-list.png',
     width: 1024,
-    height: 463,
-    alt: 'The Topics list with All, Custom and System filters, showing each topic’s type, trigger and Enabled toggle.',
+    height: 650,
+    alt: 'The Topics page with the Custom (4) filter selected, listing the Goodbye, Greeting, Start Over and Thank you topics, with the Last modified column highlighted.',
     caption:
-      'The Topics list for AI Enablement Assistant, with filters for Custom (4) and System (9) topics.',
-    authorNotes: 'Annotate: Custom vs System filters, and the Enabled toggles',
+      'The Topics list with Custom (4) selected. Last modified shows when each topic last changed.',
     afterStep: 'm4-step-2',
-    capturedAt: '2026-08-04',
+    capturedAt: '2026-11-21',
   },
   {
     id: 'm4-shot-canvas',
@@ -222,6 +220,17 @@ const m5Screenshots: Screenshot[] = [
     afterStep: 'm5-step-8',
     capturedAt: '2026-11-21',
   },
+  {
+    id: 'm5-shot-credentials',
+    src: 'images/05-send-email-credentials.png',
+    width: 1024,
+    height: 650,
+    alt: 'The Send an email (V2) tool details page for the Office 365 Outlook connector, with Credentials to use set to End user credentials and highlighted.',
+    caption:
+      'The Send an email (V2) tool details. Credentials to use is set to End user credentials.',
+    afterStep: 'm5-step-11',
+    capturedAt: '2026-11-21',
+  },
 ]
 
 const m6Screenshots: Screenshot[] = [
@@ -242,14 +251,14 @@ const m6Screenshots: Screenshot[] = [
 const m7Screenshots: Screenshot[] = [
   {
     id: 'm7-shot-1',
-    src: 'images/07-model-dropdown-1.png',
-    width: 936,
-    height: 534,
-    alt: 'The agent Overview page with the “Select your agent’s model” dropdown below the description.',
-    caption: 'The model dropdown on the Overview page, under "Select your agent’s model".',
-    authorNotes: "Annotate: model choice sits next to instructions — this is the agent's brain",
+    src: 'images/07-overview-agent-status.png',
+    width: 1024,
+    height: 650,
+    alt: 'The agent Overview page showing Details, an Agent status area with a 1 Warning badge, and the Select your agent’s model dropdown.',
+    caption:
+      'The Overview page. The 1 Warning badge is expected here: the practice agent uses No authentication so the demo website works.',
     afterStep: 'm7-step-6',
-    capturedAt: '2026-11-16',
+    capturedAt: '2026-11-21',
   },
   {
     id: 'm7-shot-2',
@@ -278,11 +287,12 @@ const m7Screenshots: Screenshot[] = [
 const m8Screenshots: Screenshot[] = [
   {
     id: 'm8-shot-activity-map',
-    src: 'images/08-activity-map.png',
+    src: 'images/08-activity-map-tool.png',
     width: 1024,
-    height: 598,
-    alt: 'The activity map for one test conversation, showing the Greeting topic with its steps: interpreting topic intent, executing topic flow and processing topic outcome.',
-    caption: 'The activity map for one test conversation: the agent picked the Greeting topic.',
+    height: 650,
+    alt: 'The test pane’s activity map for a question that used the Get my profile (V2) tool, listing each tool step with a check mark, followed by the tool’s outputs.',
+    caption:
+      'The activity map in the test pane: each step of the Get my profile (V2) tool call, then its outputs.',
     afterStep: 'm8-step-5',
     capturedAt: '2026-11-21',
   },
@@ -298,6 +308,16 @@ const m8Screenshots: Screenshot[] = [
     capturedAt: '2026-11-21',
   },
   {
+    id: 'm8-shot-test-set',
+    src: 'images/08-test-set.png',
+    width: 1024,
+    height: 650,
+    alt: 'An evaluation’s Review data set with six questions and their expected responses, above the Select test methods area showing Answer quality and Add test method.',
+    caption: 'A test set with questions and expected responses, ready for test methods.',
+    afterStep: 'm8-step-10',
+    capturedAt: '2026-11-21',
+  },
+  {
     id: 'm8-shot-test-methods',
     src: 'images/08-test-methods.png',
     width: 1024,
@@ -305,6 +325,16 @@ const m8Screenshots: Screenshot[] = [
     alt: 'A test set with three questions and an expected response column, and the Select test method window open, listing Answer quality, Content safety, Tool use, Meaning match, Text match, Keyword match, Exact match and Custom.',
     caption: 'A test set with its questions, and the Select test method window.',
     afterStep: 'm8-step-11',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm8-shot-run-results',
+    src: 'images/08-run-results.png',
+    width: 1024,
+    height: 650,
+    alt: 'A finished evaluation run with an overall score of 100%, listing each question, the agent response and an Answer quality Pass result.',
+    caption: 'A finished run: the overall score, and a result for each question.',
+    afterStep: 'm8-step-12',
     capturedAt: '2026-11-21',
   },
   {
@@ -333,22 +363,33 @@ const m9Screenshots: Screenshot[] = [
   },
   {
     id: 'm9-shot-publish',
-    src: 'images/09-publish-confirm.png',
+    src: 'images/09-publish-dialog.png',
     width: 1024,
-    height: 598,
-    alt: 'The Publish this agent confirmation box listing review warnings, with an arrow pointing to the Publish button.',
-    caption: 'The Publish this agent confirmation box. Select Publish again.',
+    height: 650,
+    alt: 'The Publish this agent dialog listing two items to review before publishing, about end user authentication and tools that use the author’s credentials, with an arrow pointing to Publish.',
+    caption: 'The Publish this agent dialog. Read the review items, then select Publish.',
     afterStep: 'm9-step-5',
     capturedAt: '2026-11-21',
   },
   {
     id: 'm9-shot-channels',
-    src: 'images/09-channels.png',
+    src: 'images/09-channels-published.png',
     width: 1024,
-    height: 598,
-    alt: 'The Channels page with the Demo website tile under Share a preview and the Microsoft 365 and Microsoft Teams tile under Microsoft channels highlighted.',
-    caption: 'The Channels page: Demo website and Microsoft 365 and Teams.',
+    height: 650,
+    alt: 'The Channels page after publishing, with the Published agent status section highlighted, above the Demo website, Microsoft 365 and Microsoft Teams, and other channel tiles.',
+    caption:
+      'The Channels page after publishing, with the published status and the Demo website tile.',
     afterStep: 'm9-step-7',
+    capturedAt: '2026-11-21',
+  },
+  {
+    id: 'm9-shot-demo-website',
+    src: 'images/09-demo-website.png',
+    width: 1024,
+    height: 453,
+    alt: 'The demo website open in a browser, with the agent’s chat window on the right answering a test message.',
+    caption: 'The demo website in a browser, with the agent answering in the chat window.',
+    afterStep: 'm9-step-8',
     capturedAt: '2026-11-21',
   },
 ]
@@ -366,22 +407,13 @@ const m10Screenshots: Screenshot[] = [
   },
   {
     id: 'm10-shot-summary',
-    src: 'images/10-monitor-summary.png',
+    src: 'images/10-monitor.png',
     width: 1024,
-    height: 598,
-    alt: 'The Monitor page with the Overview, Billing and Savings summary cards and the conversation outcomes legend highlighted.',
-    caption: 'Monitor summary cards, and the conversation outcomes chart below them.',
+    height: 650,
+    alt: 'The Monitor page with the Overview, Billing and Savings summary cards highlighted, and the Conversation outcomes chart with its Resolved, Escalated, Abandoned and Unengaged legend.',
+    caption: 'The Monitor page: summary cards, and the Conversation outcomes chart below them.',
     afterStep: 'm10-step-6',
     capturedAt: '2026-11-21',
-  },
-]
-
-const m9ScreenshotsToCapture: ScreenshotRequest[] = [
-  {
-    id: 'm9-shot-2',
-    caption: 'The demo website open in a browser, with the agent answering a test question.',
-    authorNotes:
-      'Capture: the demo website after you ask one question. Annotate: point to the browser address bar with "share this demo link for feedback before going live".',
   },
 ]
 
@@ -1984,18 +2016,14 @@ export const modules: Module[] = [
         ui('Test'),
         t(' in the top right corner to open the '),
         ui('test pane'),
-        t(', and ask your agent one question.'),
+        t('.'),
       ],
-      // VERIFY IN UI
-      verifyStep([
-        t('Select the '),
-        ui('Activity'),
-        t(' tab in the row of tabs along the top of the page.'),
-      ]),
-      // VERIFY IN UI
-      verifyStep([
-        t('Select your test conversation at the top of the list to open its activity map.'),
-      ]),
+      [
+        t(
+          'In the Test pane, ask a question that uses a tool. The activity map on the left shows each tool step.',
+        ),
+      ],
+      [t('Scroll down past the steps to see the tool’s outputs, the data it sent back.')],
       // VERIFY IN UI
       verifyStep([
         t(
@@ -2052,6 +2080,7 @@ export const modules: Module[] = [
     ],
     tips: [
       'Nothing ships untested: evaluation before publishing, every time. A 10-question test set is the minimum bar.',
+      'The Activity tab lists your sessions too, but it can take a while to show new ones. For a question you just asked, use the activity map in the test pane.',
       'If the right answer is a polite refusal, Answer quality may flag it, because it checks whether the agent tried to answer. Use a Custom test method that describes the refusal you expect.',
     ],
     screenshots: m8Screenshots,
@@ -2251,7 +2280,7 @@ export const modules: Module[] = [
         t('On the Channels page, select the '),
         ui('Demo website'),
         t(
-          ' tile. If it is not listed, publish your agent first. If it is still missing after publishing, the channel may be turned off in your environment, so ask your admin.',
+          ' tile. If it is not listed, publish your agent first. If it is still missing after publishing, the channel may be turned off in your environment, so ask your admin. If the tile doesn’t open, select the … (More) menu in the top right corner of the agent, then Go to demo website.',
         ),
       ]),
       // VERIFY IN UI
@@ -2276,7 +2305,6 @@ export const modules: Module[] = [
       'Use the demo website for stakeholder review before broad rollout. It is not meant for production.',
     ],
     screenshots: m9Screenshots,
-    screenshotsToCapture: m9ScreenshotsToCapture,
     tryIt:
       "Check your agent's sign-in setting, publish it to the demo website, and send the link to one classmate at Digital Realty for feedback. Congratulations, you've shipped an agent.",
     goDeeper: goDeeper([
@@ -2351,18 +2379,31 @@ export const modules: Module[] = [
         t('To show the numbers to a manager or analyst, don’t make them an editor. Share the '),
         kw('agent', 'agent'),
         t(' with the '),
-        kw('Analytics Viewer', 'analytics-viewer'),
-        t(' role instead: open '),
+        kw('Agent viewer', 'analytics-viewer'),
+        t(' role (previously called Analytics viewer) instead: open '),
         ui('Share'),
         t(', add the person, and select '),
-        ui('Analytics viewer'),
+        ui('Agent viewer'),
         t(
-          '. They land on the Monitor page and see nothing else: no topics, tools, settings, test pane, or publishing, and they can’t share the agent on. Only the agent’s owner can give the role, and only to individuals, not groups.',
+          '. They can view Analytics and Evaluation only. They can’t edit, configure, share, publish, or delete the agent. Only the agent’s owner can give the role, and only to individuals, not groups.',
         ),
       ]),
+      {
+        type: 'figure',
+        shot: {
+          id: 'm10-shot-share',
+          src: 'images/10-share-agent-viewer.png',
+          width: 1024,
+          height: 650,
+          alt: 'The Share window for an agent, with Agent viewer highlighted in the permissions list: it can view Analytics and Evaluation only, but not edit, configure, share, publish or delete the agent.',
+          caption:
+            'The Share window. Agent viewer (previously called Analytics viewer) gives read-only access.',
+          capturedAt: '2026-11-21',
+        },
+      },
       para([
         t(
-          'Analytics Viewer doesn’t include conversation transcripts. Opening the questions behind a metric, or downloading sessions, also needs the ',
+          'Agent viewer doesn’t include conversation transcripts. Opening the questions behind a metric, or downloading sessions, also needs the ',
         ),
         ui('Bot Transcript Viewer'),
         t(
@@ -2380,7 +2421,7 @@ export const modules: Module[] = [
         ],
         [
           t(
-            'Someone who is an editor on any agent in an environment can’t also be an Analytics Viewer in that environment.',
+            'Someone who is an editor on any agent in an environment can’t also be an Agent viewer in that environment.',
           ),
         ],
         [t('Custom metrics (preview): describe a business outcome and Copilot Studio scores it.')],
@@ -2434,6 +2475,7 @@ export const modules: Module[] = [
     watchOuts: [],
     tips: [
       "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy.",
+      'New conversations can take up to an hour to appear on the Monitor page. Chats in the test pane don’t count toward Monitor numbers, so test on the demo website.',
     ],
     screenshots: m10Screenshots,
     tryIt:
@@ -2461,7 +2503,7 @@ export const modules: Module[] = [
       },
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/admin-share-bots',
-        label: 'Share an agent’s analytics (Analytics Viewer)',
+        label: 'Share an agent’s analytics (Agent viewer, previously Analytics viewer)',
       },
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-custom-metrics',
@@ -2474,7 +2516,7 @@ export const modules: Module[] = [
       "Named one thing I'd improve based on the data",
       'Turned sign-in back on and published again',
       'Know what a 15-minute weekly review should cover',
-      'Know how to share the numbers with the Analytics Viewer role instead of edit rights',
+      'Know how to share the numbers with the Agent viewer role instead of edit rights',
     ],
   },
 ]

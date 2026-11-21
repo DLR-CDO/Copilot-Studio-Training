@@ -17,6 +17,7 @@ export type ConceptBlock =
       headers: string[]
       rows: string[][]
     }
+  | { type: 'figure'; shot: Screenshot }
 
 export interface BuildSubStep {
   tokens: InlineToken[]

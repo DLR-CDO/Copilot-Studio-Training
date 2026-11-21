@@ -72,10 +72,16 @@ describe('ModulePage navigation', () => {
 
   it('shows a step screenshot right after the step it illustrates', async () => {
     renderAt('/module/8')
-    const image = await screen.findByRole('img', { name: /activity map for one test conversation/ })
+    const image = await screen.findByRole('img', { name: /activity map for a question that used/ })
     const stepItem = image.closest('#build li')!
     expect(stepItem).toHaveTextContent(/Read the activity map from top to bottom/)
     expect(document.getElementById('screenshots')).toBeNull()
+  })
+
+  it('shows a concept screenshot inside the plain words section', async () => {
+    renderAt('/module/10')
+    const image = await screen.findByRole('img', { name: /Share window for an agent/ })
+    expect(image.closest('#concept')).not.toBeNull()
   })
 
   it('opens a screenshot full size and closes it with Escape', async () => {
