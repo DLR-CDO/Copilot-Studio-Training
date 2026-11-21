@@ -4,9 +4,9 @@ Interactive, self-paced training site that teaches non-technical business users 
 
 ## Live site (Azure Static Web Apps)
 
-**https://jolly-smoke-0f957960f.7.azurestaticapps.net**
+**https://copilotstudio-academy.azurewebsites.net** (also reachable at the generated address https://jolly-smoke-0f957960f.7.azurestaticapps.net)
 
-Static Web App `copilotstudio-training` (Free plan) in resource group `rg-copilotstudio-training` (subscription: SalesGPT Demo). Deploys on every push to `main` via `.github/workflows/deploy-swa.yml` (lint, test, build site and API, deploy).
+Static Web App `copilotstudio-training` (Standard plan) in resource group `rg-copilotstudio-training` (subscription: SalesGPT Demo). Deploys on every push to `main` via `.github/workflows/deploy-swa.yml` (lint, test, build site and API, deploy).
 
 - **Sign-in:** Static Web Apps' built-in Microsoft sign-in (no app registration needed). Every page except `/verify` and `/signed-out` requires sign-in, and the API only accepts accounts whose email ends in `@digitalrealty.com` (`ALLOWED_EMAIL_DOMAIN`). GitHub sign-in is blocked in `public/staticwebapp.config.json`.
 - **Name on the certificate:** Static Web Apps does not pass the account's display name, so learners type it once on **My Certificate**. It is tied to their signed-in email and locks once the certificate is issued (it unlocks again after the certificate expires).
@@ -33,7 +33,7 @@ npm run start:mock   # http://localhost:8080 — switch users at /.auth/login/aa
 
 Without the API (`npm run dev`, or any static host), progress falls back to `localStorage` and no certificates are issued.
 
-**Address to share:** https://copilotstudio-academy.azurewebsites.net. The App Service `copilotstudio-academy` runs only `redirect/redirect.cjs` (startup command `node /home/site/wwwroot/redirect.cjs`), which sends every path to the Static Web App named in its `REDIRECT_TARGET` app setting. Certificate verification links use this address (`PUBLIC_BASE_URL`), so keep the App Service running for as long as certificates are valid. When a custom domain is added to the Static Web App, change `REDIRECT_TARGET` to it so old links keep working.
+**Address to share:** https://copilotstudio-academy.azurewebsites.net. The App Service `copilotstudio-academy` runs only `redirect/proxy.cjs` (startup command `node /home/site/wwwroot/proxy.cjs`, app settings `PROXY_TARGET` and `PUBLIC_HOST`), relaying every request to the Static Web App so the browser keeps showing this address. This needs the Static Web Apps Standard plan and the host listed under `forwardingGateway` in `public/staticwebapp.config.json`. Certificate verification links use this address (`PUBLIC_BASE_URL`), so keep the App Service running while certificates are valid. Fallback: `redirect/redirect.cjs` (setting `REDIRECT_TARGET`) only redirects and works on the free plan. When a custom domain is added, point `PROXY_TARGET`/`REDIRECT_TARGET` at it, or switch to the redirect, so old certificate links keep working.
 
 ## Stack
 
