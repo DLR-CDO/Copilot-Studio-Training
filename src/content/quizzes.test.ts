@@ -66,6 +66,20 @@ describe('question banks', () => {
     }
   })
 
+  it.each(banks)('module $id does not give answers away by length', ({ bank }) => {
+    const choices = bank.filter((q) => q.type === 'multiple-choice')
+    const longest = choices.filter(
+      (q) => q.options[q.correctIndex]!.length >= Math.max(...q.options.map((o) => o.length)),
+    )
+    expect(longest.length / choices.length).toBeLessThanOrEqual(0.4)
+    for (const q of choices) {
+      const wrong = q.options.filter((_, i) => i !== q.correctIndex).map((o) => o.length)
+      expect(q.options[q.correctIndex]!.length, q.id).toBeLessThanOrEqual(
+        Math.ceil(Math.max(...wrong) * 1.15),
+      )
+    }
+  })
+
   it.each(banks)('module $id has enough scenario and non-true/false questions', ({ bank }) => {
     expect(countOf(bank, (q) => q.scenario === true)).toBeGreaterThanOrEqual(4)
     expect(countOf(bank, (q) => q.type !== 'true-false')).toBeGreaterThanOrEqual(

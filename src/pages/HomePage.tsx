@@ -58,7 +58,7 @@ export function HomePage() {
 
       {isFirstVisit ? (
         <div className="mt-8 rounded-card border border-teal bg-teal-soft p-5">
-          <h2 className="font-display text-lg font-bold">Welcome to Agent Academy</h2>
+          <h2 className="font-display text-lg font-bold">Welcome to Copilot Studio Fundamentals</h2>
           <p className="mt-2 text-sm text-muted">
             Your progress saves automatically. Check the access list below, then start with Module 1
             — no coding required.

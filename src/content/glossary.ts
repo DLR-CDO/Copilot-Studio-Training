@@ -128,7 +128,7 @@ export const glossary: GlossaryTerm[] = [
     id: 'trigger',
     term: 'Trigger',
     definition:
-      'Something that starts the agent automatically, for example an urgent question arriving by email that the agent then answers by email.',
+      'What starts something. A topic trigger starts a topic, usually from what the user says: trigger phrases in classic orchestration, or the topic description in generative orchestration. An agent trigger starts the agent automatically on an event, for example an urgent email arriving, which an autonomous agent then answers by email.',
   },
   {
     id: 'suggested-prompt',
@@ -147,6 +147,54 @@ export const glossary: GlossaryTerm[] = [
     term: 'Solution',
     definition:
       'A container in Power Apps that stores all the work for your agent, so it can be moved between environments later.',
+  },
+  {
+    id: 'copilot-credits',
+    term: 'Copilot Credits',
+    definition:
+      'The billing unit for agents in Copilot Studio since September 1, 2025. Your organization buys capacity and agents use credits as they work; your admin manages this, not you.',
+  },
+  {
+    id: 'harness',
+    term: 'Harness',
+    definition:
+      'The engine that runs an agent and shapes how you build it. This course uses the standard harness, which follows the topics and rules you define. Agents on the Microsoft Copilot harness look and work differently.',
+  },
+  {
+    id: 'activity-map',
+    term: 'Activity map',
+    definition:
+      'A step-by-step view of one conversation on the Activity tab. It shows which knowledge, tools, and topics the agent used for each answer, and why.',
+  },
+  {
+    id: 'instructions',
+    term: 'Instructions',
+    definition:
+      'Standing guidance the agent always follows: what it does, its tone, and its rules. You write them on the Overview page.',
+  },
+  {
+    id: 'data-policy',
+    term: 'Data policy (DLP)',
+    definition:
+      'Rules your admin sets for an environment, also called data loss prevention (DLP) policies. They control which connectors, knowledge sources, and channels agents may use, and can require people to sign in.',
+  },
+  {
+    id: 'authentication',
+    term: 'Authentication (sign-in)',
+    definition:
+      'Who must sign in to chat with an agent, set under Settings > Security > Authentication. No authentication lets anyone with the link chat. Authenticate with Microsoft signs people in with their work account, as in Teams and Microsoft 365.',
+  },
+  {
+    id: 'monitor',
+    term: 'Monitor (Analytics)',
+    definition:
+      'The page that shows how a published agent is used: sessions, engagement, resolution, and escalation. Older screens call it Analytics. Chats in the test pane never appear here.',
+  },
+  {
+    id: 'ungrounded-responses',
+    term: 'Allow ungrounded responses',
+    definition:
+      'A setting under Settings > Generative AI > Knowledge (older screens: use general knowledge). When it is off, the agent only answers when it used a knowledge source or tool, instead of falling back on the AI model’s general knowledge.',
   },
 ]
 

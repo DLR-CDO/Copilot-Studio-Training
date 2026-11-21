@@ -50,19 +50,11 @@ describe('module freshness metadata', () => {
     expect(modules[0]!.buildSteps.map((s) => s.id)).toEqual([
       'm1-step-harness',
       'm1-step-1',
+      'm1-step-solution',
       'm1-step-2',
       'm1-step-3',
       'm1-step-4',
       'm1-step-5',
-    ])
-    expect(modules[8]!.buildSteps.map((s) => s.id)).toEqual([
-      'm9-step-pick-agent',
-      'm9-step-1',
-      'm9-step-2',
-      'm9-step-3',
-      'm9-step-4',
-      'm9-step-5',
-      'm9-step-6',
     ])
   })
 })

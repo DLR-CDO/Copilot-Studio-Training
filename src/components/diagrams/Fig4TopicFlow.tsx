@@ -4,13 +4,13 @@ type Branch = 'knowledge' | 'escalate'
 
 const BRANCH_INFO: Record<Branch, { label: string; caption: string; color: string }> = {
   knowledge: {
-    label: 'Ask: routine question',
-    caption: 'Routine question → the agent answers straight from its knowledge.',
+    label: 'User picks: Outlook',
+    caption: 'Outlook → the condition matches, so the agent sends the Outlook answer.',
     color: '#6B5BD2',
   },
   escalate: {
-    label: 'Ask: urgent issue',
-    caption: 'Urgent issue → the condition routes it to a person instead.',
+    label: 'User picks: Teams',
+    caption: 'Anything else → All other conditions → the Escalate topic hands it to a person.',
     color: '#C4453B',
   },
 }
@@ -93,10 +93,10 @@ export function Fig4TopicFlow() {
             style={{ transition: 'fill 200ms ease, stroke 200ms ease, stroke-width 200ms ease' }}
           />
           <text x="572" y="55" textAnchor="middle" className="st" fontSize="12.5">
-            Answer from
+            Send the
           </text>
           <text x="572" y="71" textAnchor="middle" className="st" fontSize="12.5">
-            knowledge
+            Outlook answer
           </text>
           <rect
             x="520"
@@ -175,7 +175,7 @@ export function Fig4TopicFlow() {
       >
         {branch
           ? BRANCH_INFO[branch].caption
-          : 'Choose how the question comes in to see the path light up.'}
+          : 'Choose what the user picks to see the path light up.'}
       </div>
 
       <figcaption className="mt-2.5 font-mono text-xs text-muted">

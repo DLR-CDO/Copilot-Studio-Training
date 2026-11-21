@@ -18,3 +18,18 @@ export function WatchOut({ items }: WatchOutProps) {
     </section>
   )
 }
+
+export function Tips({ items }: WatchOutProps) {
+  if (items.length === 0) return null
+  return (
+    <section id="tips" className="scroll-mt-28">
+      <Callout variant="info" title="Tips">
+        <ul className="list-disc space-y-1.5 pl-5">
+          {items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </Callout>
+    </section>
+  )
+}

@@ -1,4 +1,4 @@
-# Agent Academy
+# Copilot Studio Fundamentals: Build Your First Agent
 
 Interactive, self-paced training site that teaches non-technical business users how to build agents in **Microsoft Copilot Studio**. Course content is sourced from `copilot-studio-training-guide.html` in the repo root.
 

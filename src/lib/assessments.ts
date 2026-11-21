@@ -21,7 +21,7 @@ export interface FinalAssessment {
 
 export const FINAL_ASSESSMENT: FinalAssessment = {
   scope: 'final-1',
-  title: 'Part 1 final assessment',
+  title: 'Final assessment',
   modules: Array.from({ length: MODULE_COUNT }, (_, i) => i + 1),
   perModule: 2,
   minScenario: 4,

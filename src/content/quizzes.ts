@@ -64,9 +64,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'Which list names parts of an agent that you set up on its Overview page?',
       options: [
         'Description, instructions, knowledge, tools, triggers, agents, topics, and suggested prompts',
-        'Environments, licensing, Copilot Credits, and data policies',
-        'Variables, conditions, citations, and evaluations',
-        'Analytics, test sets, sessions, and escalations',
+        'Environment, solution, license type, Copilot Credits, data policies, and admin approvals',
+        'Variables, conditions, citations, evaluations, test sets, and the activity map for each answer',
+        'Channels, sessions, escalations, resolution rate, engagement, and the weekly review notes',
       ],
       correctIndex: 0,
       explanation:
@@ -107,10 +107,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: "What's the very first step in creating your practice agent?",
       options: [
-        'Open Settings and pick a model',
+        'Open Settings and pick a model for the agent',
         'Make sure the DEV environment is selected',
-        'Add a knowledge source',
-        'Publish to the demo website',
+        'Add a knowledge source so it has content',
+        'Publish it to the demo website to test it',
       ],
       correctIndex: 1,
       explanation:
@@ -125,9 +125,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Your team wants an agent that answers urgent questions arriving by email, without anyone opening a chat. What kind of agent is that?',
       options: [
         'An autonomous agent that acts on a trigger',
-        'A conversational agent',
-        'A suggested prompt',
-        'A system topic',
+        'A conversational agent that people chat with',
+        'A topic with trigger phrases for urgent emails',
+        'A suggested prompt shown at the top of the chat',
       ],
       correctIndex: 0,
       explanation:
@@ -140,9 +140,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'Why is every practice agent created inside a solution?',
       options: [
         'The solution stores all the work you do on the agent',
-        'A solution makes the agent public',
-        'A solution picks the best model automatically',
-        'A solution turns on web search',
+        'The solution makes the agent visible to everyone at once',
+        'The solution picks the best model for the agent automatically',
+        "The solution turns on web search for the agent's answers",
       ],
       correctIndex: 0,
       explanation:
@@ -152,16 +152,18 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm1-q8',
       type: 'multiple-choice',
-      prompt: "What is an agent's description for?",
+      scenario: true,
+      prompt:
+        'Other agents keep handing your agent requests it was never meant to handle. What should you rewrite first?',
       options: [
-        'People and other agents read it to decide when to use the agent',
-        'It is the greeting users see first',
-        'It sets which environment the agent lives in',
-        'It lists the files the agent can search',
+        'Its description, which others read to decide when to use it',
+        'Its greeting topic, which is the first message users see',
+        'Its suggested prompts, which list the questions people can ask',
+        'Its knowledge files, which decide what it is allowed to answer',
       ],
       correctIndex: 0,
       explanation:
-        'The description says in one or two sentences what the agent does. People and other agents read it to decide when to use your agent.',
+        'The description says what your agent does. People and other agents read it to decide when to use your agent, so a vague description attracts the wrong requests.',
       sourceUrl: src.getStarted,
     },
     {
@@ -172,9 +174,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Priya opens Copilot Studio to start her practice agent and sees a Production environment name above her name. What should she do first?',
       options: [
         'Switch to the DEV environment before doing anything else',
-        'Create the agent now and move it later',
-        'Ask users to test it in Production',
-        'Ignore it; environments only matter when publishing',
+        'Create the agent here and move it to DEV once it works',
+        'Build it in Production so users can try it straight away',
+        'Carry on; environments only matter when you publish',
       ],
       correctIndex: 0,
       explanation:
@@ -189,7 +191,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'You have just added knowledge to a new agent. Which questions should you ask first in the test pane?',
       options: [
         'Questions your knowledge files are certain to answer',
-        'Questions about topics none of your files cover',
+        'Questions about subjects that none of your files cover yet',
         'Trick questions designed to confuse the agent',
         'Questions copied from another agent at random',
       ],
@@ -202,18 +204,17 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       id: 'm1-q11',
       type: 'multiple-choice',
       scenario: true,
-      prompt:
-        'You have two agents: a broad company news agent, and an HR agent that handles salary questions. Which one is it reasonable to turn web search on for?',
+      prompt: 'You need a knowledge file for your practice agent. Which one is fine to upload?',
       options: [
-        'Only the company news agent',
-        'Only the HR agent',
-        'Both agents',
-        'Neither; web search is never allowed',
+        'A made-up FAQ you wrote for the exercise',
+        "Last quarter's sales figures for your region",
+        "A spreadsheet of your team's names and salaries",
+        'A customer contract, with the names removed by hand',
       ],
       correctIndex: 0,
       explanation:
-        'Turn on web search only for broad agents that do not handle confidential information. Salary questions are confidential.',
-      sourceUrl: src.publicWebsite,
+        'Practice agents only get made-up or already-public content. Customer and employee data, financial results, and contracts never go in, even with names removed.',
+      sourceUrl: src.fileUpload,
     },
     {
       id: 'm1-q12',
@@ -261,9 +262,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What are suggested prompts?',
       options: [
         'Starter prompts, each with a title, that show users what to ask',
-        'Instructions the agent always follows',
-        'Questions in a test set',
-        'Messages the agent sends when it fails',
+        'Instructions the agent always follows, in every conversation',
+        'Questions saved in a test set, each with an expected answer',
+        'Messages the agent sends when it cannot find an answer',
       ],
       correctIndex: 0,
       explanation:
@@ -274,10 +275,15 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       id: 'm1-q16',
       type: 'multiple-choice',
       prompt: 'What is the billing unit for agents in Copilot Studio?',
-      options: ['Tokens', 'Copilot Credits', 'Sessions', 'Licenses'],
+      options: [
+        'Tokens used by the model',
+        'Copilot Credits',
+        'Chat sessions per month',
+        'User licenses',
+      ],
       correctIndex: 1,
       explanation:
-        'Agents are billed in Copilot Credits. They replaced messages as the billing unit on 1 September 2025.',
+        'Agents are billed in Copilot Credits. They replaced messages as the billing unit on September 1, 2025.',
       sourceUrl: src.billing,
     },
   ],
@@ -292,10 +298,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       scenario: true,
       prompt: "You built an agent but can't find it after switching environments. What happened?",
       options: [
-        'The agent was deleted automatically',
+        'The agent was deleted automatically when you switched',
         'Agents live only in the environment where they were created',
-        'The agent moved to Production automatically',
-        'Your license expired',
+        'The agent was moved to Production when you switched',
+        'Your license expired, so your agents are hidden from you',
       ],
       correctIndex: 1,
       explanation:
@@ -316,10 +322,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'Where do you check and switch your current environment in Copilot Studio?',
       options: [
-        'The Channels page',
+        'The Channels page, in the row of tabs along the top',
         'The globe icon in the bottom left corner, above your name',
-        'The Settings page',
-        'The Overview page',
+        'The Settings page, under Security, next to Authentication',
+        'The Overview page, in the Details card at the top',
       ],
       correctIndex: 1,
       explanation:
@@ -353,9 +359,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'A teammate edited a live agent directly in Production "just to try something". What is the main risk?',
       options: [
         'Real users can see unfinished changes, and real data is involved',
-        'The agent will run more slowly',
-        'The agent will lose its model',
-        'There is no risk if the change is small',
+        'The agent will run more slowly until the change is undone',
+        'The agent will lose its model and fall back to the default',
+        'None, as long as the change is small and you undo it straight after',
       ],
       correctIndex: 0,
       explanation:
@@ -368,9 +374,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What does an environment hold?',
       options: [
         'Agents, data, and permissions',
-        'Only agents',
-        'Only the model settings',
-        'Only published channels',
+        'Only agents, nothing else',
+        'Only the model settings for agents',
+        'Only published channels and links',
       ],
       correctIndex: 0,
       explanation: 'An environment is a container for agents, data, and permissions.',
@@ -384,9 +390,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'A colleague can pick a model tagged Preview, but in your environment it does not appear. What is the most likely reason?',
       options: [
         'Your admin has not allowed preview models in your environment',
-        'Your agent has too many topics',
-        'Preview models only appear after publishing',
-        'You need to clear your browser cache',
+        'Your agent has too many topics for preview models to load',
+        'Preview models only appear after the agent has been published',
+        'Your browser cached an old model list, so you need to clear it',
       ],
       correctIndex: 0,
       explanation:
@@ -401,9 +407,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'You try to add a connector and get a message that a policy blocks it. Who can explain why?',
       options: [
         'Your environment admin, who manages data policies',
-        'The person who wrote the connector',
-        'The users of your agent',
-        'Nobody; the block is random',
+        'The person who built the connector, through its support page',
+        'The users of your agent, who agreed to the policy',
+        'Nobody; these blocks happen at random and clear by themselves',
       ],
       correctIndex: 0,
       explanation:
@@ -415,10 +421,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'What do data policies control for agents?',
       options: [
-        'Which connectors and capabilities agents in the environment may use',
-        'How long each conversation can last',
-        'Which model is the default',
-        'The colours of the agent in Teams',
+        'Which connectors and capabilities agents may use there',
+        'How long each conversation can last before the agent ends it',
+        'Which model every agent in the environment uses by default',
+        'The colors and icon the agent shows when it appears in Teams',
       ],
       correctIndex: 0,
       explanation:
@@ -433,9 +439,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'You come back to Copilot Studio after a long weekend to keep working on your practice agent. What do you check before editing anything?',
       options: [
         'That the globe icon shows the DEV environment',
-        'That the agent has been published',
-        'That analytics show new sessions',
-        'That the test pane is empty',
+        'That the agent was published since your last visit',
+        'That analytics show new sessions from the weekend',
+        'That the test pane is empty before you start',
       ],
       correctIndex: 0,
       explanation:
@@ -447,10 +453,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'What is the Test environment for?',
       options: [
-        'Checking the agent before real users see it in Production',
-        'Building new ideas from scratch',
-        'Storing old agents you no longer need',
-        'Hosting the demo website only',
+        'Checking the agent before real users see it',
+        'Building new ideas from scratch before anyone sees them',
+        'Storing old agents you no longer need, as an archive',
+        'Hosting the demo website so stakeholders can review it',
       ],
       correctIndex: 0,
       explanation:
@@ -498,10 +504,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         "Your Add knowledge pop-up has no 'Public websites' option. What is the most likely reason?",
       options: [
-        'Your license expired',
-        'An admin restricted that source type in the Power Platform admin center',
-        'The agent is already published',
-        'You picked the wrong model',
+        'Your trial license has ended, so only file uploads are offered',
+        'An admin restricted that source type for your environment',
+        'The agent is already published, so new source types are locked',
+        'Your agent uses a model that cannot read public websites',
       ],
       correctIndex: 1,
       explanation:
@@ -521,10 +527,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'A colleague asks the agent a policy question and wants to be sure the answer is trustworthy, not just generated. What should they check?',
       options: [
-        'Nothing; generative answers are always correct',
-        "The citation, to confirm the answer actually came from the agent's knowledge",
-        "The agent's badge name",
-        'The number of tools connected',
+        'Nothing; generative answers are checked by Microsoft first',
+        'The citation, to confirm the answer came from its knowledge',
+        'The model name, to confirm a trusted model wrote it',
+        'The number of knowledge sources connected to the agent',
       ],
       correctIndex: 1,
       explanation:
@@ -535,16 +541,22 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       id: 'm3-q2',
       type: 'true-false',
       prompt:
-        'The "use general knowledge" toggle controls whether the agent can answer beyond your connected knowledge sources.',
+        'Turning off Allow ungrounded responses (older screens: use general knowledge) stops the agent from answering when it used no knowledge source or tool.',
       correct: true,
-      explanation: 'With general knowledge switched off, answers stick to your connected sources.',
+      explanation:
+        'With Allow ungrounded responses off, the agent blocks a response in any turn where it did not use a knowledge source or tool, instead of falling back on the model’s general knowledge.',
       sourceUrl: src.knowledge,
     },
     {
       id: 'm3-q3',
       type: 'multiple-choice',
       prompt: 'Which of these is NOT a knowledge source?',
-      options: ['SharePoint', 'Uploaded files', 'Public websites', 'A connected agent'],
+      options: [
+        'A SharePoint site',
+        'An uploaded PDF file',
+        'A public website',
+        'A connected agent',
+      ],
       correctIndex: 3,
       explanation:
         'SharePoint, OneDrive, uploaded files, and public websites are the everyday knowledge sources. A connected agent is another agent your agent can hand work to, not a source of documents.',
@@ -556,9 +568,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is the main thing that helps the agent pick the right knowledge source?',
       options: [
         'A clear, well-written description of the source',
-        'The order sources were added',
-        'The file size of the source',
-        'The environment the agent is built in',
+        'The order in which the sources were added to the agent',
+        'The file size of each source, with bigger files first',
+        'The environment the agent is built in, DEV or Test',
       ],
       correctIndex: 0,
       explanation:
@@ -582,14 +594,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'Your HR agent keeps giving generic internet-style advice instead of quoting your policy documents. Which setting should you review first?',
       options: [
-        'The "use general knowledge" toggle',
-        'The environment name',
-        'The demo website channel',
-        'The suggested prompts',
+        'Allow ungrounded responses (general knowledge)',
+        'The environment the agent was created in',
+        'The demo website channel and its welcome message',
+        'The suggested prompts on the Overview page',
       ],
       correctIndex: 0,
       explanation:
-        'With general knowledge on, the agent can answer from the model’s own knowledge. Switch it off when answers must come only from your sources.',
+        'When Allow ungrounded responses is on, the agent can answer from the model’s general knowledge instead of your documents. Turn it off when answers must come from your sources.',
       sourceUrl: src.knowledge,
     },
     {
@@ -600,9 +612,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'You added two SharePoint libraries, "Benefits" and "IT how-to", and the agent often searches the wrong one. What is the best fix?',
       options: [
         'Write a clearer description for each source',
-        'Delete one of the libraries',
-        'Rename the agent',
-        'Add more suggested prompts',
+        'Delete one of the libraries so only one is left',
+        'Rename the agent so it sounds more specific',
+        'Add more suggested prompts that mention each one',
       ],
       correctIndex: 0,
       explanation:
@@ -615,9 +627,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What does selecting the reference link under an answer let you do?',
       options: [
         'Open the source the answer came from',
-        'Rate the answer for analytics',
-        'Send the answer by email',
-        'Publish the answer to Teams',
+        'Rate the answer so it counts in analytics',
+        'Send the answer to yourself by email',
+        'Publish the answer to a Teams channel',
       ],
       correctIndex: 0,
       explanation:
@@ -631,9 +643,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'You have a PDF on your laptop that is not stored on SharePoint or OneDrive. How do you add it as knowledge?',
       options: [
         'Upload the file in the Add knowledge pop-up',
-        'Add it as a tool',
-        'Paste it into the description',
-        'Add it as a child agent',
+        'Add it as a tool so the agent can open it',
+        "Paste its text into the agent's description",
+        'Add it as a child agent with its own instructions',
       ],
       correctIndex: 0,
       explanation:
@@ -647,10 +659,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'The agent gives a confident answer with no citation underneath. What does that suggest?',
       options: [
-        'The answer may not have come from your knowledge sources, so check it before trusting it',
-        'The answer is guaranteed to be correct',
-        'The agent has been published',
-        'The knowledge source has too many files',
+        'It may not have come from your sources, so check it first',
+        'It is guaranteed correct, because the agent was confident',
+        'It came from the published version, not your draft',
+        'The knowledge source has too many files to show citations',
       ],
       correctIndex: 0,
       explanation:
@@ -685,16 +697,18 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm3-q13',
       type: 'multiple-choice',
-      prompt: 'Which four sources does this module treat as the everyday starting points?',
+      scenario: true,
+      prompt:
+        "You add a vendor's public help site as a knowledge source, and web search is off. Where does the agent look on the web?",
       options: [
-        'SharePoint, OneDrive, uploaded files, and public websites',
-        'Outlook, Teams, Excel, and Planner',
-        'Topics, tools, triggers, and channels',
-        'Dev, Test, Production, and Default',
+        "Only on the vendor's site that you added",
+        'On every public website that Bing has indexed',
+        "On the vendor's site and any site it links to",
+        "On your SharePoint sites, then on the vendor's site",
       ],
       correctIndex: 0,
       explanation:
-        'SharePoint, OneDrive, uploaded files, and public websites are the everyday four. Other sources exist but are used less often here.',
+        'A public website source searches only the sites you name. Web search is a separate setting that searches all public websites Bing has indexed; with it off, the agent stays on your listed sites.',
       sourceUrl: src.knowledge,
     },
     {
@@ -713,14 +727,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'Answers must come only from the policies library, never from general model knowledge. What do you do?',
       options: [
-        'Add the library as knowledge and switch off "use general knowledge"',
-        'Add the library as a tool',
-        'Turn on web search',
-        'Write the policies into the suggested prompts',
+        'Add the library as knowledge and turn off Allow ungrounded responses',
+        'Add the library as a tool, so the agent opens it on request',
+        'Turn on web search, so the agent can double-check each policy',
+        'Paste the policies into the suggested prompts on the Overview page',
       ],
       correctIndex: 0,
       explanation:
-        'Adding the library grounds answers in it, and switching off general knowledge stops the agent answering from anywhere else.',
+        'Add the library as a knowledge source, then turn off Allow ungrounded responses so the agent does not fall back on the model’s general knowledge.',
       sourceUrl: src.knowledge,
     },
   ],
@@ -735,9 +749,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is a topic, in plain terms?',
       options: [
         'A scripted conversation path with a trigger',
-        'A connector to an external system',
-        'The AI model behind a response',
-        'A knowledge source type',
+        'A connector that links the agent to another system',
+        "The AI model that writes each of the agent's answers",
+        'A knowledge source made of scripted answers',
       ],
       correctIndex: 0,
       explanation:
@@ -775,9 +789,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What does a variable do, in plain terms?',
       options: [
         'It lets the agent remember what the user told it',
-        "It stores the agent's model settings",
-        'It connects the agent to SharePoint',
-        'It publishes the agent to a channel',
+        "It stores the agent's model and orchestration settings",
+        'It connects the agent to a SharePoint site',
+        "It publishes the agent's answers to a channel",
       ],
       correctIndex: 0,
       explanation: 'A variable is the agent remembering what the user told it.',
@@ -830,9 +844,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'When does the "All other conditions" branch run?',
       options: [
         'When none of the other conditions match',
-        'Always, after every other branch',
-        'Only when the user types "other"',
-        'Only in the test pane',
+        'Always, after every other branch has finished',
+        'Only when the user types the word "other"',
+        'Only in the test pane, never for real users',
       ],
       correctIndex: 0,
       explanation:
@@ -884,10 +898,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'After asking "Which system do you need help with?", you want to use the answer later in the same topic. What do you do?',
       options: [
-        'Save the response in a clearly named variable, like SystemName',
-        'Ask the same question again later',
-        'Add the answer to the knowledge sources',
-        'Write the answer into the agent description',
+        'Save it in a clearly named variable, like SystemName',
+        'Ask the same question again at the point you need the answer',
+        "Add the answer to the agent's knowledge sources for later",
+        'Write the answer into the agent description so it remembers',
       ],
       correctIndex: 0,
       explanation:
@@ -930,9 +944,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is a tool, in plain terms?',
       options: [
         'An action the agent can take on your behalf',
-        'A scripted conversation path',
-        'A container for agents and data',
-        'A link back to a knowledge source',
+        'A scripted conversation path that starts on a trigger',
+        'A container that holds agents, data, and permissions',
+        'A link back to the knowledge source behind an answer',
       ],
       correctIndex: 0,
       explanation:
@@ -968,10 +982,11 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       id: 'm5-q4',
       type: 'true-false',
       prompt:
-        'Agent flows for multi-step automation are covered at an awareness level in this module.',
+        'A tool set to Maker-provided credentials runs with your access for everyone who chats with the agent.',
       correct: true,
-      explanation: 'Agent flows for multi-step automation are introduced at an awareness level.',
-      sourceUrl: src.agentFlows,
+      explanation:
+        'Maker-provided credentials make the tool use your credentials. End user credentials, the default, mean users only get data they are allowed to see, which is what a practice agent should use.',
+      sourceUrl: src.tools,
     },
     {
       id: 'm5-q5',
@@ -979,9 +994,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is a prompt, as covered in this module?',
       options: [
         'Reusable AI instructions that can be added as a tool',
-        'A knowledge source type',
-        'A system topic',
-        'An environment setting',
+        'A knowledge source made from your saved chat messages',
+        'A system topic that runs when the agent is unsure',
+        'An environment setting that your admin turns on',
       ],
       correctIndex: 0,
       explanation: 'Prompts are reusable AI instructions, and you can add a prompt as a tool.',
@@ -994,10 +1009,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'You want the agent to email the user a summary of the chat. What do you add to the agent?',
       options: [
-        'A connector tool, such as the Office 365 Outlook "Send an email" action',
-        'A knowledge source with email templates',
-        'A suggested prompt about email',
-        'A new environment for email',
+        'A connector tool, like Outlook "Send an email (V2)"',
+        'A knowledge source that holds your email templates',
+        'A suggested prompt that asks the agent about email',
+        'A topic that tells users how to send the email themselves',
       ],
       correctIndex: 0,
       explanation:
@@ -1011,10 +1026,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'Your agent has a "Send email" tool, but when users ask it to email them, it never uses the tool. What is the most likely fix?',
       options: [
-        "Rewrite the tool's description so it clearly says when to use it",
-        'Add the tool a second time',
-        'Switch to the Production environment',
-        'Turn on web search',
+        'Rewrite its description to say clearly when to use it',
+        'Add the same tool a second time so it gets picked more',
+        'Move the agent to Production, where tools run properly',
+        'Turn on web search so the agent can find the email tool',
       ],
       correctIndex: 0,
       explanation:
@@ -1027,9 +1042,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What must a connector tool have before it can run?',
       options: [
         'A working connection, signed in with an account',
-        'A published demo website',
-        'At least three topics',
-        'A preview model',
+        'A published demo website where the tool can run',
+        'At least three topics that mention the tool by name',
+        'A preview model that supports connector actions',
       ],
       correctIndex: 0,
       explanation:
@@ -1041,7 +1056,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       scenario: true,
       prompt:
-        'You need the same "summarise this in three bullet points" instructions in several places. What fits best?',
+        'You need the same "summarize this in three bullet points" instructions in several places. What fits best?',
       options: [
         'A prompt, reused as a tool',
         'A new environment',
@@ -1059,9 +1074,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is an agent flow for?',
       options: [
         'Running a multi-step automation the agent can start',
-        'Switching between environments',
-        'Writing the agent description',
-        'Storing knowledge files',
+        'Switching the agent between DEV, Test, and Production',
+        "Writing the agent's description and instructions for you",
+        'Storing knowledge files outside SharePoint and OneDrive',
       ],
       correctIndex: 0,
       explanation:
@@ -1135,9 +1150,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is a child agent?',
       options: [
         'A specialist agent that lives inside your agent',
-        'A knowledge source type',
-        'A channel for publishing',
-        'A test set of questions',
+        'A copy of your agent that you keep for testing',
+        'A smaller agent that only works on the demo website',
+        'A separate agent that answers from websites only',
       ],
       correctIndex: 0,
       explanation:
@@ -1160,9 +1175,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What makes sure the parent agent routes a question to the right child agent?',
       options: [
         "A crisp, one-line description of the child agent's job",
-        'The order the child agents were added',
-        'The channel the parent is published to',
-        'The model selected in Settings',
+        'The order in which you added the child agents to the parent',
+        'The channel the parent is published to, such as Teams',
+        'The model the parent uses, chosen in Settings',
       ],
       correctIndex: 0,
       explanation:
@@ -1185,9 +1200,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is an MCP server, at the awareness level covered here?',
       options: [
         'A standard plug for external tools',
-        'A type of knowledge source',
-        'A system topic',
-        'An environment picker',
+        'A type of knowledge source for files',
+        'A system topic that calls other agents',
+        'An environment picker for admins',
       ],
       correctIndex: 0,
       explanation:
@@ -1201,10 +1216,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'One agent answers IT, HR, and facilities questions and keeps mixing them up. What structure does this module recommend?',
       options: [
-        'Specialist child agents, each with a narrow job and a clear description',
-        'One longer set of instructions',
-        'Three copies of the same agent',
-        'Removing all knowledge sources',
+        'Specialist child agents with narrow jobs and clear descriptions',
+        'One much longer set of instructions that covers all three areas',
+        'Three copies of the same agent, one published per department',
+        'Removing the knowledge sources so it answers from the model only',
       ],
       correctIndex: 0,
       explanation:
@@ -1216,10 +1231,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'What is the difference between a child agent and a connected agent?',
       options: [
-        'A child agent lives inside your agent; a connected agent is a separate agent, often built by someone else',
-        'A child agent is always published; a connected agent never is',
-        'They are two names for the same thing',
-        'A connected agent can only answer from websites',
+        'A child agent lives inside yours; a connected agent is separate, often built by others',
+        'A child agent is always published; a connected agent stays in draft until you publish it',
+        'They are two names for the same thing, used in different parts of Copilot Studio',
+        'A connected agent can only answer from websites; a child agent can use any knowledge',
       ],
       correctIndex: 0,
       explanation:
@@ -1261,9 +1276,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Two child agents have the descriptions "Helps with questions" and "Answers questions". What is likely to happen?',
       options: [
         'The parent cannot tell them apart, so the wrong one may answer',
-        'The parent asks the user to choose every time',
-        'Both answer every question together',
-        'Nothing; descriptions do not affect routing',
+        'The parent asks the user to choose between them every time',
+        'Both child agents answer every question at the same time',
+        'Nothing, because descriptions do not affect routing at all',
       ],
       correctIndex: 0,
       explanation:
@@ -1317,9 +1332,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'Why are specialist agents easier to trust than one big agent?',
       options: [
         'Each has a clear job you can test on its own',
-        'They use a different model',
-        'They never need descriptions',
-        'They skip evaluation',
+        'They use a newer model than a single large agent',
+        'They do not need descriptions, so there is less to get wrong',
+        'They skip evaluation because each one is so small',
       ],
       correctIndex: 0,
       explanation:
@@ -1386,9 +1401,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What are agent instructions, in plain terms?',
       options: [
         'The standing guidance your agent always follows',
-        'A one-time setup checklist',
-        'A list of connectors',
-        'The demo website link',
+        'A one-time setup checklist you follow when creating it',
+        'A list of the connectors the agent is allowed to call',
+        'The welcome message shown on the demo website',
       ],
       correctIndex: 0,
       explanation: 'Agent instructions are the standing guidance your agent always follows.',
@@ -1410,10 +1425,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       scenario: true,
       prompt: 'An agent is switched from generative to classic orchestration. What changes?',
       options: [
-        'Topics start from trigger phrases instead of the agent choosing them by description',
-        'The agent loses all its knowledge',
-        'The agent moves to a different environment',
-        'Nothing changes for users',
+        'Topics start from trigger phrases, not from their descriptions',
+        'The agent loses its knowledge sources and must be re-grounded',
+        'The agent moves to a different environment set up for classic',
+        'Nothing changes for users; only the Settings page looks different',
       ],
       correctIndex: 0,
       explanation:
@@ -1427,10 +1442,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt:
         'Your manager wants a model tagged Experimental in the agent your whole department uses. What do you recommend?',
       options: [
-        'Explore it in DEV only; experimental models are not for production',
-        'Switch the production agent to it straight away',
-        'Use it only on Fridays',
-        'Ask users to vote on it',
+        'Try it in DEV only; experimental models are not for production',
+        "Switch the department's agent to it straight away, then monitor",
+        'Use it in production only for questions that are low risk',
+        'Let users vote on it in Teams before switching over',
       ],
       correctIndex: 0,
       explanation:
@@ -1442,10 +1457,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'Why write down the current orchestration mode and model before changing anything?',
       options: [
-        'It is a production-safe baseline you can compare against or return to',
-        'Copilot Studio requires it before saving',
-        'It turns on analytics',
-        'It publishes the agent',
+        'It is a safe baseline to compare against or go back to',
+        'Copilot Studio asks for it before it lets you save changes',
+        'Writing it down turns on analytics for the old settings',
+        'It is needed to publish the agent after you change the model',
       ],
       correctIndex: 0,
       explanation:
@@ -1469,9 +1484,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Your agent answers simple FAQ lookups well but slowly. Which trade-off might you revisit, after testing in DEV?',
       options: [
         'A faster model, accepting less reasoning depth',
-        'More knowledge sources',
-        'A different environment',
-        'Turning off authentication',
+        'More knowledge sources, so it finds answers sooner',
+        'A different environment with more capacity',
+        'Turning off authentication to skip the sign-in step',
       ],
       correctIndex: 0,
       explanation:
@@ -1482,7 +1497,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       id: 'm7-q11',
       type: 'true-false',
       prompt:
-        'The models in the dropdown change over time, so check the dropdown instead of memorising a list.',
+        'The models in the dropdown change over time, so check the dropdown instead of memorizing a list.',
       correct: true,
       explanation:
         'Microsoft adds and retires models regularly. The dropdown always shows what is available to you now.',
@@ -1494,9 +1509,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: "Where do you choose the agent's primary model?",
       options: [
         'In the model dropdown on the Overview page',
-        'On the Channels page',
-        'In the test pane',
-        'In Power Apps Solutions',
+        'On the Channels page, next to the Teams tile',
+        'In the test pane, before you ask a question',
+        "In Power Apps, on the agent's solution page",
       ],
       correctIndex: 0,
       explanation:
@@ -1506,16 +1521,16 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm7-q13',
       type: 'multiple-choice',
-      prompt: 'What does the general-knowledge setting affect?',
+      prompt: 'What does the Allow ungrounded responses setting affect?',
       options: [
-        "Whether the agent can answer from the model's own knowledge, beyond your sources",
-        'Which environment the agent is in',
-        'Who can use the agent',
-        'How many topics the agent can have',
+        "Whether it may answer from the model's own knowledge alone",
+        'Which environment the agent is allowed to publish from',
+        'Who is allowed to chat with the agent once it is shared',
+        'How many topics the agent can run in one conversation',
       ],
       correctIndex: 0,
       explanation:
-        "With general knowledge on, the agent can answer from the model's own knowledge as well as your sources.",
+        'Allow ungrounded responses (older screens: use general knowledge) decides whether the agent may answer from the model’s general knowledge when it used no knowledge source or tool.',
       sourceUrl: src.knowledge,
     },
     {
@@ -1562,9 +1577,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What does the activity map show you?',
       options: [
         'Which knowledge, tools, and topics the agent picked, and why',
-        "The agent's licensing tier",
-        'The list of connected channels',
-        "The environment's data policy",
+        "The agent's licensing tier and the credits each answer used",
+        'The list of channels the agent is connected to, with links',
+        "The environment's data policy and which connectors it blocks",
       ],
       correctIndex: 0,
       explanation:
@@ -1586,9 +1601,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What is a test set?',
       options: [
         'Real questions paired with expected answers',
-        'A list of connectors',
-        'A group of child agents',
-        'The pre-publish checklist',
+        'A list of connectors the agent is allowed to use',
+        'A group of child agents that are tested together',
+        'The pre-publish checklist, written as questions',
       ],
       correctIndex: 0,
       explanation:
@@ -1597,12 +1612,20 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     },
     {
       id: 'm8-q4',
-      type: 'true-false',
-      prompt: 'The minimum bar for a test set in this course is 10 real user questions.',
-      correct: true,
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your new test set has an expected answer for every question. Which test methods fit best?',
+      options: [
+        'General quality plus Compare meaning',
+        'Exact match only, so wording must be identical',
+        'Content safety only, since it checks every answer',
+        'Tool use only, because it covers knowledge too',
+      ],
+      correctIndex: 0,
       explanation:
-        'The course sets a 10-question test set of real user questions as the minimum bar.',
-      sourceUrl: src.evalCreate,
+        'General quality scores how good each answer is overall, and every test set starts with it. Compare meaning checks each answer against the one you expect, which fits when you have expected answers.',
+      sourceUrl: src.evalOverview,
     },
     {
       id: 'm8-q5',
@@ -1637,9 +1660,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What makes a good test set question?',
       options: [
         'A real user question, with the answer you expect',
-        'A question only you would ask',
-        'A question with no right answer',
-        'The same question repeated ten times',
+        'A question only you would ask, to catch edge cases',
+        'A question with no right answer, to see how it copes',
+        'The same question repeated ten times to check consistency',
       ],
       correctIndex: 0,
       explanation: 'Real user questions with expected answers test what people will actually ask.',
@@ -1653,9 +1676,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         "You changed the instructions to fix one bad answer. How do you check you didn't break the others?",
       options: [
         'Re-run the whole test set and compare with the last run',
-        'Ask the fixed question once in the test pane',
-        'Publish and wait for complaints',
-        'Check the environment name',
+        'Ask the fixed question once in the test pane and move on',
+        'Publish it and wait to see whether anyone complains',
+        'Check the environment name, then publish the change',
       ],
       correctIndex: 0,
       explanation:
@@ -1690,10 +1713,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'Why use a saved test set instead of chatting with the agent each time?',
       options: [
-        'The same questions every run let you compare results over time',
-        'Test sets make the agent faster',
-        'Chatting with the agent is not allowed',
-        'Test sets publish the agent automatically',
+        'The same questions every run let you compare results',
+        'Test sets make the agent answer faster once published',
+        'Chatting with the agent in the test pane is not allowed',
+        'Test sets publish the agent automatically when they pass',
       ],
       correctIndex: 0,
       explanation:
@@ -1707,9 +1730,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'Your test set has three questions, all written by you. What is wrong with it?',
       options: [
         'It is too small and does not use real user questions',
-        'Nothing; three is enough',
-        'It should only contain yes or no questions',
-        'Test sets must be written by an admin',
+        'Nothing; three questions are enough if you wrote them',
+        'It should only contain questions with yes or no answers',
+        'Test sets must be written by an admin, not by makers',
       ],
       correctIndex: 0,
       explanation:
@@ -1721,10 +1744,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       prompt: 'What is the test pane for?',
       options: [
-        'Chatting with the agent while you build it, and seeing which topic runs',
-        'Publishing the agent',
-        'Switching environments',
-        'Viewing weekly analytics',
+        'Chatting with the agent as you build, and seeing which topic runs',
+        'Publishing the agent to the demo website once it is ready',
+        'Switching between DEV, Test, and Production while you work',
+        'Viewing the weekly analytics for sessions and escalation',
       ],
       correctIndex: 0,
       explanation:
@@ -1761,9 +1784,9 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       prompt: 'What two kinds of test set can you create for an evaluation?',
       options: [
         'Single response and conversation (multi-turn)',
-        'Draft and published',
-        'Manual and automatic',
-        'Internal and external',
+        "Draft and published, matching the agent's state",
+        'Manual and automatic, depending on who runs them',
+        'Internal and external, depending on the audience',
       ],
       correctIndex: 0,
       explanation:
@@ -1773,25 +1796,274 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
   ],
 
   // ---------------------------------------------------------------------
-  // Module 9 — Monitor & improve
+  // Module 9 — Channels & publishing
   // ---------------------------------------------------------------------
   9: [
     {
       id: 'm9-q1',
       type: 'multiple-choice',
-      prompt: 'Which numbers does the analytics summary track?',
+      scenario: true,
+      prompt: 'You fixed a typo in the instructions but users still see old behavior. Why?',
       options: [
-        'Sessions, engagement, resolution, and escalation',
-        'Licensing, credits, and quotas',
-        'Dev, Test, and Production usage',
-        'Knowledge sources and connectors',
+        "The fix didn't save",
+        'Changes stay in draft until you publish again',
+        'The agent needs to be rebuilt from scratch to pick it up',
+        "Typos can't be fixed after publishing",
       ],
-      correctIndex: 0,
-      explanation: 'The analytics summary covers sessions, engagement, resolution, and escalation.',
-      sourceUrl: src.analytics,
+      correctIndex: 1,
+      explanation:
+        'Nothing is live until you publish. Changes stay in draft on purpose, so a fix needs a new publish before users see it.',
+      sourceUrl: src.publish,
     },
     {
       id: 'm9-q2',
+      type: 'true-false',
+      prompt: 'The demo website channel is meant for stakeholder review before broad rollout.',
+      correct: true,
+      explanation: 'Use the demo website for stakeholder review before broad rollout.',
+      sourceUrl: src.webChannels,
+    },
+    {
+      id: 'm9-q3',
+      type: 'multiple-choice',
+      prompt:
+        "What does deploying to Teams + Microsoft 365 for your whole organization need that the demo website doesn't?",
+      options: [
+        'An admin approval step',
+        'A new environment',
+        'A separate knowledge source',
+        'A different model',
+      ],
+      correctIndex: 0,
+      explanation:
+        'To make the agent available to your organization, submit it for admin approval so it appears under Built for your org in the Teams app store.',
+      sourceUrl: src.teams,
+    },
+    {
+      id: 'm9-q4',
+      type: 'true-false',
+      prompt:
+        'The pre-publish checklist includes checking the sign-in setting before you share the agent.',
+      correct: true,
+      explanation:
+        'The pre-publish checklist is: right environment, knowledge verified, evaluation passed, sign-in checked, right channel.',
+      sourceUrl: src.authentication,
+    },
+    {
+      id: 'm9-q5',
+      type: 'order',
+      prompt:
+        'Put the pre-publish checks in the order you would do them. Each check depends on the one before it.',
+      steps: [
+        'Right channel',
+        'Evaluation passed',
+        'Sign-in checked',
+        'Right environment',
+        'Knowledge verified',
+      ],
+      correctOrder: [3, 4, 1, 2, 0],
+      explanation:
+        'First make sure you are publishing the right agent from the right environment. Verify its knowledge, because the evaluation depends on it. Pass the evaluation, check who will be able to chat with the agent, then choose the channel.',
+      sourceUrl: src.publish,
+    },
+    {
+      id: 'm9-q6',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You published yesterday, then edited the instructions today without publishing. What do users see?',
+      options: [
+        "Yesterday's published version",
+        "Today's edits, as soon as you save",
+        "A mix of yesterday's and today's changes",
+        'Nothing; the agent goes offline',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Users see the last published version. Your edits stay in draft until you publish again.',
+      sourceUrl: src.publish,
+    },
+    {
+      id: 'm9-q7',
+      type: 'multiple-choice',
+      prompt: 'Which channel puts the agent where people already work every day?',
+      options: [
+        'Teams + Microsoft 365',
+        'The demo website you share',
+        'The test pane',
+        'The Overview page',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Teams + Microsoft 365 bring the agent into the apps people already use at work.',
+      sourceUrl: src.teams,
+    },
+    {
+      id: 'm9-q8',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'After publishing, the Demo website tile is still missing from the Channels page. What should you do?',
+      options: [
+        'Ask your admin; the channel may be off in your environment',
+        'Delete the agent and start again in a new solution',
+        'Switch to a preview model, which enables more channels',
+        'Add more knowledge so the channel has something to show',
+      ],
+      correctIndex: 0,
+      explanation:
+        'If a channel is missing after publishing, it may be turned off in your environment. Your admin can check.',
+      sourceUrl: src.webChannels,
+    },
+    {
+      id: 'm9-q9',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Before sharing your demo website link, you find an uploaded file with a customer price list in your practice agent. What do you do?',
+      options: [
+        'Remove the file before you switch to No authentication',
+        'Keep it; uploaded files only answer signed-in people',
+        'Keep it; the demo website never shows file content',
+        'Rename the file so nobody recognizes what it holds',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Uploaded files need no sign-in, so with No authentication anyone who has the link can get answers from them. Confidential files never belong in a practice agent: remove it first.',
+      sourceUrl: src.knowledge,
+    },
+    {
+      id: 'm9-q10',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You set your practice agent to No authentication so the demo website works. Who can chat with it?',
+      options: [
+        'Anyone who has the link, inside or outside the company',
+        "Only people in your DEV environment's security group",
+        'Only colleagues signed in with a Digital Realty account',
+        'Only the people you shared the agent with in Copilot Studio',
+      ],
+      correctIndex: 0,
+      explanation:
+        "With No authentication, anyone who has the link can chat with the agent, and you can't control which users do. Check what the agent can reveal before you share the link.",
+      sourceUrl: src.authentication,
+    },
+    {
+      id: 'm9-q11',
+      type: 'multiple-choice',
+      prompt: 'What does single sign-on give users of an agent in Teams?',
+      options: [
+        'They do not have to sign in again separately to use the agent',
+        'They can edit the agent from inside Teams without a license',
+        'They see your draft changes before you publish them',
+        'They skip the admin approval step for organization-wide use',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Single sign-on uses the account people are already signed in with, so they are not asked to sign in again.',
+      sourceUrl: src.authentication,
+    },
+    {
+      id: 'm9-q12',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt: 'On launch day, your evaluation still fails two test cases. What do you do?',
+      options: [
+        'Fix them and re-run the evaluation before publishing',
+        'Publish anyway and fix the two failures in the next update',
+        'Delete the two failing test cases so the run passes',
+        'Publish only to Teams, where fewer people will notice',
+      ],
+      correctIndex: 0,
+      explanation:
+        '"Evaluation passed" is on the pre-publish checklist. Fix the failures, re-run, then publish.',
+      sourceUrl: src.evalResults,
+    },
+    {
+      id: 'm9-q13',
+      type: 'multiple-choice',
+      prompt: 'What is the difference between the demo website and a live website?',
+      options: [
+        'Demo is for review; a live website is the real channel once ready',
+        'There is no difference; they are two names for the same page',
+        'The live website is only for admins; the demo is for everyone',
+        'The demo website runs a different agent, built just for demos',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Share the demo website for feedback first. A live website is where the finished agent meets its users.',
+      sourceUrl: src.webChannels,
+    },
+    {
+      id: 'm9-q14',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You want your agent to appear in the Teams app store for everyone in your organization. What extra step is needed?',
+      options: [
+        'Submit it for admin approval',
+        'Publish it twice, a day apart',
+        'Move it to the Default environment',
+        'Share the demo website link',
+      ],
+      correctIndex: 0,
+      explanation:
+        'After an admin approves it, the agent appears under Built for your org in the Teams app store and Built by your org in the Microsoft 365 Agent Store.',
+      sourceUrl: src.teams,
+    },
+    {
+      id: 'm9-q15',
+      type: 'multiple-choice',
+      prompt: 'Why is it helpful that publishing is a separate, deliberate step?',
+      options: [
+        'You decide exactly when users see changes',
+        'It makes the agent run faster for users',
+        'It removes the need to test before release',
+        'It lets users edit the agent while it is live',
+      ],
+      correctIndex: 0,
+      explanation:
+        "Nothing is live until you publish. That's a feature: you decide exactly when users see changes.",
+      sourceUrl: src.publish,
+    },
+    {
+      id: 'm9-q16',
+      type: 'multiple-choice',
+      prompt: 'Which authentication option should you use for the Teams + Microsoft 365 channel?',
+      options: [
+        'Authenticate with Microsoft',
+        'No authentication',
+        'A shared password',
+        'Manual authentication with a personal account',
+      ],
+      correctIndex: 0,
+      explanation:
+        'For publishing through the built-in Teams + Microsoft 365 channel, Learn recommends Authenticate with Microsoft.',
+      sourceUrl: src.authentication,
+    },
+  ],
+  // ---------------------------------------------------------------------
+  // Module 10 — Monitor & improve
+  // ---------------------------------------------------------------------
+  10: [
+    {
+      id: 'm10-q1',
+      type: 'multiple-choice',
+      prompt: 'Which numbers does the Monitor page summary track?',
+      options: [
+        'Sessions, engagement, resolution, and escalation',
+        'Licensing tier, Copilot Credits used, and remaining quota',
+        'Usage in DEV, Test, and Production, side by side',
+        'Knowledge sources, connectors, and their error counts',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The Monitor page summary covers sessions, engagement, resolution, and escalation.',
+      sourceUrl: src.analytics,
+    },
+    {
+      id: 'm10-q2',
       type: 'true-false',
       prompt: 'Publishing an agent is the finish line; no further review is needed.',
       correct: false,
@@ -1800,32 +2072,37 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.effectiveness,
     },
     {
-      id: 'm9-q3',
+      id: 'm10-q3',
       type: 'multiple-choice',
       prompt: 'About how long should the simple weekly review take?',
-      options: ['About 15 minutes', 'A full day', 'About 3 hours', "It isn't necessary weekly"],
+      options: [
+        'About 15 minutes',
+        'A full working day',
+        'About 3 hours',
+        "It isn't necessary weekly",
+      ],
       correctIndex: 0,
       explanation: 'The weekly review is a short ritual of about 15 minutes.',
       sourceUrl: src.analytics,
     },
     {
-      id: 'm9-q4',
+      id: 'm10-q4',
       type: 'true-false',
       prompt: 'Autonomous agents have their own health view, separate from chat analytics.',
       correct: true,
       explanation:
-        'Autonomous agents run on triggers rather than chats, so their health is analysed separately.',
+        'Autonomous agents run on triggers rather than chats, so their health is analyzed separately.',
       sourceUrl: src.health,
     },
     {
-      id: 'm9-q5',
+      id: 'm10-q5',
       type: 'multiple-choice',
       prompt: 'What should the weekly ritual cover?',
       options: [
         "What to check, what 'bad' looks like, and who to tell",
-        'Rewriting all topics from scratch',
-        'Switching environments',
-        'Re-licensing the agent',
+        'Rewriting every topic from scratch with fresh wording',
+        'Switching environments to compare DEV with Production',
+        'Re-licensing the agent and checking Copilot Credits',
       ],
       correctIndex: 0,
       explanation:
@@ -1833,15 +2110,15 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.effectiveness,
     },
     {
-      id: 'm9-q6',
+      id: 'm10-q6',
       type: 'multiple-choice',
       scenario: true,
       prompt: "Your agent's escalation rate jumped this week. What is a good first step?",
       options: [
-        'Review the escalated conversations to find which questions or topics are failing',
-        'Turn off escalation',
-        'Switch to a preview model',
-        'Wait a month and see if it settles',
+        'Review the escalated conversations to see what is failing',
+        'Turn off escalation so conversations stay with the agent',
+        'Switch to a preview model that escalates less often',
+        'Wait a month and see whether the rate settles by itself',
       ],
       correctIndex: 0,
       explanation:
@@ -1849,14 +2126,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.effectiveness,
     },
     {
-      id: 'm9-q7',
+      id: 'm10-q7',
       type: 'multiple-choice',
       prompt: 'What does the resolution number tell you?',
       options: [
-        "How often conversations ended with the user's question resolved",
-        'How many knowledge sources the agent has',
-        'How fast the model responds',
-        'How many people have edit rights',
+        'How often conversations ended with the question resolved',
+        'How many knowledge sources the agent searched per answer',
+        'How fast the model responds, averaged over the week',
+        'How many makers edited the agent during the period',
       ],
       correctIndex: 0,
       explanation:
@@ -1864,16 +2141,16 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.analytics,
     },
     {
-      id: 'm9-q8',
+      id: 'm10-q8',
       type: 'multiple-choice',
       scenario: true,
       prompt:
         'Your weekly review shows that answers from one SharePoint library are out of date. Who do you tell?',
       options: [
         'The owner of that content, so the source gets fixed',
-        'Nobody; the agent will fix itself',
-        'Every user of the agent',
-        'Only the Copilot Studio support team',
+        'Nobody; the agent updates its own sources over time',
+        'Every user of the agent, so they know to double-check',
+        'Only the Copilot Studio support team at Microsoft',
       ],
       correctIndex: 0,
       explanation:
@@ -1881,7 +2158,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.effectiveness,
     },
     {
-      id: 'm9-q9',
+      id: 'm10-q9',
       type: 'multiple-choice',
       prompt: 'For a weekly review, which period of analytics should you look at?',
       options: ['The last 7 days', 'Since the agent was created', 'Today only', 'The last year'],
@@ -1890,7 +2167,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.analytics,
     },
     {
-      id: 'm9-q10',
+      id: 'm10-q10',
       type: 'true-false',
       prompt: 'Analytics are only useful for agents with problems.',
       correct: false,
@@ -1899,14 +2176,14 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.analytics,
     },
     {
-      id: 'm9-q11',
+      id: 'm10-q11',
       type: 'multiple-choice',
       prompt: 'What is the purpose of the weekly review?',
       options: [
         'Catch problems early and keep improving a live agent',
-        'Rebuild the agent each week',
-        'Move the agent to a new environment',
-        'Reset the analytics',
+        'Rebuild the agent each week with the latest features',
+        'Move the agent to a new environment once a week',
+        'Reset the analytics so each week starts clean',
       ],
       correctIndex: 0,
       explanation:
@@ -1914,7 +2191,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.effectiveness,
     },
     {
-      id: 'm9-q12',
+      id: 'm10-q12',
       type: 'order',
       prompt: 'Put the steps of the weekly review in order.',
       steps: [
@@ -1929,7 +2206,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.analytics,
     },
     {
-      id: 'm9-q13',
+      id: 'm10-q13',
       type: 'multiple-choice',
       scenario: true,
       prompt:
@@ -1946,16 +2223,16 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.publish,
     },
     {
-      id: 'm9-q14',
+      id: 'm10-q14',
       type: 'multiple-choice',
       scenario: true,
       prompt:
         'A live agent shows no sessions at all in the last 7 days. What is a sensible first question?',
       options: [
         'Is it published to a channel people actually use?',
-        'Does it need a preview model?',
-        'Should it have more child agents?',
-        'Is the test pane open?',
+        'Does it need a preview model to record sessions?',
+        'Should it have more child agents to share the load?',
+        'Is the test pane open while people are chatting?',
       ],
       correctIndex: 0,
       explanation:
@@ -1963,7 +2240,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.analytics,
     },
     {
-      id: 'm9-q15',
+      id: 'm10-q15',
       type: 'true-false',
       prompt: 'The weekly review should include who to tell when something looks bad.',
       correct: true,
@@ -1972,244 +2249,21 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       sourceUrl: src.effectiveness,
     },
     {
-      id: 'm9-q16',
+      id: 'm10-q16',
       type: 'multiple-choice',
       scenario: true,
       prompt:
-        'You chatted with your unpublished practice agent in the test pane 20 times, but the Monitor page shows no sessions. Why?',
+        'You chatted with your practice agent in the test pane 20 times, but the Monitor page shows no sessions. Why?',
       options: [
         'Test pane conversations are not included in analytics',
-        'Analytics take a month to appear',
-        'You need a preview model to see analytics',
-        'The agent has too much knowledge',
+        'Analytics take a full month before anything appears',
+        'You need a preview model before analytics are recorded',
+        'The agent has too much knowledge for analytics to load',
       ],
       correctIndex: 0,
       explanation:
         'The Monitor page only covers real conversations. Activity in the test pane never shows up, so review a published agent.',
       sourceUrl: src.analytics,
-    },
-  ],
-
-  // ---------------------------------------------------------------------
-  // Module 10 — Channels & publishing
-  // ---------------------------------------------------------------------
-  10: [
-    {
-      id: 'm10-q1',
-      type: 'multiple-choice',
-      scenario: true,
-      prompt: 'You fixed a typo in the instructions but users still see old behavior. Why?',
-      options: [
-        "The fix didn't save",
-        'Changes stay in draft until you publish again',
-        'The agent needs to be rebuilt from scratch',
-        "Typos can't be fixed after publishing",
-      ],
-      correctIndex: 1,
-      explanation:
-        'Nothing is live until you publish. Changes stay in draft on purpose, so a fix needs a new publish before users see it.',
-      sourceUrl: src.publish,
-    },
-    {
-      id: 'm10-q2',
-      type: 'true-false',
-      prompt: 'The demo website channel is meant for stakeholder review before broad rollout.',
-      correct: true,
-      explanation: 'Use the demo website for stakeholder review before broad rollout.',
-      sourceUrl: src.webChannels,
-    },
-    {
-      id: 'm10-q3',
-      type: 'multiple-choice',
-      prompt:
-        "What does deploying to Teams + Microsoft 365 for your whole organisation need that the demo website doesn't?",
-      options: [
-        'An admin approval step',
-        'A new environment',
-        'A new knowledge source',
-        'A different model',
-      ],
-      correctIndex: 0,
-      explanation:
-        'To make the agent available to your organisation, submit it for admin approval so it appears under Built for your org in the Teams app store.',
-      sourceUrl: src.teams,
-    },
-    {
-      id: 'm10-q4',
-      type: 'true-false',
-      prompt:
-        'The pre-publish checklist includes confirming knowledge is verified and evaluation has passed.',
-      correct: true,
-      explanation:
-        'The pre-publish checklist is: right environment, knowledge verified, evaluation passed, right channel.',
-      sourceUrl: src.publish,
-    },
-    {
-      id: 'm10-q5',
-      type: 'order',
-      prompt:
-        'Put the pre-publish checks in the order you would do them. Each check depends on the one before it.',
-      steps: ['Right channel', 'Evaluation passed', 'Right environment', 'Knowledge verified'],
-      correctOrder: [2, 3, 1, 0],
-      explanation:
-        'First make sure you are publishing the right agent from the right environment. Verify its knowledge, because the evaluation depends on it. Pass the evaluation, then choose the channel.',
-      sourceUrl: src.publish,
-    },
-    {
-      id: 'm10-q6',
-      type: 'multiple-choice',
-      scenario: true,
-      prompt:
-        'You published yesterday, then edited the instructions today without publishing. What do users see?',
-      options: [
-        "Yesterday's published version",
-        "Today's edits",
-        'A mix of both',
-        'Nothing; the agent goes offline',
-      ],
-      correctIndex: 0,
-      explanation:
-        'Users see the last published version. Your edits stay in draft until you publish again.',
-      sourceUrl: src.publish,
-    },
-    {
-      id: 'm10-q7',
-      type: 'multiple-choice',
-      prompt: 'Which channel puts the agent where people already work every day?',
-      options: ['Teams + Microsoft 365', 'The demo website', 'The test pane', 'The Overview page'],
-      correctIndex: 0,
-      explanation:
-        'Teams + Microsoft 365 bring the agent into the apps people already use at work.',
-      sourceUrl: src.teams,
-    },
-    {
-      id: 'm10-q8',
-      type: 'multiple-choice',
-      scenario: true,
-      prompt:
-        'After publishing, the Demo website tile is still missing from the Channels page. What should you do?',
-      options: [
-        'Ask your admin, because the channel may be turned off in your environment',
-        'Delete the agent and start again',
-        'Switch to a preview model',
-        'Add more knowledge',
-      ],
-      correctIndex: 0,
-      explanation:
-        'If a channel is missing after publishing, it may be turned off in your environment. Your admin can check.',
-      sourceUrl: src.webChannels,
-    },
-    {
-      id: 'm10-q9',
-      type: 'multiple-choice',
-      prompt: 'Which check comes first in the pre-publish checklist?',
-      options: ['Right environment', 'Right channel', 'Evaluation passed', 'Knowledge verified'],
-      correctIndex: 0,
-      explanation:
-        'Everything else depends on publishing the right agent from the right environment, so that check comes first.',
-      sourceUrl: src.publish,
-    },
-    {
-      id: 'm10-q10',
-      type: 'true-false',
-      prompt: 'Changes to an agent stay in draft until you publish.',
-      correct: true,
-      explanation:
-        'Nothing is live until you publish. That lets you decide exactly when users see changes.',
-      sourceUrl: src.publish,
-    },
-    {
-      id: 'm10-q11',
-      type: 'multiple-choice',
-      prompt: 'What does single sign-on give users of an agent in Teams?',
-      options: [
-        'They do not have to sign in again separately to use the agent',
-        'They can edit the agent',
-        'They see draft changes',
-        'They skip the admin approval step',
-      ],
-      correctIndex: 0,
-      explanation:
-        'Single sign-on uses the account people are already signed in with, so they are not asked to sign in again.',
-      sourceUrl: src.authentication,
-    },
-    {
-      id: 'm10-q12',
-      type: 'multiple-choice',
-      scenario: true,
-      prompt: 'On launch day, your evaluation still fails two test cases. What do you do?',
-      options: [
-        'Fix them and re-run the evaluation before publishing',
-        'Publish anyway and fix them later',
-        'Delete the two test cases',
-        'Publish only to Teams',
-      ],
-      correctIndex: 0,
-      explanation:
-        '"Evaluation passed" is on the pre-publish checklist. Fix the failures, re-run, then publish.',
-      sourceUrl: src.evalResults,
-    },
-    {
-      id: 'm10-q13',
-      type: 'multiple-choice',
-      prompt: 'What is the difference between the demo website and a live website?',
-      options: [
-        'The demo website is for review; a live website is the real channel once the agent is ready',
-        'There is no difference',
-        'The live website is only for admins',
-        'The demo website uses a different agent',
-      ],
-      correctIndex: 0,
-      explanation:
-        'Share the demo website for feedback first. A live website is where the finished agent meets its users.',
-      sourceUrl: src.webChannels,
-    },
-    {
-      id: 'm10-q14',
-      type: 'multiple-choice',
-      scenario: true,
-      prompt:
-        'You want your agent to appear in the Teams app store for everyone in your organisation. What extra step is needed?',
-      options: [
-        'Submit it for admin approval',
-        'Publish it twice',
-        'Move it to the Default environment',
-        'Share the demo website link',
-      ],
-      correctIndex: 0,
-      explanation:
-        'After an admin approves it, the agent appears under Built for your org in the Teams app store and Built by your org in the Microsoft 365 Agent Store.',
-      sourceUrl: src.teams,
-    },
-    {
-      id: 'm10-q15',
-      type: 'multiple-choice',
-      prompt: 'Why is it helpful that publishing is a separate, deliberate step?',
-      options: [
-        'You decide exactly when users see changes',
-        'It makes the agent run faster',
-        'It removes the need for testing',
-        'It lets users edit the agent',
-      ],
-      correctIndex: 0,
-      explanation:
-        "Nothing is live until you publish. That's a feature: you decide exactly when users see changes.",
-      sourceUrl: src.publish,
-    },
-    {
-      id: 'm10-q16',
-      type: 'multiple-choice',
-      prompt: 'Which authentication option should you use for the Teams + Microsoft 365 channel?',
-      options: [
-        'Authenticate with Microsoft',
-        'No authentication',
-        'A shared password',
-        'Manual authentication with a personal account',
-      ],
-      correctIndex: 0,
-      explanation:
-        'For publishing through the built-in Teams + Microsoft 365 channel, Learn recommends Authenticate with Microsoft.',
-      sourceUrl: src.authentication,
     },
   ],
 }

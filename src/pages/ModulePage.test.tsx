@@ -63,7 +63,7 @@ describe('ModulePage navigation', () => {
   })
 
   it('keeps extra detail in a collapsed Good to know box', async () => {
-    renderAt('/module/10')
+    renderAt('/module/9')
     const summary = await screen.findByText('Good to know')
     const details = summary.closest('details')!
     expect(details).not.toHaveAttribute('open')
@@ -76,6 +76,23 @@ describe('ModulePage navigation', () => {
     const summary = await screen.findByText('Before you start: what to ask IT for')
     expect(summary.closest('details')).toHaveAttribute('open')
     expect(summary.closest('details')).toHaveTextContent(/trial .* cannot publish/i)
+  })
+
+  it('tells learners to check sign-in before sharing the demo website link', async () => {
+    renderAt('/module/9')
+    expect(
+      await screen.findByText(/Check who will be able to chat with your agent/),
+    ).toBeInTheDocument()
+    expect(
+      screen.getAllByText(/Never put confidential data into a practice agent/).length,
+    ).toBeGreaterThan(0)
+  })
+
+  it('shows general advice as Tips, apart from Watch out', async () => {
+    renderAt('/module/1')
+    const tip = await screen.findByText(/Ask early, ask often/)
+    expect(tip.closest('#tips')).toHaveTextContent(/^Tips/)
+    expect(screen.getByText(/Never put confidential data/).closest('#watch-out')).not.toBeNull()
   })
 
   it('points the last module at the final assessment', async () => {

@@ -1,4 +1,4 @@
-/** Shared content & progress types for Agent Academy */
+/** Shared content & progress types for the course */
 
 export type DiagramId =
   'fig1' | 'fig2' | 'fig3' | 'fig4' | 'fig5' | 'fig6' | 'fig7' | 'fig8' | 'fig9' | 'fig10'
@@ -36,6 +36,9 @@ export interface Screenshot {
   id: string
   /** Path under `public/`, e.g. `images/02-environment-picker.png`. */
   src: string
+  /** Pixel size of the image, so the page reserves space before it loads. */
+  width: number
+  height: number
   /** Describes the image for screen readers. */
   alt: string
   caption: string
@@ -131,7 +134,10 @@ export interface Module {
   goodToKnow?: ConceptBlock[]
   diagram: DiagramId
   buildSteps: BuildStep[]
+  /** Real risks: rendered in the red Watch out box. */
   watchOuts: string[]
+  /** General advice: rendered in a neutral Tips box. */
+  tips?: string[]
   screenshots: Screenshot[]
   /** Author-only list of screenshots still to capture. Never rendered. */
   screenshotsToCapture?: ScreenshotRequest[]

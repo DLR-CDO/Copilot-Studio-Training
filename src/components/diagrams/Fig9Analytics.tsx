@@ -129,7 +129,7 @@ export function Fig9Analytics() {
       </div>
 
       <figcaption className="mt-2.5 font-mono text-xs text-muted">
-        fig 9 · watch two numbers first: resolution and escalation
+        fig 10 · watch two numbers first: resolution and escalation
       </figcaption>
     </figure>
   )

@@ -274,7 +274,7 @@ export function Fig10PublishPath() {
       </div>
 
       <figcaption className="mt-2.5 font-mono text-xs text-muted">
-        fig 10 · demo website first, then the real channels
+        fig 9 · demo website first, then the real channels
       </figcaption>
     </figure>
   )

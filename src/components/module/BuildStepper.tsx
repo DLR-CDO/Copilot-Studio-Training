@@ -5,10 +5,13 @@ interface BuildStepperProps {
   steps: BuildStep[]
   checked: Record<string, boolean>
   onToggle: (stepId: string, value: boolean) => void
+  /** The module was completed before some of these steps existed. */
+  completed?: boolean
 }
 
-export function BuildStepper({ steps, checked, onToggle }: BuildStepperProps) {
+export function BuildStepper({ steps, checked, onToggle, completed = false }: BuildStepperProps) {
   const done = steps.filter((s) => checked[s.id]).length
+  const newSteps = steps.length - done
   const ratio = steps.length === 0 ? 0 : done / steps.length
 
   return (
@@ -16,7 +19,9 @@ export function BuildStepper({ steps, checked, onToggle }: BuildStepperProps) {
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em]">Build it</h2>
         <p className="font-mono text-xs text-muted">
-          {done}/{steps.length} steps
+          {completed && newSteps > 0
+            ? `Module complete · ${newSteps} new step${newSteps === 1 ? '' : 's'} to review`
+            : `${done}/${steps.length} steps`}
         </p>
       </div>
       <div

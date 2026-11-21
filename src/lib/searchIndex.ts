@@ -4,18 +4,22 @@
  */
 import { Document } from 'flexsearch'
 import type { DocumentValue } from 'flexsearch'
+import { glossary } from '../content/glossary'
 import { modules } from '../content/modules'
 import type { ConceptBlock, InlineToken, Module } from '../content/types'
 
-export type SearchSection = 'why' | 'concept' | 'build' | 'watch-out' | 'try-it' | 'checklist'
+export type SearchSection =
+  'why' | 'concept' | 'build' | 'watch-out' | 'tips' | 'try-it' | 'checklist' | 'glossary'
 
 export const SEARCH_SECTION_LABELS: Record<SearchSection, string> = {
   why: 'Why it matters',
   concept: 'In plain words',
   build: 'Build it',
   'watch-out': 'Watch out',
+  tips: 'Tips',
   'try-it': 'Try it',
   checklist: 'Checklist',
+  glossary: 'Glossary',
 }
 
 /** Sections with a matching `id` on the module page; others link to the module top. */
@@ -23,6 +27,7 @@ export const SEARCH_SECTION_ANCHORS: Partial<Record<SearchSection, string>> = {
   concept: 'concept',
   build: 'build',
   'watch-out': 'watch-out',
+  tips: 'tips',
   'try-it': 'try-it',
 }
 
@@ -74,6 +79,7 @@ function recordsForModule(mod: Module): SearchRecord[] {
     push('build', `${tokensToText(step.tokens)} ${subText}`.trim(), step.id)
   })
   mod.watchOuts.forEach((item, i) => push('watch-out', item, String(i)))
+  mod.tips?.forEach((item, i) => push('tips', item, String(i)))
   push('try-it', mod.tryIt, 'main')
   mod.checklist.forEach((item, i) => push('checklist', item, String(i)))
 
@@ -107,11 +113,19 @@ const searchDocument = new Document<SearchRecord>({
 
 const recordsById = new Map<string, SearchRecord>()
 
-for (const mod of modules) {
-  for (const record of recordsForModule(mod)) {
-    searchDocument.add(record)
-    recordsById.set(record.id, record)
-  }
+/** Glossary entries use module id 0; the search dialog links them to the Glossary page. */
+const glossaryRecords: SearchRecord[] = glossary.map((g) => ({
+  id: `glossary-${g.id}`,
+  moduleId: 0,
+  moduleTitle: 'Glossary',
+  section: 'glossary',
+  sectionLabel: SEARCH_SECTION_LABELS.glossary,
+  text: `${g.term}. ${g.definition}`,
+}))
+
+for (const record of [...modules.flatMap(recordsForModule), ...glossaryRecords]) {
+  searchDocument.add(record)
+  recordsById.set(record.id, record)
 }
 
 export function searchModules(query: string, limit = 20): SearchResult[] {

@@ -37,11 +37,14 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
         </button>
 
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-teal">
-            Agent Academy
+          <p className="hidden font-mono text-[11px] uppercase tracking-[0.14em] text-teal sm:block">
+            Digital Realty
           </p>
-          <p className="truncate font-display text-lg font-bold leading-tight sm:text-xl">
-            Copilot Studio Training
+          <p className="font-display text-base font-bold leading-tight sm:truncate sm:text-xl">
+            <span className="sm:hidden">Copilot Studio Fundamentals</span>
+            <span className="hidden sm:inline">
+              Copilot Studio Fundamentals: Build Your First Agent
+            </span>
           </p>
         </div>
 
@@ -61,7 +64,7 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
         <button
           type="button"
           onClick={() => setTheme(isDark ? 'light' : 'dark')}
-          className="rounded-pill border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-wide hover:border-violet"
+          className="hidden rounded-pill border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-wide hover:border-violet sm:inline-block"
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           aria-pressed={isDark}
           title={isDark ? 'Light mode' : 'Dark mode'}
@@ -77,10 +80,12 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
           Settings
         </button>
 
-        <ProgressRing ratio={ratio} size={40} />
+        <span className="hidden sm:block">
+          <ProgressRing ratio={ratio} size={40} />
+        </span>
 
         {user ? (
-          <div className="min-w-0 max-w-[8rem] shrink text-right sm:max-w-[14rem]">
+          <div className="hidden min-w-0 max-w-[14rem] shrink text-right sm:block">
             <p className="truncate text-sm font-semibold" title={user.email}>
               {serverStatus?.name || user.email}
             </p>

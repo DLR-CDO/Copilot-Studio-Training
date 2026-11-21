@@ -91,6 +91,8 @@ const m1Screenshots: Screenshot[] = [
   {
     id: 'm1-shot-1',
     src: 'screenshots/1-1.png',
+    width: 1024,
+    height: 463,
     alt: 'Copilot Studio Overview page for an agent, with the instructions box in the middle and the test pane on the right.',
     caption:
       'AI Enablement Assistant Overview in CDO - DEV, with instructions visible and the test pane open on the right.',
@@ -103,6 +105,8 @@ const m2Screenshots: Screenshot[] = [
   {
     id: 'm2-shot-1',
     src: 'images/02-environment-picker.png',
+    width: 936,
+    height: 528,
     alt: 'The Switch environment menu open over the Copilot Studio home page, listing the current environment and other environments.',
     caption: 'Switch environment menu, opened from the globe icon at the bottom left.',
     authorNotes: 'Annotate: circle the current environment name, add "always check this first"',
@@ -114,6 +118,8 @@ const m3Screenshots: Screenshot[] = [
   {
     id: 'm3-shot-1',
     src: 'screenshots/3-1.png',
+    width: 1024,
+    height: 463,
     alt: 'The Add knowledge dialog with a file upload area and tiles for featured sources such as Public websites, SharePoint and Dataverse.',
     caption:
       'The Add knowledge dialog for AI Enablement Assistant (CDO - DEV), showing upload, SharePoint, and featured source options.',
@@ -123,6 +129,8 @@ const m3Screenshots: Screenshot[] = [
   {
     id: 'm3-shot-2',
     src: 'images/03-test-pane-sources.png',
+    width: 936,
+    height: 546,
     alt: 'A test pane answer with its reference expanded, and a callout pointing to the cited source document.',
     caption: 'Always check the source the agent cites.',
     authorNotes: 'Annotate: arrow to the citation with "always check the source"',
@@ -134,6 +142,8 @@ const m4Screenshots: Screenshot[] = [
   {
     id: 'm4-shot-1',
     src: 'screenshots/4-1.png',
+    width: 1024,
+    height: 463,
     alt: 'The Topics list with All, Custom and System filters, showing each topic’s type, trigger and Enabled toggle.',
     caption:
       'The Topics list for AI Enablement Assistant showing custom topics (Greeting, Goodbye) and system topics.',
@@ -146,7 +156,9 @@ const m5Screenshots: Screenshot[] = [
   {
     id: 'm5-shot-1',
     src: 'images/05-connector.png',
-    alt: 'A connector tool’s Details page with the Description field highlighted and labelled “this is how the agent decides”.',
+    width: 936,
+    height: 532,
+    alt: 'A connector tool’s Details page with the Description field highlighted and labeled “this is how the agent decides”.',
     caption:
       'A connector tool’s Details page. The Description field is how the agent decides when to use it.',
     authorNotes: 'Annotate: highlight the description field, "this is how the agent decides"',
@@ -158,6 +170,8 @@ const m6Screenshots: Screenshot[] = [
   {
     id: 'm6-shot-1',
     src: 'images/06-child-agent.png',
+    width: 936,
+    height: 522,
     alt: 'A child agent’s Details page showing the error “Missing required property Description” under an empty Description field.',
     caption: 'Child agent Details: the description is required before the agent can be saved.',
     authorNotes:
@@ -170,6 +184,8 @@ const m7Screenshots: Screenshot[] = [
   {
     id: 'm7-shot-1',
     src: 'images/07-model-dropdown-1.png',
+    width: 936,
+    height: 534,
     alt: 'The agent Overview page with the “Select your agent’s model” dropdown below the description.',
     caption: 'The model dropdown on the Overview page, under "Select your agent’s model".',
     authorNotes: "Annotate: model choice sits next to instructions — this is the agent's brain",
@@ -178,7 +194,9 @@ const m7Screenshots: Screenshot[] = [
   {
     id: 'm7-shot-2',
     src: 'images/07-model-dropdown-2.png',
-    alt: 'The model dropdown open, listing models with Preview and Experimental tags circled and labelled “not for production”.',
+    width: 936,
+    height: 534,
+    alt: 'The model dropdown open, listing models with Preview and Experimental tags circled and labeled “not for production”.',
     caption: 'The model dropdown open. Preview and Experimental tags mean not for production.',
     authorNotes: 'Annotate: circle Preview / Experimental tags — not for production',
     capturedAt: '2026-11-16',
@@ -202,26 +220,26 @@ const m8ScreenshotsToCapture: ScreenshotRequest[] = [
   },
 ]
 
-const m9ScreenshotsToCapture: ScreenshotRequest[] = [
-  {
-    id: 'm9-shot-1',
-    caption:
-      'The Analytics page of a published agent, showing sessions, engagement, resolution, and escalation.',
-    authorNotes:
-      'Capture: the Analytics summary for the last 7 days of a published agent. Annotate: circle the resolution rate and the escalation rate.',
-  },
-]
-
 const m10ScreenshotsToCapture: ScreenshotRequest[] = [
   {
     id: 'm10-shot-1',
+    caption:
+      'The Monitor page of a published agent, showing sessions, engagement, resolution, and escalation.',
+    authorNotes:
+      'Capture: the Monitor summary for the last 7 days of a published agent. Annotate: circle the resolution rate and the escalation rate.',
+  },
+]
+
+const m9ScreenshotsToCapture: ScreenshotRequest[] = [
+  {
+    id: 'm9-shot-1',
     caption:
       'The Channels page after publishing, showing the Demo website tile alongside Teams + Microsoft 365 and the other channel tiles.',
     authorNotes:
       'Capture: the full Channels page of your published practice agent. Annotate: circle the Demo website tile with "start here for stakeholder review". public/screenshots/10-1.png exists but shows a colleague’s name in “Published by”; recapture or blur before use.',
   },
   {
-    id: 'm10-shot-2',
+    id: 'm9-shot-2',
     caption: 'The demo website open in a browser, with the agent answering a test question.',
     authorNotes:
       'Capture: the demo website after you ask one question. Annotate: point to the browser address bar with "share this demo link for feedback before going live".',
@@ -231,8 +249,8 @@ const m10ScreenshotsToCapture: ScreenshotRequest[] = [
 /** Access to request before Module 1, so a business user does not get stuck mid-course. */
 export const BEFORE_YOU_START: { item: string; neededFor: string }[] = [
   {
-    item: 'A Copilot Studio user licence. A trial lets you build and test, but it cannot publish an agent.',
-    neededFor: 'All modules; publishing in Module 10',
+    item: 'A Copilot Studio user license. A trial lets you build and test, but it cannot publish an agent.',
+    neededFor: 'All modules; publishing in Module 9',
   },
   {
     item: 'Access to a DEV environment where you can create agents.',
@@ -247,20 +265,21 @@ export const BEFORE_YOU_START: { item: string; neededFor: string }[] = [
     neededFor: 'Module 5',
   },
   {
-    item: 'Publishing and the Demo website channel allowed in DEV.',
-    neededFor: 'Module 10',
-  },
-  {
-    item: 'Optional: view access to the analytics of a live agent, for example through the Analytics Viewer role from its owner.',
-    neededFor: 'Module 9, if you want to do it before publishing your own agent',
+    item: 'Publishing and the Demo website channel allowed in DEV. The demo website needs the No authentication sign-in option, which some data policies turn off.',
+    neededFor: 'Modules 9 and 10',
   },
 ]
+
+/** What must never go into a practice agent's instructions, knowledge, or test questions. */
+export const PRACTICE_DATA_RULE =
+  'Never put confidential data into a practice agent: no customer or employee personal data, financial results, contracts, passwords or keys, or anything labeled confidential. Use made-up or already-public content in instructions, knowledge files, and test questions.'
 
 /** In dependency order: each check relies on the one before it. */
 export const PRE_PUBLISH_CHECKS = [
   'Right environment: you are publishing the right agent, from the right environment',
   'Knowledge verified: the sources are current and citations point where you expect',
   'Evaluation passed: your test set runs clean on the latest version',
+  'Sign-in checked: you know who will be able to chat with the agent, and nothing in it is unsafe for them to see',
   'Right channel: the audience you mean to reach, starting with the demo website',
 ]
 
@@ -296,7 +315,9 @@ export const modules: Module[] = [
           kw('description', 'agent-description'),
           t(' + a '),
           kw('model', 'model'),
-          t(' + instructions + knowledge + '),
+          t(' + '),
+          kw('instructions', 'instructions'),
+          t(' + knowledge + '),
           kw('tools', 'tool'),
           t(' + '),
           kw('triggers', 'trigger'),
@@ -329,9 +350,9 @@ export const modules: Module[] = [
           ),
         ],
         [
-          t(
-            'Licensing basics and Copilot Credits, the billing unit for agents, awareness level only',
-          ),
+          t('Licensing basics and '),
+          kw('Copilot Credits', 'copilot-credits'),
+          t(', the billing unit for agents (awareness only)'),
         ],
       ]),
     ],
@@ -339,7 +360,7 @@ export const modules: Module[] = [
       list([
         [
           t(
-            'On 1 September 2025, Copilot Credits replaced messages as the billing unit for agents. Prepaid pack quantities and the pay-as-you-go rate did not change.',
+            'On September 1, 2025, Copilot Credits replaced messages as the billing unit for agents. Prepaid pack quantities and the pay-as-you-go rate did not change.',
           ),
         ],
       ]),
@@ -350,8 +371,10 @@ export const modules: Module[] = [
         id: 'm1-step-harness',
         verify: true,
         tokens: [
+          t('Check which '),
+          kw('harness', 'harness'),
           t(
-            'Check which harness you are on. This course teaches the standard harness, which follows the topics and rules you define. Agents on the Microsoft Copilot harness look and work differently, so if your screens do not match the steps here, check the harness first.',
+            ' you are on. This course teaches the standard harness, which follows the topics and rules you define. Agents on the Microsoft Copilot harness look and work differently, so if your screens do not match the steps here, check the harness first.',
           ),
         ],
       },
@@ -362,47 +385,62 @@ export const modules: Module[] = [
         ui('globe icon'),
         t(' in the bottom left corner, above your name, and select the DEV environment.'),
       ],
+      {
+        id: 'm1-step-solution',
+        tokens: [
+          t(
+            'Create the solution that will store your agent. You do this once, in Power Apps, before you create the agent.',
+          ),
+        ],
+        substeps: [
+          sub([
+            t('Open a new browser tab, go to '),
+            ui('make.powerapps.com'),
+            t(', and sign in with your work account.'),
+          ]),
+          sub(
+            [
+              t(
+                'Check that the environment name in the top right corner shows DEV. If not, select it and switch to DEV.',
+              ),
+            ],
+            true,
+          ),
+          sub([
+            t('In the left navigation, select '),
+            ui('Solutions'),
+            t(', then select '),
+            ui('+ New solution'),
+            t('.'),
+          ]),
+          sub([
+            t('Enter a '),
+            ui('Display name'),
+            t(', pick a '),
+            ui('Publisher'),
+            t(', and leave the other fields as they are.'),
+          ]),
+          sub([t('Select '), ui('Create'), t(', then go back to the Copilot Studio tab.')]),
+        ],
+      },
       // VERIFY IN UI
       verifyStep([
-        t('On the home screen, once logged in, select '),
+        t('On the home screen, select '),
         ui('Other ways to build'),
         t(', then select '),
         ui('Agent (standard)'),
         t('.'),
       ]),
       {
-        tokens: [t('Name your agent and create the solution that will store it.')],
+        tokens: [t('Name your agent and put it in your solution.')],
         substeps: [
           sub([t('In the '), ui('Name'), t(' box, enter a name for your agent.')]),
-          sub([t('Expand the agent settings section below the name.')]),
-          sub([t('Leave the schema name as it is.')]),
-          sub([t('Select the language your agent will speak.')]),
           sub([
-            t('Open a new browser tab and go to Power Apps at '),
-            ui('make.powerapps.com'),
-            t('.'),
+            t(
+              'Expand the agent settings below the name, and select the language your agent will speak. Leave the schema name as it is.',
+            ),
           ]),
-          sub([t('Log in with your work account.')]),
-          sub([t('In the left navigation, select '), ui('Solutions'), t('.')]),
-          sub([
-            t('Select '),
-            ui('+ New solution'),
-            t(' in the top left corner of the Solutions page.'),
-          ]),
-          sub([t('Enter a '), ui('Display name'), t(' for the solution.')]),
-          sub([t('Enter a '), ui('Name'), t(' for the solution.')]),
-          sub([t('Select a '), ui('Publisher'), t('.')]),
-          sub([t('Leave the '), ui('Version'), t(' as it is.')]),
-          sub([t('Leave '), ui('Set as preferred solution'), t(' unchecked.')]),
-          sub([
-            t('Select '),
-            ui('Create'),
-            t('. The solution stores all the work you do on this agent.'),
-          ]),
-          sub([t('Go back to the Copilot Studio browser tab.')]),
-          sub([
-            t('In the agent settings, select the display name of the solution you just created.'),
-          ]),
+          sub([t('Under '), ui('Solution'), t(', select the solution you just created.')], true),
           sub([t('Select '), ui('Create'), t('.')]),
         ],
       },
@@ -441,14 +479,7 @@ export const modules: Module[] = [
             t(': select '),
             ui('Add knowledge'),
             t(
-              '. A pop-up opens where you can drag and drop files, or connect SharePoint or OneDrive.',
-            ),
-          ]),
-          sub([
-            t('In the pop-up, select '),
-            ui('OneDrive'),
-            t(
-              ' and pick your file. Turn on web search only for broad agents that do not handle confidential information.',
+              ' and drag one small practice file into the pop-up, for example a made-up FAQ document. Use only made-up or already-public content (see Watch out). Module 3 covers SharePoint and OneDrive.',
             ),
           ]),
           sub([
@@ -491,14 +522,15 @@ export const modules: Module[] = [
         ),
       ],
     ]),
-    watchOuts: [
-      'One agent, built progressively — every module adds a layer to the same practice agent, and by Module 10 you will have published something real.',
-      'Licensing and Copilot Credits are awareness level only for now — nothing to configure yet.',
-      'Ask early, ask often — post questions in the shared FAQ so your question improves the course for the next cohort.',
+    watchOuts: [PRACTICE_DATA_RULE],
+    tips: [
+      'One agent, built progressively: every module adds a layer to the same practice agent. You publish it in Module 9 and watch how it is used in Module 10.',
+      'Licensing and Copilot Credits are awareness only for now. There is nothing to configure yet.',
+      'Ask early, ask often: if a step does not match your screen, ask your course admin. Screens change, and your question helps fix the course for the next group.',
     ],
     screenshots: m1Screenshots,
     tryIt:
-      "Create your first agent in the DEV environment, inside a new solution. Add a description, instructions, and knowledge, then ask it three questions in the test pane. That's it, you've built an agent.",
+      "Create your first agent in the DEV environment, inside a new solution. Add a description, instructions, and one practice knowledge file, then ask it three questions in the test pane. That's it, you've built an agent.",
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/fundamentals-what-is-copilot-studio',
@@ -579,7 +611,9 @@ export const modules: Module[] = [
         [
           t('What admins control per '),
           kw('environment', 'environment'),
-          t(': data policies, and whether preview AI '),
+          t(': '),
+          kw('data policies (DLP)', 'data-policy'),
+          t(', and whether preview AI '),
           kw('models', 'model'),
           t(' are allowed'),
         ],
@@ -630,8 +664,10 @@ export const modules: Module[] = [
       ],
     ]),
     watchOuts: [
-      'Why you never build directly in Production — work flows one direction: Dev → Test → Production.',
-      "Environments come first — always confirm you're in Dev before touching anything. It's the check that prevents the most painful mistakes.",
+      "Environments come first: always confirm you're in DEV before touching anything. It's the check that prevents the most painful mistakes.",
+    ],
+    tips: [
+      'Work flows one direction: DEV, then Test, then Production. You never build directly in Production.',
     ],
     screenshots: m2Screenshots,
     tryIt:
@@ -700,7 +736,16 @@ export const modules: Module[] = [
           kw('agent', 'agent'),
           t(' picks the right one'),
         ],
-        [t('The "use general knowledge" toggle, and when to switch it off')],
+        [
+          t(
+            'Allow ungrounded responses (older screens: use general knowledge): whether the agent may answer from the AI model’s general knowledge when your sources have no answer, and when to switch it off',
+          ),
+        ],
+        [
+          t(
+            'Web search is a different feature from a public website source: web search looks across the whole public web, while a public website source searches only the sites you name',
+          ),
+        ],
         [t('Checking whether an answer actually came from your knowledge')],
       ]),
       {
@@ -716,7 +761,7 @@ export const modules: Module[] = [
           ],
           [
             'Public websites',
-            'Pull answers from pages on the public web. Use web search only for broad agents that do not handle confidential information.',
+            'Answer from specific public sites you name, such as a vendor’s help pages. The agent searches only those sites.',
           ],
         ],
       },
@@ -751,7 +796,9 @@ export const modules: Module[] = [
         ui('SharePoint'),
         t(' or '),
         ui('OneDrive'),
-        t(', or drag and drop a file into the upload area.'),
+        t(
+          '. You uploaded a file in Module 1; this time connect a source your team already uses, with content that is safe for a practice agent.',
+        ),
       ],
       [t('Pick one site or file, following the prompts in the pop-up.')],
       [
@@ -773,14 +820,44 @@ export const modules: Module[] = [
         kw('citation', 'citation'),
         t(' and confirm the answer came from your knowledge source.'),
       ],
+      // VERIFY IN UI
+      verifyStep([
+        t('Select '),
+        ui('Settings'),
+        t(' in the top right corner, then select '),
+        ui('Generative AI'),
+        t(' and scroll to the '),
+        ui('Knowledge'),
+        t(' section.'),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t('Turn off '),
+        ui('Allow ungrounded responses'),
+        t(' (older screens: '),
+        ui('Use general knowledge'),
+        t(') so the agent answers only from your sources. Check that '),
+        ui('Use information from the web'),
+        t(' (web search) is off too, then select '),
+        ui('Save'),
+        t('.'),
+      ]),
+      [
+        t(
+          'Close Settings and ask the test pane a question your sources do not cover. The agent should say it does not know, instead of guessing.',
+        ),
+      ],
     ]),
     watchOuts: [
-      'Always check the source — verify a citation actually backs up the answer before you trust it.',
-      'Descriptions are a skill — the agent routes by reading your description of each knowledge source, so write it like you mean it.',
+      'Always check the source: verify a citation actually backs up the answer before you trust it.',
+      'Leave web search off for agents that handle internal information. It searches the whole public web, not just the sites you add.',
+    ],
+    tips: [
+      'Descriptions are a skill: the agent picks a knowledge source by reading your description of it, so write it like you mean it.',
     ],
     screenshots: m3Screenshots,
     tryIt:
-      'Add one SharePoint site or file to your practice agent. Ask five questions and verify the citations point where you expect.',
+      'Add one SharePoint site or OneDrive file to your practice agent. Ask five questions and verify the citations point where you expect. Then turn off ungrounded responses and ask something your sources do not cover.',
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio',
@@ -808,11 +885,11 @@ export const modules: Module[] = [
       },
     ]),
     checklist: [
-      'Added one SharePoint site or file as a knowledge source',
+      'Added one SharePoint site or OneDrive file as a knowledge source',
       'Wrote a clear description for the source',
       'Asked five questions and got answers with citations',
       'Checked that each citation points where I expect',
-      'Know when to switch off the "use general knowledge" toggle',
+      'Turned off Allow ungrounded responses and saw the agent decline a question my sources do not cover',
     ],
   },
 
@@ -981,13 +1058,31 @@ export const modules: Module[] = [
         ui('test pane'),
         t(', then type a message that should start your topic, and try both branches.'),
       ],
+      // VERIFY IN UI
+      verifyStep([
+        t('Go back to the '),
+        ui('Topics'),
+        t(' tab and select the '),
+        ui('System'),
+        t(
+          ' filter. These built-in topics, like Conversation Start, Fallback, and Escalate, handle moments every agent has.',
+        ),
+      ]),
+      [
+        t('Open '),
+        ui('Fallback'),
+        t(
+          ' and read what the agent says when it does not understand. Do not change it for now; customize system topics only when the default message does not fit your users.',
+        ),
+      ],
     ]),
-    watchOuts: [
-      'Descriptions are a skill — write trigger phrases and topic descriptions like you mean it, since the agent routes by reading them.',
+    watchOuts: [],
+    tips: [
+      'Descriptions are a skill: write trigger phrases and topic descriptions like you mean it, since the agent routes by reading them.',
     ],
     screenshots: m4Screenshots,
     tryIt:
-      'Build one topic with a question and a two-way branch, for example: answer FAQs from knowledge, or offer to escalate.',
+      'Build one topic that asks "Which system do you need help with?", answers when the user picks Outlook, and hands everything else to the Escalate topic.',
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-create-edit-topics',
@@ -1014,6 +1109,7 @@ export const modules: Module[] = [
       'Built one topic with a question node',
       'Added a condition node that branches two ways',
       'Tested the topic end-to-end in the test pane',
+      'Looked at the system topics, like Fallback and Escalate',
       'Can explain the difference between trigger phrases and topic descriptions',
     ],
   },
@@ -1051,8 +1147,20 @@ export const modules: Module[] = [
           kw('Connectors', 'connector'),
           t(': ready-made bridges to systems like Outlook, SharePoint, and Dataverse'),
         ],
-        [t('Prompts as reusable AI instructions, and adding a prompt as a '), kw('tool', 'tool')],
-        [kw('Agent', 'agent'), t(' flows for multi-step automation, awareness level')],
+        [
+          t('Prompts as reusable AI instructions, and adding a prompt as a '),
+          kw('tool', 'tool'),
+          t(' (awareness only, no hands-on step)'),
+        ],
+        [
+          kw('Agent', 'agent'),
+          t(' flows for multi-step automation (awareness only, no hands-on step)'),
+        ],
+        [
+          t(
+            'Whose access a tool uses: each user’s own (End user credentials, the default) or yours (Maker-provided credentials)',
+          ),
+        ],
         [
           t('Why the '),
           kw('tool', 'tool'),
@@ -1067,7 +1175,7 @@ export const modules: Module[] = [
         [t('MCP servers can be added as tools: a standard plug for external services.')],
         [
           t(
-            'Computer use (generally available since May 2026) lets the agent operate websites and desktop apps the way a person would. It is high impact, so test it only in DEV.',
+            'Computer use (generally available since May 2026) lets the agent operate websites and desktop apps the way a person would, by clicking and typing in them. It acts in real apps on someone’s behalf, so try it only in DEV, with test accounts and test data.',
           ),
         ],
         [
@@ -1125,6 +1233,16 @@ export const modules: Module[] = [
         ui('Description'),
         t(' field, write a clear description so the agent knows when to use the tool.'),
       ],
+      // VERIFY IN UI
+      verifyStep([
+        t('On the same page, check that '),
+        ui('Authentication'),
+        t(' is set to '),
+        ui('End user credentials'),
+        t(
+          ' (the default). Maker-provided credentials would let anyone who chats with your agent act with your access.',
+        ),
+      ]),
       [t('Select '), ui('Save'), t(' in the top right corner of the page.')],
       [
         t('Select '),
@@ -1142,8 +1260,10 @@ export const modules: Module[] = [
       ],
     ]),
     watchOuts: [
-      "The tool's description decides whether the agent picks it at the right moment — a vague description means a missed tool.",
-      'Computer use is high impact — it clicks and types in real apps on someone’s behalf. Test it only in DEV, with test accounts and test data.',
+      'Keep tools on End user credentials in a practice agent. With Maker-provided credentials, everyone who chats with the agent uses your access.',
+    ],
+    tips: [
+      "The tool's description decides whether the agent picks it at the right moment. A vague description means a missed tool.",
     ],
     screenshots: m5Screenshots,
     tryIt: 'Add one connector-based tool to your practice agent and trigger it from the test pane.',
@@ -1180,6 +1300,7 @@ export const modules: Module[] = [
     checklist: [
       'Added one connector-based tool to my practice agent',
       'Wrote a clear description so the agent knows when to use it',
+      'Checked that the tool uses End user credentials',
       'Triggered the tool from the test pane and saw it run',
       'Can explain the difference between a connector, a prompt tool, and an agent flow',
     ],
@@ -1215,14 +1336,14 @@ export const modules: Module[] = [
         [
           t('Connecting to an existing '),
           kw('Copilot Studio agent', 'connected-agent'),
-          t(' someone else built'),
+          t(' someone else built (awareness only, no hands-on step)'),
         ],
         [t('Writing descriptions so the parent always routes to the right specialist')],
         [
           kw('MCP', 'mcp'),
           t(' servers as '),
           kw('tools', 'tool'),
-          t(', awareness level: a standard plug for external services (see Module 5)'),
+          t(' (awareness only): a standard plug for external services, see Module 5'),
         ],
       ]),
     ],
@@ -1337,8 +1458,9 @@ export const modules: Module[] = [
         t(' that should route to the child agent, and watch what happens.'),
       ],
     ]),
-    watchOuts: [
-      'Write descriptions so the parent always routes to the right specialist — a vague description means the wrong child agent answers.',
+    watchOuts: [],
+    tips: [
+      'Write descriptions so the parent always routes to the right specialist. A vague description means the wrong child agent answers.',
     ],
     screenshots: m6Screenshots,
     tryIt:
@@ -1416,7 +1538,7 @@ export const modules: Module[] = [
           t('Picking a primary '),
           kw('model', 'model'),
           t(
-            ' from the dropdown: the trade-off is reasoning depth vs speed vs cost. The list changes often, so check the dropdown instead of memorising model names',
+            ' from the dropdown: the trade-off is reasoning depth vs speed vs cost. The list changes often, so check the dropdown instead of memorizing model names',
           ),
         ],
         [
@@ -1433,8 +1555,13 @@ export const modules: Module[] = [
             ' tags: fine to explore, never for production, and your admin controls whether they appear at all',
           ),
         ],
-        [t('Content moderation and the general-knowledge toggle')],
-        [t('Authentication, awareness level: who is allowed to use the '), kw('agent', 'agent')],
+        [t('Content moderation, and the Allow ungrounded responses setting you met in Module 3')],
+        [
+          kw('Authentication', 'authentication'),
+          t(': who is allowed to chat with the '),
+          kw('agent', 'agent'),
+          t('. You check it before sharing in Module 9'),
+        ],
       ]),
     ],
     goodToKnow: [
@@ -1475,8 +1602,10 @@ export const modules: Module[] = [
       [t('Close the dropdown without changing the model.')],
     ]),
     watchOuts: [
-      'Preview means not for production — preview and experimental model tags are fine to explore, but stay out of anything real.',
-      'Your admin controls whether preview models appear at all — do not assume they are available everywhere.',
+      'Preview means not for production: preview and experimental model tags are fine to explore, but stay out of anything real.',
+    ],
+    tips: [
+      'Your admin controls whether preview models appear at all, so do not assume they are available everywhere.',
     ],
     screenshots: m7Screenshots,
     tryIt:
@@ -1542,7 +1671,9 @@ export const modules: Module[] = [
           t(' is running'),
         ],
         [
-          t('Reading the activity map: which knowledge, '),
+          t('Reading the '),
+          kw('activity map', 'activity-map'),
+          t(': which knowledge, '),
           kw('tools', 'tool'),
           t(', and '),
           kw('topics', 'topic'),
@@ -1668,7 +1799,7 @@ export const modules: Module[] = [
         t('Select '),
         ui('Add test method'),
         t(
-          ' and choose the methods that fit your questions, such as Compare meaning when you have expected answers. Set a pass score if the method asks for one, then select ',
+          '. Keep General quality, which scores how good each answer is overall, and add Compare meaning, which checks each answer against the one you expect. Set a pass score if a method asks for one, then select ',
         ),
         ui('Evaluate'),
         t(' to start the run.'),
@@ -1685,8 +1816,9 @@ export const modules: Module[] = [
       ]),
       [t('Fix the description or instructions behind it, then re-run the test set and compare.')],
     ]),
-    watchOuts: [
-      'Nothing ships untested — evaluation before publishing, every time. A 10-question test set is the minimum bar.',
+    watchOuts: [],
+    tips: [
+      'Nothing ships untested: evaluation before publishing, every time. A 10-question test set is the minimum bar.',
     ],
     screenshots: [],
     screenshotsToCapture: m8ScreenshotsToCapture,
@@ -1716,7 +1848,7 @@ export const modules: Module[] = [
     ]),
     checklist: [
       'Wrote a 10-question test set from real user questions',
-      'Ran an evaluation and read the results',
+      'Ran an evaluation with General quality and Compare meaning, and read the results',
       'Found my worst-scoring answer',
       'Fixed a description or instruction and re-ran the test',
     ],
@@ -1727,139 +1859,6 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 9,
-    harness: 'standard',
-    slug: 'monitor-and-improve',
-    title: 'Monitor & improve',
-    whyItMatters:
-      "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy and improving.",
-    estimatedMinutes: 25,
-    lastReviewed: '2026-11-21',
-    verifiedAgainst: '2026-11',
-    badgeName: 'Pulse Checker',
-    diagram: 'fig9',
-    concept: [
-      para([
-        t(
-          "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy and improving.",
-        ),
-      ]),
-      list([
-        [
-          t('Reading the analytics summary: sessions, engagement, resolution, '),
-          kw('escalation', 'escalation'),
-        ],
-        [t('Turning analytics into fixes for conversational '), kw('agents', 'agent')],
-        [t('Autonomous '), kw('agent', 'agent'), t(' health, where it applies')],
-        [t('A simple weekly ritual: what to check, what "bad" looks like, who to tell')],
-        [
-          t(
-            'Analytics only count real conversations with a published agent. Chats in the test pane never show up',
-          ),
-        ],
-      ]),
-    ],
-    goodToKnow: [
-      list([
-        [t('User question and reaction lists can be filtered and downloaded as a CSV file.')],
-        [t('Session transcripts are available to people with the transcript viewer privilege.')],
-        [
-          t(
-            'The Analytics Viewer role (April 2026) shares analytics with colleagues without giving them maker rights.',
-          ),
-        ],
-        [t('Custom metrics (preview): describe a business outcome and Copilot Studio scores it.')],
-      ]),
-    ],
-    buildSteps: buildSteps(9, [
-      {
-        id: 'm9-step-pick-agent',
-        tokens: [
-          t(
-            'Pick a published agent you can open: a live agent you own or co-own, or one whose owner has shared its analytics with you. Your practice agent is not published until Module 10, and test pane chats never show up in analytics. If you have no live agent yet, turn on ',
-          ),
-          ui('Free roam'),
-          t(
-            ' in Settings, do Module 10, chat with your agent a few times on the demo website, then come back here.',
-          ),
-        ],
-      },
-      [
-        t('Check that the '),
-        ui('globe icon'),
-        t(' in the bottom left corner shows the environment of that agent. Then select '),
-        ui('Agents'),
-        t(' in the left navigation, and select the agent. Its Overview page opens.'),
-      ],
-      // VERIFY IN UI
-      verifyStep([
-        t('Find '),
-        ui('Monitor'),
-        t(
-          ' in the row of tabs along the top of the page (older screens call it Analytics). On a narrow screen it may be under the overflow menu at the right end.',
-        ),
-      ]),
-      // VERIFY IN UI
-      verifyStep([t('Select '), ui('Monitor'), t('. The analytics summary opens.')]),
-      // VERIFY IN UI
-      verifyStep([
-        t(
-          'Use the date range picker in the top right corner of the Analytics page to choose the last 7 days.',
-        ),
-      ]),
-      // VERIFY IN UI
-      verifyStep([
-        t(
-          'Review the sessions, engagement, resolution, and escalation numbers in the summary cards.',
-        ),
-      ]),
-      [t('Name one thing you would improve based on what you see.')],
-    ]),
-    watchOuts: [
-      "Publishing isn't the finish line — a 15-minute weekly review keeps a live agent healthy.",
-    ],
-    screenshots: [],
-    screenshotsToCapture: m9ScreenshotsToCapture,
-    tryIt:
-      "Open the Monitor page of a live agent you can access (or your own, after Module 10) and name one thing you'd improve based on what you see.",
-    goDeeper: goDeeper([
-      {
-        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-summary',
-        label: 'Analytics summary',
-      },
-      {
-        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-improve-agent-effectiveness',
-        label: 'Improve conversational agent effectiveness',
-      },
-      {
-        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-improve-agent-health',
-        label: 'Analyze autonomous agent health',
-      },
-      {
-        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-question-reaction-lists',
-        label: 'User question and reaction lists',
-      },
-      {
-        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-transcripts-studio',
-        label: 'Session transcripts',
-      },
-      {
-        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-custom-metrics',
-        label: 'Custom metrics (preview)',
-      },
-    ]),
-    checklist: [
-      'Opened the Analytics summary page of a live or demo agent',
-      'Read sessions, engagement, resolution, and escalation numbers',
-      "Named one thing I'd improve based on the data",
-      'Know what a 15-minute weekly review should cover',
-    ],
-  },
-
-  // -------------------------------------------------------------------------
-  // Module 10
-  // -------------------------------------------------------------------------
-  {
-    id: 10,
     harness: 'standard',
     slug: 'channels-and-publishing',
     title: 'Channels & publishing',
@@ -1889,8 +1888,14 @@ export const modules: Module[] = [
         [kw('Channels', 'channel'), t(': demo website, live website, Teams + Microsoft 365')],
         [t('Using the demo website for stakeholder review before broad rollout')],
         [
+          kw('Sign-in', 'authentication'),
           t(
-            'Teams + Microsoft 365: use Authenticate with Microsoft for sign-in, and submit the agent for admin approval to reach the whole organisation',
+            ': the demo website only works with No authentication, which means anyone who has the link can chat with your agent. Check what your agent can reveal before you share the link',
+          ),
+        ],
+        [
+          t(
+            'Teams + Microsoft 365: use Authenticate with Microsoft for sign-in, and submit the agent for admin approval to reach the whole organization',
           ),
         ],
         [t('Single sign-on, awareness level')],
@@ -1899,7 +1904,7 @@ export const modules: Module[] = [
           kw('environment', 'environment'),
           t(', knowledge verified, '),
           kw('evaluation', 'evaluation'),
-          t(' passed, right '),
+          t(' passed, sign-in checked, right '),
           kw('channel', 'channel'),
         ],
       ]),
@@ -1912,7 +1917,7 @@ export const modules: Module[] = [
           ['Live website', 'The public-facing channel once the agent is ready to go live.'],
           [
             'Teams + Microsoft 365',
-            'Deploy where people already work. Use Authenticate with Microsoft. Organisation-wide availability goes through admin approval.',
+            'Deploy where people already work. Use Authenticate with Microsoft, so people sign in with their work account. Organization-wide availability goes through admin approval.',
           ],
         ],
       },
@@ -1926,7 +1931,7 @@ export const modules: Module[] = [
         ],
         [
           t(
-            'Since 23 October 2026, new agents can no longer connect to WhatsApp through the Azure Communication Services channel. Agents connected before then keep working.',
+            'Since October 23, 2026, new agents can no longer connect to WhatsApp through the Azure Communication Services channel. Agents connected before then keep working.',
           ),
         ],
         [t('MCP and Agent2Agent (A2A) channels let other tools and agents call yours (preview).')],
@@ -1938,13 +1943,55 @@ export const modules: Module[] = [
         [t('A privacy statement link can appear at the start of conversations (preview).')],
       ]),
     ],
-    buildSteps: buildSteps(10, [
+    buildSteps: buildSteps(9, [
       [
         t(
-          'Run through the pre-publish checklist, in order: right environment, knowledge verified, evaluation passed, right channel.',
+          'Run through the pre-publish checklist, in order: right environment, knowledge verified, evaluation passed, sign-in checked, right channel.',
         ),
       ],
       openPracticeAgent(),
+      verifyStep(
+        [
+          t('Check who will be able to chat with your agent. Select '),
+          ui('Settings'),
+          t(', then '),
+          ui('Security'),
+          t(', then '),
+          ui('Authentication'),
+          t('. The demo website needs '),
+          ui('No authentication'),
+          t(', so anyone who has the link can chat with your agent.'),
+        ],
+        [
+          sub([
+            t('Open the '),
+            ui('Knowledge'),
+            t(
+              ' tab and remove any uploaded file that not everyone may read. Uploaded files answer anyone who chats. SharePoint and OneDrive sources only answer signed-in people, so they stay quiet on the demo website.',
+            ),
+          ]),
+          sub([
+            t('Open the '),
+            ui('Tools'),
+            t(
+              ' tab and check every tool uses End user credentials, never Maker-provided. Otherwise people using your link act with your access.',
+            ),
+          ]),
+          sub([t('Check the instructions and test questions too: '), t(PRACTICE_DATA_RULE)]),
+          sub(
+            [
+              t('If all of that is safe, select '),
+              ui('No authentication'),
+              t(' and '),
+              ui('Save'),
+              t(
+                '. If the option is grayed out, a data policy requires sign-in: skip the demo website and ask your course admin how to share instead.',
+              ),
+            ],
+            true,
+          ),
+        ],
+      ),
       // VERIFY IN UI
       verifyStep([
         t('Select '),
@@ -1979,17 +2026,25 @@ export const modules: Module[] = [
           'In the panel that opens on the right, copy the demo website link, then open it in a new browser tab to check it works.',
         ),
       ]),
-      [t('Send the demo website link to a classmate for feedback.')],
+      [
+        t(
+          'Send the demo website link to one classmate at Digital Realty for feedback. Never share it outside the company. Leave it on until you finish Module 10, which uses these chats.',
+        ),
+      ],
     ]),
     watchOuts: [
-      'Nothing is live until you press Publish — changes stay in draft on purpose, so you decide exactly when users see them.',
-      'Run the pre-publish checklist first, in order: right environment, knowledge verified, evaluation passed, right channel.',
-      'Use the demo website for stakeholder review before broad rollout.',
+      'Never share an agent link before checking its sign-in setting. With No authentication, anyone who has the link can chat with the agent and get answers from its uploaded files.',
+      PRACTICE_DATA_RULE,
+    ],
+    tips: [
+      'Nothing is live until you press Publish. Changes stay in draft on purpose, so you decide exactly when users see them.',
+      'Run the pre-publish checklist first, in order: right environment, knowledge verified, evaluation passed, sign-in checked, right channel.',
+      'Use the demo website for stakeholder review before broad rollout. It is not meant for production.',
     ],
     screenshots: [],
-    screenshotsToCapture: m10ScreenshotsToCapture,
+    screenshotsToCapture: m9ScreenshotsToCapture,
     tryIt:
-      "Publish your practice agent to the demo website and send the link to a classmate for feedback. Congratulations, you've shipped an agent.",
+      "Check your agent's sign-in setting, publish it to the demo website, and send the link to one classmate at Digital Realty for feedback. Congratulations, you've shipped an agent.",
     goDeeper: goDeeper([
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/publication-fundamentals-publish-channels',
@@ -2014,9 +2069,148 @@ export const modules: Module[] = [
     ]),
     checklist: [
       'Completed the pre-publish checklist',
+      'Checked the sign-in setting, uploaded files, and tool credentials before sharing',
       'Published my practice agent',
       'Opened the Demo website channel and copied its link',
       'Sent the demo link to a classmate for feedback',
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  // Module 10
+  // -------------------------------------------------------------------------
+  {
+    id: 10,
+    harness: 'standard',
+    slug: 'monitor-and-improve',
+    title: 'Monitor & improve',
+    whyItMatters:
+      "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy and improving.",
+    estimatedMinutes: 25,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
+    badgeName: 'Pulse Checker',
+    diagram: 'fig9',
+    concept: [
+      para([
+        t(
+          "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy and improving.",
+        ),
+      ]),
+      list([
+        [
+          t('Reading the '),
+          kw('Monitor', 'monitor'),
+          t(' page summary: sessions, engagement, resolution, '),
+          kw('escalation', 'escalation'),
+        ],
+        [t('Turning analytics into fixes for conversational '), kw('agents', 'agent')],
+        [t('Autonomous '), kw('agent', 'agent'), t(' health, where it applies')],
+        [t('A simple weekly ritual: what to check, what "bad" looks like, who to tell')],
+        [
+          t(
+            'Analytics only count real conversations with a published agent. Chats in the test pane never show up',
+          ),
+        ],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [t('User question and reaction lists can be filtered and downloaded as a CSV file.')],
+        [t('Session transcripts are available to people with the transcript viewer privilege.')],
+        [
+          t(
+            'The Analytics Viewer role (April 2026) shares analytics with colleagues without giving them maker rights.',
+          ),
+        ],
+        [t('Custom metrics (preview): describe a business outcome and Copilot Studio scores it.')],
+      ]),
+    ],
+    buildSteps: buildSteps(10, [
+      [
+        t(
+          'Chat with the practice agent you published in Module 9 three or four times on the demo website, or ask your classmate to. Only real conversations count; test pane chats never show up. New conversations can take a while to appear, so if the numbers are empty, come back later.',
+        ),
+      ],
+      openPracticeAgent(),
+      // VERIFY IN UI
+      verifyStep([
+        t('Find '),
+        ui('Monitor'),
+        t(
+          ' in the row of tabs along the top of the page (older screens call it Analytics). On a narrow screen it may be under the overflow menu at the right end.',
+        ),
+      ]),
+      // VERIFY IN UI
+      verifyStep([t('Select '), ui('Monitor'), t('. The analytics summary opens.')]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'Use the date range picker in the top right corner of the Monitor page to choose the last 7 days.',
+        ),
+      ]),
+      // VERIFY IN UI
+      verifyStep([
+        t(
+          'Review the sessions, engagement, resolution, and escalation numbers in the summary cards.',
+        ),
+      ]),
+      [t('Name one thing you would improve based on what you see.')],
+      // VERIFY IN UI
+      verifyStep([
+        t('Finished? Close the demo website to everyone: select '),
+        ui('Settings'),
+        t(', then '),
+        ui('Security'),
+        t(', then '),
+        ui('Authentication'),
+        t(', choose '),
+        ui('Authenticate with Microsoft'),
+        t(', select '),
+        ui('Save'),
+        t(', and publish again. Sign-in changes only take effect after you publish.'),
+      ]),
+    ]),
+    watchOuts: [],
+    tips: [
+      "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy.",
+    ],
+    screenshots: [],
+    screenshotsToCapture: m10ScreenshotsToCapture,
+    tryIt:
+      "Chat with your published agent a few times on the demo website, open its Monitor page, and name one thing you'd improve based on what you see.",
+    goDeeper: goDeeper([
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-summary',
+        label: 'Analytics summary',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-improve-agent-effectiveness',
+        label: 'Improve conversational agent effectiveness',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-improve-agent-health',
+        label: 'Analyze autonomous agent health',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-question-reaction-lists',
+        label: 'User question and reaction lists',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-transcripts-studio',
+        label: 'Session transcripts',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-custom-metrics',
+        label: 'Custom metrics (preview)',
+      },
+    ]),
+    checklist: [
+      'Opened the Monitor page of my published practice agent',
+      'Read sessions, engagement, resolution, and escalation numbers',
+      "Named one thing I'd improve based on the data",
+      'Turned sign-in back on and published again',
+      'Know what a 15-minute weekly review should cover',
     ],
   },
 ]

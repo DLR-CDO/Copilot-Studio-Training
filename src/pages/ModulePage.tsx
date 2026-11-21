@@ -12,7 +12,7 @@ import {
 import { ModuleDiagram } from '../components/diagrams'
 import { ConceptSection } from '../components/module/ConceptSection'
 import { BuildStepper } from '../components/module/BuildStepper'
-import { WatchOut } from '../components/module/WatchOut'
+import { Tips, WatchOut } from '../components/module/WatchOut'
 import { ScreenshotFigure } from '../components/module/ScreenshotFigure'
 import { HarnessBanner, HarnessTag } from '../components/module/Harness'
 import { TryIt } from '../components/module/TryIt'
@@ -111,7 +111,8 @@ export function ModulePage() {
       label: 'Build it',
       done: stepIds.every((sid) => progress.buildSteps[sid]),
     },
-    { id: 'watch-out', label: 'Watch out', done: true },
+    ...(mod.watchOuts.length > 0 ? [{ id: 'watch-out', label: 'Watch out', done: true }] : []),
+    ...((mod.tips?.length ?? 0) > 0 ? [{ id: 'tips', label: 'Tips', done: true }] : []),
     ...(mod.screenshots.length > 0
       ? [{ id: 'screenshots', label: 'Screenshots', done: true }]
       : []),
@@ -135,7 +136,7 @@ export function ModulePage() {
           >
             This module is still locked in the recommended path. You can read ahead, but the quiz
             stays disabled until you complete prior modules — or turn on <strong>Free roam</strong>{' '}
-            in Settings.
+            with this course&apos;s Settings button at the top of the page.
           </div>
         ) : null}
 
@@ -188,9 +189,12 @@ export function ModulePage() {
             steps={mod.buildSteps}
             checked={progress.buildSteps}
             onToggle={onToggleStep}
+            completed={progress.completed}
           />
 
           <WatchOut items={mod.watchOuts} />
+
+          <Tips items={mod.tips ?? []} />
 
           {mod.screenshots.length > 0 ? (
             <section id="screenshots" className="scroll-mt-28 space-y-4">

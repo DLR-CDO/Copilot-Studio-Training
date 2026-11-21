@@ -12,7 +12,7 @@ export interface HouseRule {
 export const houseRules: HouseRule[] = [
   {
     title: 'One agent, built progressively',
-    body: "Every module adds a layer to the same practice agent. By Module 10 you've published something real.",
+    body: "Every module adds a layer to the same practice agent. By Module 9 you've published something real, and in Module 10 you see how it's used.",
   },
   {
     title: 'Environments come first',
@@ -27,12 +27,16 @@ export const houseRules: HouseRule[] = [
     body: 'Evaluation before publishing, every time. A 10-question test set is the minimum bar.',
   },
   {
+    title: 'Practice data only',
+    body: "Never put confidential data into a practice agent. Use made-up or already-public content, and check the agent's sign-in setting before you share a link.",
+  },
+  {
     title: 'Preview means not for production',
     body: 'Preview and experimental features are for exploring. If it has a preview tag, it stays out of anything real.',
   },
   {
     title: 'Ask early, ask often',
-    body: 'Post questions in the shared FAQ. Your question improves the course for the next cohort.',
+    body: 'If a step does not match your screen, ask your course admin. Screens change, and your question helps fix the course for the next group.',
   },
 ]
 
@@ -43,8 +47,8 @@ export interface KeepLearningLink extends LinkItem {
 export const keepLearning: KeepLearningLink[] = [
   {
     url: 'https://aka.ms/agent-academy',
-    label: 'Copilot Studio Agent Academy',
-    note: 'free curated lessons from Microsoft',
+    label: 'Microsoft Copilot Studio Agent Academy',
+    note: 'free lessons from Microsoft, separate from this course',
   },
   {
     url: 'https://aka.ms/nextAgIAD',

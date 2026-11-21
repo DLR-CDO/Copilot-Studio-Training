@@ -30,7 +30,7 @@ export function VerifyPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-xl bg-paper px-5 py-12 text-ink">
-      <p className="font-mono text-xs uppercase tracking-[0.14em] text-teal">Digital University</p>
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-teal">Digital Realty</p>
       <h1 className="mt-1 font-display text-3xl font-bold">Verify a certificate</h1>
 
       <form onSubmit={onSubmit} className="mt-6 flex flex-wrap items-end gap-3">

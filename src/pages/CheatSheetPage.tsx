@@ -51,7 +51,7 @@ export function CheatSheetPage() {
       </div>
 
       <h1 className="hidden font-display text-2xl font-bold print:mb-4 print:block">
-        Agent Academy — Cheat sheet
+        Copilot Studio Fundamentals: cheat sheet
       </h1>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 print:mt-0 print:grid-cols-2 print:gap-3">

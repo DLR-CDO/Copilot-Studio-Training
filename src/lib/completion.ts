@@ -20,7 +20,7 @@ export function certificateTitle(track?: CertificateTrack): string {
   return CERTIFICATES[track ?? 'fundamentals'].title
 }
 
-export const CERTIFICATE_ISSUER = 'Digital University, Digital Realty'
+export const CERTIFICATE_ISSUER = 'Digital Realty'
 export const CERTIFICATE_VALID_MONTHS = 12
 
 export interface CompletionResult {

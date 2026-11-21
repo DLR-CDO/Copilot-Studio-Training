@@ -51,7 +51,7 @@ describe('certificate content', () => {
       title: 'Certificate of Completion',
       learnerName: 'Alice Learner',
       course: 'Copilot Studio Fundamentals: Build Your First Agent',
-      issuedBy: 'Issued by Digital University, Digital Realty',
+      issuedBy: 'Issued by Digital Realty',
       completionDate: 'November 17, 2026',
       expirationDate: 'November 17, 2027',
       finalScore: '96%',

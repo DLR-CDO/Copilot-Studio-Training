@@ -24,7 +24,7 @@ describe('searchModules', () => {
   })
 
   it('finds build sub-step content', () => {
-    const results = searchModules('preferred solution')
+    const results = searchModules('Display name')
     expect(results.some((r) => r.section === 'build' && r.moduleId === 1)).toBe(true)
   })
 
@@ -43,7 +43,17 @@ describe('searchModules', () => {
 
   it('only defines anchors for sections that exist on the module page', () => {
     for (const anchor of Object.values(SEARCH_SECTION_ANCHORS)) {
-      expect(['concept', 'build', 'watch-out', 'try-it']).toContain(anchor)
+      expect(['concept', 'build', 'watch-out', 'tips', 'try-it']).toContain(anchor)
     }
+  })
+
+  it('finds glossary terms, such as DLP', () => {
+    const results = searchModules('DLP')
+    expect(results.some((r) => r.section === 'glossary')).toBe(true)
+  })
+
+  it('finds tips', () => {
+    const results = searchModules('Ask early')
+    expect(results.some((r) => r.section === 'tips' && r.moduleId === 1)).toBe(true)
   })
 })

@@ -6,7 +6,7 @@ export function NotFoundPage() {
       <p className="font-mono text-xs uppercase tracking-[0.14em] text-teal">404</p>
       <h1 className="mt-2 font-display text-3xl font-bold">Page not found</h1>
       <p className="mt-3 text-muted">
-        That route isn&apos;t part of Agent Academy. Head home and pick a module.
+        That page isn&apos;t part of this course. Head home and pick a module.
       </p>
       <Link
         to="/"

@@ -10,7 +10,8 @@ export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const { state, setFreeRoam, setTheme, dismissNotice, syncError } = useLearner()
+  const { state, setFreeRoam, setTheme, dismissNotice, syncError, session } = useLearner()
+  const user = session.mode === 'server' ? session.user : null
 
   useHashHighlight()
 
@@ -117,6 +118,14 @@ export function AppShell() {
                 </span>
               </span>
             </label>
+            {user ? (
+              <p className="mt-4 text-sm text-muted">
+                Signed in as {user.email}.{' '}
+                <a href={user.logoutUrl} className="text-violet underline">
+                  Sign out
+                </a>
+              </p>
+            ) : null}
             <button
               type="button"
               className="mt-6 rounded-pill border border-line px-4 py-2 text-sm hover:border-violet"

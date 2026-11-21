@@ -33,7 +33,8 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
 
   const goToResult = (result: SearchResult) => {
     const anchor = SEARCH_SECTION_ANCHORS[result.section]
-    navigate(`/module/${result.moduleId}${anchor ? `#${anchor}` : ''}`)
+    if (result.section === 'glossary') navigate('/glossary')
+    else navigate(`/module/${result.moduleId}${anchor ? `#${anchor}` : ''}`)
     onClose()
   }
 
@@ -65,7 +66,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
         }}
       >
         <h2 id="search-dialog-title" className="sr-only">
-          Search Agent Academy
+          Search the course
         </h2>
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
           <span aria-hidden="true" className="text-muted">
@@ -111,8 +112,9 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                     }`}
                   >
                     <p className="font-mono text-[10px] uppercase tracking-wide text-teal">
-                      {String(result.moduleId).padStart(2, '0')} · {result.moduleTitle} ·{' '}
-                      {result.sectionLabel}
+                      {result.section === 'glossary'
+                        ? 'Glossary'
+                        : `${String(result.moduleId).padStart(2, '0')} · ${result.moduleTitle} · ${result.sectionLabel}`}
                     </p>
                     <p className="mt-0.5 line-clamp-2 text-sm text-ink">{result.snippet}</p>
                   </button>
