@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { QuizQuestion } from '../../content/types'
 import { PASSING_SCORE } from '../../content/types'
 import {
@@ -25,12 +25,21 @@ interface QuizProps {
 /** Full quiz UI for a module: all questions at once, one submit, immediate feedback, retakes reshuffle. */
 export function Quiz({ questions, locked, bestScore, onResult }: QuizProps) {
   const [attempt, setAttempt] = useState(0)
+  const headingRef = useRef<HTMLHeadingElement>(null)
   const retake = useCallback(() => setAttempt((a) => a + 1), [])
+
+  useEffect(() => {
+    if (attempt > 0) headingRef.current?.focus()
+  }, [attempt])
 
   return (
     <section id="quiz" className="scroll-mt-28 rounded-card border border-line bg-card p-5">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em]">
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-display text-sm font-bold uppercase tracking-[0.06em] outline-none"
+        >
           Knowledge check
         </h2>
         {!locked && questions.length > 0 ? (
@@ -139,6 +148,7 @@ function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
     ],
   )
 
+  const submitHintId = `${shuffled[0]?.id ?? 'quiz'}-submit-hint`
   const score = submitted ? Object.values(results).filter(Boolean).length : 0
   const passed = submitted && score >= PASSING_SCORE
 
@@ -167,19 +177,29 @@ function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
       </div>
 
       {!submitted ? (
-        <button
-          type="submit"
-          disabled={!allAnswered}
-          className={`mt-6 rounded-pill px-5 py-2.5 font-display text-sm font-semibold ${
-            allAnswered
-              ? 'bg-violet text-white hover:opacity-90'
-              : 'cursor-not-allowed bg-line text-muted'
-          }`}
-        >
-          Submit answers
-        </button>
-      ) : (
-        <div className="mt-6 space-y-3" role="status" aria-live="polite">
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            aria-disabled={!allAnswered}
+            aria-describedby={allAnswered ? undefined : submitHintId}
+            className={`rounded-pill px-5 py-2.5 font-display text-sm font-semibold ${
+              allAnswered
+                ? 'bg-violet text-white hover:opacity-90'
+                : 'cursor-not-allowed bg-line text-muted'
+            }`}
+          >
+            Submit answers
+          </button>
+          {!allAnswered ? (
+            <p id={submitHintId} className="text-sm text-muted">
+              Answer all questions to submit.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="mt-6 space-y-3" role="status" aria-live="polite">
+        {submitted ? (
           <Callout variant={passed ? 'why' : 'watch'} title={passed ? 'Passed!' : 'Not quite yet'}>
             <p>
               You scored {score} of {shuffled.length}
@@ -188,15 +208,17 @@ function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
                 : `. You need ${PASSING_SCORE} of ${shuffled.length} to pass — check the explanations below, then retake.`}
             </p>
           </Callout>
-          <button
-            type="button"
-            onClick={onRetake}
-            className="rounded-pill border border-line px-5 py-2.5 font-display text-sm font-semibold hover:border-violet"
-          >
-            Retake quiz
-          </button>
-        </div>
-      )}
+        ) : null}
+      </div>
+      {submitted ? (
+        <button
+          type="button"
+          onClick={onRetake}
+          className="mt-3 rounded-pill border border-line px-5 py-2.5 font-display text-sm font-semibold hover:border-violet"
+        >
+          Retake quiz
+        </button>
+      ) : null}
     </form>
   )
 }
@@ -228,6 +250,11 @@ function QuizQuestionField({
   originalSteps,
   onMoveOrderItem,
 }: QuizQuestionFieldProps) {
+  const [moveMessage, setMoveMessage] = useState('')
+  const move = (from: number, to: number, label: string) => {
+    onMoveOrderItem(from, to)
+    setMoveMessage(`Moved "${label}" to position ${to + 1} of ${orderValue.length}.`)
+  }
   const feedbackClass = !submitted
     ? 'border-line bg-paper'
     : correct
@@ -236,12 +263,15 @@ function QuizQuestionField({
 
   return (
     <fieldset className={`rounded-block border px-4 py-4 ${feedbackClass}`}>
-      <legend className="mb-3 px-1 text-[15px] font-semibold leading-snug">
+      <legend
+        id={`${question.id}-prompt`}
+        className="mb-3 px-1 text-[15px] font-semibold leading-snug"
+      >
         {index + 1}. {question.prompt}
       </legend>
 
       {question.type === 'multiple-choice' ? (
-        <div className="space-y-2">
+        <div className="space-y-2" role="radiogroup" aria-labelledby={`${question.id}-prompt`}>
           {question.options.map((option, i) => {
             const optionId = `${question.id}-opt-${i}`
             const selected = mcValue === i
@@ -257,12 +287,14 @@ function QuizQuestionField({
                   id={optionId}
                   type="radio"
                   name={question.id}
+                  value={String(i)}
+                  aria-labelledby={`${optionId}-text`}
                   className="mt-0.5 size-4 accent-violet"
                   checked={selected}
                   disabled={submitted}
                   onChange={() => onMcChange(i)}
                 />
-                <span>{option}</span>
+                <span id={`${optionId}-text`}>{option}</span>
               </label>
             )
           })}
@@ -270,7 +302,7 @@ function QuizQuestionField({
       ) : null}
 
       {question.type === 'true-false' ? (
-        <div className="flex gap-3">
+        <div className="flex gap-3" role="radiogroup" aria-labelledby={`${question.id}-prompt`}>
           {[true, false].map((value) => {
             const optionId = `${question.id}-${value}`
             const selected = tfValue === value
@@ -286,12 +318,14 @@ function QuizQuestionField({
                   id={optionId}
                   type="radio"
                   name={question.id}
+                  value={String(value)}
+                  aria-labelledby={`${optionId}-text`}
                   className="size-4 accent-violet"
                   checked={selected}
                   disabled={submitted}
                   onChange={() => onTfChange(value)}
                 />
-                {value ? 'True' : 'False'}
+                <span id={`${optionId}-text`}>{value ? 'True' : 'False'}</span>
               </label>
             )
           })}
@@ -315,7 +349,7 @@ function QuizQuestionField({
                   <button
                     type="button"
                     disabled={submitted || position === 0}
-                    onClick={() => onMoveOrderItem(position, position - 1)}
+                    onClick={() => move(position, position - 1, label)}
                     aria-label={`Move "${label}" up`}
                     className="rounded-inner border border-line px-2 py-1 text-xs hover:border-violet disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -324,7 +358,7 @@ function QuizQuestionField({
                   <button
                     type="button"
                     disabled={submitted || position === orderValue.length - 1}
-                    onClick={() => onMoveOrderItem(position, position + 1)}
+                    onClick={() => move(position, position + 1, label)}
                     aria-label={`Move "${label}" down`}
                     className="rounded-inner border border-line px-2 py-1 text-xs hover:border-violet disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -336,12 +370,23 @@ function QuizQuestionField({
           })}
         </ol>
       ) : null}
-
-      {submitted ? (
-        <p className={`mt-3 text-sm ${correct ? 'text-teal' : 'text-red'}`}>
-          <strong>{correct ? 'Correct.' : 'Not quite.'}</strong> {question.explanation}
+      {question.type === 'order' ? (
+        <p className="sr-only" aria-live="polite">
+          {moveMessage}
         </p>
       ) : null}
+
+      <div aria-live="polite">
+        {submitted ? (
+          <p className={`mt-3 text-sm ${correct ? 'text-teal' : 'text-red'}`}>
+            <strong>
+              <span aria-hidden="true">{correct ? '✓ ' : '✗ '}</span>
+              {correct ? 'Correct.' : 'Not quite.'}
+            </strong>{' '}
+            {question.explanation}
+          </p>
+        ) : null}
+      </div>
     </fieldset>
   )
 }

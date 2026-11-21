@@ -31,8 +31,9 @@ describe('VerifyPage', () => {
       jsonResponse(200, {
         id: 'DR-CSA-7K2M-Q9XD-4HTB',
         name: 'Alice Learner',
-        course: 'Copilot Studio Advanced',
+        course: 'Copilot Studio Fundamentals: Build Your First Agent',
         completedAt: '2026-11-17T15:00:00.000Z',
+        expiresAt: '2027-11-17T15:00:00.000Z',
         status: 'valid',
         email: 'alice@example.com',
         scorePercent: 96,
@@ -41,8 +42,11 @@ describe('VerifyPage', () => {
     renderAt('/verify?id=DR-CSA-7K2M-Q9XD-4HTB')
 
     expect(await screen.findByText('Alice Learner')).toBeInTheDocument()
-    expect(screen.getByText('Copilot Studio Advanced')).toBeInTheDocument()
+    expect(
+      screen.getByText('Copilot Studio Fundamentals: Build Your First Agent'),
+    ).toBeInTheDocument()
     expect(screen.getByText('November 17, 2026')).toBeInTheDocument()
+    expect(screen.getByText('November 17, 2027')).toBeInTheDocument()
     expect(screen.getByText('Valid')).toBeInTheDocument()
     // Even if the API sent more, the page shows nothing else about the learner.
     expect(document.body.textContent).not.toContain('alice@example.com')
@@ -57,8 +61,9 @@ describe('VerifyPage', () => {
     mockApi(() =>
       jsonResponse(200, {
         name: 'Alice Learner',
-        course: 'Copilot Studio Advanced',
+        course: 'Copilot Studio Fundamentals: Build Your First Agent',
         completedAt: '2025-01-02T00:00:00.000Z',
+        expiresAt: '2026-01-02T00:00:00.000Z',
         status: 'expired',
       }),
     )

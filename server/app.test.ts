@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { createServer, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
@@ -94,5 +94,19 @@ describe('Azure Functions adapter', () => {
     expect(req.query.get('x')).toBe('1')
     expect(req.headers['x-ms-client-principal']).toBe('abc')
     expect(req.headers['content-type']).toBe('application/json')
+  })
+})
+
+describe('staticwebapp.config.json', () => {
+  it('limits admin routes to the admin role before the broader rules match', () => {
+    const config = JSON.parse(
+      readFileSync(join(process.cwd(), 'public/staticwebapp.config.json'), 'utf8'),
+    ) as { routes: { route: string; allowedRoles?: string[] }[] }
+    const index = (route: string) => config.routes.findIndex((r) => r.route === route)
+    for (const route of ['/admin', '/admin/*', '/api/admin/*']) {
+      expect(config.routes[index(route)]?.allowedRoles).toEqual(['admin'])
+      expect(index(route)).toBeLessThan(index('/api/*'))
+      expect(index(route)).toBeLessThan(index('/*'))
+    }
   })
 })

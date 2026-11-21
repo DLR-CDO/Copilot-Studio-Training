@@ -3,6 +3,7 @@ import { quizzesByModule } from '../src/content/quizzes'
 import { handleApi, type ApiDeps, type ApiRequest } from './api'
 import { loadConfig } from './config'
 import { LearnerService } from './learnerService'
+import { RateLimiter } from './rateLimit'
 import { TableStore } from './tableStore'
 
 /** Subset of the Azure Functions (Node programming model v3) HTTP trigger shapes we use. */
@@ -17,6 +18,8 @@ export interface FunctionsContext {
   res?: { status: number; headers: Record<string, string>; body?: Buffer | string; isRaw?: boolean }
 }
 
+const VERIFY_LOOKUPS_PER_MINUTE = 30
+
 const logo = Buffer.from(logoDataUrl.slice(logoDataUrl.indexOf(',') + 1), 'base64')
 
 let depsPromise: Promise<ApiDeps> | undefined
@@ -27,7 +30,13 @@ function getDeps(): Promise<ApiDeps> {
     const config = loadConfig(process.env)
     const store = await TableStore.connect(config.storageConnectionString!)
     const service = new LearnerService(store, quizzesByModule)
-    return { config, store, service, loadLogo: async () => logo }
+    return {
+      config,
+      store,
+      service,
+      loadLogo: async () => logo,
+      verifyLimiter: new RateLimiter(VERIFY_LOOKUPS_PER_MINUTE, 60_000),
+    }
   })().catch((err: unknown) => {
     depsPromise = undefined
     throw err

@@ -1,3 +1,5 @@
+import type { CertificateTrack } from '../src/lib/completion'
+
 export interface LearnerRecord {
   email: string
   /** Typed by the learner for their certificate; empty until entered. */
@@ -23,7 +25,10 @@ export interface CertificateRecord {
   id: string
   name: string
   email: string
+  /** Title at the time of issue, for the record. Pages show the current title for `track`. */
   course: string
+  /** Missing on certificates issued before tracks existed, which are Fundamentals. */
+  track?: CertificateTrack
   completedAt: string
   expiresAt: string
   scorePercent: number

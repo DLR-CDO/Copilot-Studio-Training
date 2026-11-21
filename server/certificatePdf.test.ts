@@ -10,12 +10,14 @@ import {
   renderCertificatePdf,
   verifyUrlFor,
 } from './certificatePdf'
+import { CERT_TITLE } from '../src/lib/completion'
 import type { CertificateRecord } from './store'
 
 const cert: CertificateRecord = {
   id: 'DR-CSA-7K2M-Q9XD-4HTB',
   name: 'Alice Learner',
   email: 'alice@example.com',
+  // Issued before tracks existed, under the course's former title.
   course: 'Copilot Studio Advanced',
   completedAt: '2026-11-17T15:00:00.000Z',
   expiresAt: '2027-11-17T15:00:00.000Z',
@@ -38,12 +40,17 @@ async function imageCount(bytes: Uint8Array): Promise<number> {
 }
 
 describe('certificate content', () => {
+  it('shows the current title for certificates stored with the former title', () => {
+    expect(certificateContent(cert, 'https://x.test').course).toBe(CERT_TITLE)
+    expect(CERT_TITLE).not.toMatch(/advanced/i)
+  })
+
   it('has every required field, with the name and dates from the stored record', () => {
     const url = verifyUrlFor('https://copilotstudio-academy.azurewebsites.net/', cert.id)
     expect(certificateContent(cert, url)).toEqual({
       title: 'Certificate of Completion',
       learnerName: 'Alice Learner',
-      course: 'Copilot Studio Advanced',
+      course: 'Copilot Studio Fundamentals: Build Your First Agent',
       issuedBy: 'Issued by Digital University, Digital Realty',
       completionDate: 'November 17, 2026',
       expirationDate: 'November 17, 2027',

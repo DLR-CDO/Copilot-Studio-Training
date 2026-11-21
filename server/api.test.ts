@@ -1,9 +1,11 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it } from 'vitest'
 import { quizzesByModule } from '../src/content/quizzes'
+import { CERT_TITLE } from '../src/lib/completion'
 import { handleApi, type ApiDeps, type ApiResponse } from './api'
 import type { ServerConfig } from './config'
 import { LearnerService } from './learnerService'
+import { RateLimiter } from './rateLimit'
 import { MemoryStore, type CertificateRecord } from './store'
 import { answersFor } from './testing'
 
@@ -45,7 +47,7 @@ function principal(email: string, provider = 'aad', roles = ['anonymous', 'authe
 }
 const alice = principal('alice@example.com')
 const bob = principal('bob@example.com')
-const admin = principal('admin@example.com')
+const admin = principal('admin@example.com', 'aad', ['anonymous', 'authenticated', 'admin'])
 
 function call(method: string, pathAndQuery: string, headers: Headers = {}, body = '') {
   const url = new URL(pathAndQuery, 'http://localhost')
@@ -83,7 +85,7 @@ function certificate(overrides: Partial<CertificateRecord> = {}): CertificateRec
 }
 
 describe('/api/verify (public)', () => {
-  it('needs no sign-in and returns only name, course, completion date, and status', async () => {
+  it('needs no sign-in and returns only name, title, dates, and status', async () => {
     await store.saveCertificate(certificate())
     const res = await get('/api/verify?id=dr-csa-7k2m-q9xd-4htb')
 
@@ -91,10 +93,12 @@ describe('/api/verify (public)', () => {
     expect(parse(res)).toEqual({
       id: 'DR-CSA-7K2M-Q9XD-4HTB',
       name: 'Alice Learner',
-      course: 'Copilot Studio Advanced',
+      course: CERT_TITLE,
       completedAt: '2026-11-17T15:00:00.000Z',
+      expiresAt: '2027-11-17T15:00:00.000Z',
       status: 'valid',
     })
+    expect(String(res.body)).not.toMatch(/advanced/i)
     expect(String(res.body)).not.toContain('alice@example.com')
     expect(String(res.body)).not.toContain('96')
   })
@@ -105,8 +109,26 @@ describe('/api/verify (public)', () => {
     expect(parse(await get('/api/verify?id=DR-CSA-7K2M-Q9XD-4HTB')).status).toBe('expired')
   })
 
+  it('limits lookups per caller', async () => {
+    deps.verifyLimiter = new RateLimiter(2, 60_000)
+    const from = (ip: string) =>
+      call('GET', '/api/verify?id=DR-CSF-0000-0000-0000', {
+        'x-forwarded-for': ip,
+      })
+    expect((await from('203.0.113.5')).status).toBe(404)
+    expect((await from('203.0.113.5')).status).toBe(404)
+    expect((await from('203.0.113.5')).status).toBe(429)
+    expect((await from('198.51.100.7')).status).toBe(404)
+    clock.now = new Date(clock.now.getTime() + 60_000)
+    expect((await from('203.0.113.5')).status).toBe(404)
+  })
+
   it('returns 404 for unknown IDs and 400 for malformed ones', async () => {
     expect((await get('/api/verify?id=DR-CSA-0000-0000-0000')).status).toBe(404)
+    expect((await get('/api/verify?id=DR-CSF-0000-0000-0000')).status).toBe(404)
+    // A tampered prefix or character outside the ID alphabet is rejected outright.
+    expect((await get('/api/verify?id=DR-XXX-7K2M-Q9XD-4HTB')).status).toBe(400)
+    expect((await get('/api/verify?id=DR-CSF-7K2M-Q9XD-4HTU')).status).toBe(400)
     expect((await get('/api/verify?id=%3Cscript%3E')).status).toBe(400)
     expect((await get('/api/verify')).status).toBe(400)
   })
@@ -220,9 +242,18 @@ describe('learner data', () => {
 })
 
 describe('/api/admin/completions.csv', () => {
-  it('is limited to the admin allowlist', async () => {
+  it('needs both the admin allowlist and the Static Web Apps admin role', async () => {
     expect((await get('/api/admin/completions.csv', alice)).status).toBe(403)
     expect((await get('/api/admin/completions.csv', admin)).status).toBe(200)
+    // On the allowlist but without the role, e.g. before accepting the role invitation.
+    expect((await get('/api/admin/completions.csv', principal('admin@example.com'))).status).toBe(
+      403,
+    )
+    // Holding the role but not on the allowlist.
+    const roleOnly = principal('alice@example.com', 'aad', ['authenticated', 'admin'])
+    expect((await get('/api/admin/completions.csv', roleOnly)).status).toBe(403)
+    expect(parse(await get('/api/me', roleOnly)).isAdmin).toBe(false)
+    expect(parse(await get('/api/me', admin)).isAdmin).toBe(true)
   })
 
   it('exports every completion as CSV with formula injection neutralized', async () => {

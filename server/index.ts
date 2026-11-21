@@ -6,6 +6,7 @@ import { quizzesByModule } from '../src/content/quizzes'
 import { createRequestHandler } from './app'
 import { loadConfig } from './config'
 import { LearnerService } from './learnerService'
+import { RateLimiter } from './rateLimit'
 import { log } from './log'
 import { MemoryStore, type Store } from './store'
 import { TableStore } from './tableStore'
@@ -34,10 +35,16 @@ async function main(): Promise<void> {
   const logoPath = join(staticDir, 'assets', 'digital-realty-logo.png')
   const loadLogo = () => readFile(logoPath).catch(() => null)
   const service = new LearnerService(store, quizzesByModule)
-  createServer(createRequestHandler({ config, service, store, loadLogo, staticDir })).listen(
-    port,
-    () => log.info('Local server listening', { port }),
-  )
+  createServer(
+    createRequestHandler({
+      config,
+      service,
+      store,
+      loadLogo,
+      staticDir,
+      verifyLimiter: new RateLimiter(30, 60_000),
+    }),
+  ).listen(port, () => log.info('Local server listening', { port }))
 }
 
 main().catch((err: unknown) => {

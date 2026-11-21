@@ -1,6 +1,24 @@
 import { MODULE_COUNT, PASSING_PERCENT } from '../content/types'
 
-export const COURSE_NAME = 'Copilot Studio Advanced'
+export type CertificateTrack = 'fundamentals' | 'practitioner'
+
+/** Title and ID prefix per certificate. Change titles here only; every surface reads them. */
+export const CERTIFICATES: Record<CertificateTrack, { title: string; idPrefix: string }> = {
+  fundamentals: {
+    title: 'Copilot Studio Fundamentals: Build Your First Agent',
+    idPrefix: 'DR-CSF',
+  },
+  practitioner: { title: 'Copilot Studio Practitioner', idPrefix: 'DR-CSP' },
+}
+
+/** The certificate this course currently issues (Modules 1–10). */
+export const CERT_TITLE = CERTIFICATES.fundamentals.title
+
+/** Certificates issued before tracks existed have no track and are Fundamentals. */
+export function certificateTitle(track?: CertificateTrack): string {
+  return CERTIFICATES[track ?? 'fundamentals'].title
+}
+
 export const CERTIFICATE_ISSUER = 'Digital University, Digital Realty'
 export const CERTIFICATE_VALID_MONTHS = 12
 

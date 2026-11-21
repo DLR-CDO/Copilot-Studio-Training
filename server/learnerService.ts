@@ -2,7 +2,8 @@ import { randomBytes } from 'node:crypto'
 import type { LearnerState, QuizQuestion } from '../src/content/types'
 import { MODULE_COUNT } from '../src/content/types'
 import {
-  COURSE_NAME,
+  CERTIFICATES,
+  CERT_TITLE,
   certificateExpiration,
   evaluateCompletion,
   isExpired,
@@ -20,8 +21,9 @@ const MAX_SAVE_ATTEMPTS = 3
 
 // Crockford base32: no I, L, O, or U, so IDs are easy to read aloud and type.
 const ID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
+/** CSF = Fundamentals, CSP = Practitioner. CSA (the course's former title) stays verifiable. */
 export const CERTIFICATE_ID_PATTERN =
-  /^DR-CSA-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}$/
+  /^DR-CS[AFP]-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}$/
 
 export class ValidationError extends Error {
   readonly status: number
@@ -47,11 +49,14 @@ export interface QuizOutcome extends ProgressSnapshot {
   passed: boolean
 }
 
-/** 60 random bits, e.g. DR-CSA-7K2M-Q9XD-4HTB. */
-export function newCertificateId(random: (size: number) => Uint8Array = randomBytes): string {
+/** 60 random bits, e.g. DR-CSF-7K2M-Q9XD-4HTB. */
+export function newCertificateId(
+  random: (size: number) => Uint8Array = randomBytes,
+  prefix = CERTIFICATES.fundamentals.idPrefix,
+): string {
   // 256 is a multiple of 32, so `byte % 32` is unbiased.
   const chars = Array.from(random(12), (b) => ID_ALPHABET[b % 32]).join('')
-  return `DR-CSA-${chars.slice(0, 4)}-${chars.slice(4, 8)}-${chars.slice(8, 12)}`
+  return `${prefix}-${chars.slice(0, 4)}-${chars.slice(4, 8)}-${chars.slice(8, 12)}`
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -104,6 +109,7 @@ export class LearnerService {
       theme: state.theme,
       themeChosen: state.themeChosen,
       modules: state.modules,
+      ...(state.cheatSheet ? { cheatSheet: state.cheatSheet } : {}),
     })
     if (uiState.length > MAX_UI_STATE_CHARS) {
       throw new ValidationError('Notes are too long to save. Shorten them and try again.', 413)
@@ -251,7 +257,8 @@ function issueIfDue(
     id: newCertificateId(),
     name: record.name,
     email: record.email,
-    course: COURSE_NAME,
+    course: CERT_TITLE,
+    track: 'fundamentals',
     completedAt,
     expiresAt: certificateExpiration(now).toISOString(),
     scorePercent: completion.finalPercent,
@@ -271,7 +278,8 @@ function certificateFromLearner(record: LearnerRecord): CertificateRecord | null
     id: record.certificateId,
     name: record.name,
     email: record.email,
-    course: COURSE_NAME,
+    course: CERT_TITLE,
+    track: 'fundamentals',
     completedAt: record.completedAt,
     expiresAt: record.certificateExpiresAt,
     scorePercent: record.finalPercent ?? 0,

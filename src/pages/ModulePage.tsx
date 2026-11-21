@@ -13,7 +13,8 @@ import { ModuleDiagram } from '../components/diagrams'
 import { ConceptSection } from '../components/module/ConceptSection'
 import { BuildStepper } from '../components/module/BuildStepper'
 import { WatchOut } from '../components/module/WatchOut'
-import { ScreenshotSlotCard } from '../components/module/ScreenshotSlot'
+import { ScreenshotFigure } from '../components/module/ScreenshotFigure'
+import { HarnessBanner, HarnessTag } from '../components/module/Harness'
 import { TryIt } from '../components/module/TryIt'
 import { GoDeeper } from '../components/module/GoDeeper'
 import { ModuleFooterNav } from '../components/module/ModuleFooterNav'
@@ -114,7 +115,9 @@ export function ModulePage() {
       done: stepIds.every((sid) => progress.buildSteps[sid]),
     },
     { id: 'watch-out', label: 'Watch out', done: true },
-    { id: 'screenshots', label: 'Screenshots', done: true },
+    ...(mod.screenshots.length > 0
+      ? [{ id: 'screenshots', label: 'Screenshots', done: true }]
+      : []),
     { id: 'try-it', label: 'Try it', done: progress.tryItDone },
     {
       id: 'quiz',
@@ -139,6 +142,8 @@ export function ModulePage() {
           </div>
         ) : null}
 
+        {mod.harness === 'standard' ? <HarnessBanner className="mb-4" /> : null}
+
         <header className="rounded-card border border-line bg-card p-6 sm:p-8">
           <div className="flex flex-wrap items-baseline gap-4">
             <span className="font-display text-4xl font-extrabold text-violet">
@@ -148,6 +153,7 @@ export function ModulePage() {
             <span className="rounded-pill border border-line px-3 py-1 font-mono text-xs capitalize text-muted">
               {status}
             </span>
+            <HarnessTag harness={mod.harness} />
           </div>
           <div className="mt-4">
             <Callout variant="why">
@@ -186,14 +192,16 @@ export function ModulePage() {
 
           <WatchOut items={mod.watchOuts} />
 
-          <section id="screenshots" className="scroll-mt-28 space-y-4">
-            <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em]">
-              Screenshots
-            </h2>
-            {mod.screenshotSlots.map((slot, i) => (
-              <ScreenshotSlotCard key={slot.id} moduleId={moduleId} slot={slot} index={i} />
-            ))}
-          </section>
+          {mod.screenshots.length > 0 ? (
+            <section id="screenshots" className="scroll-mt-28 space-y-4">
+              <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em]">
+                Screenshots
+              </h2>
+              {mod.screenshots.map((shot) => (
+                <ScreenshotFigure key={shot.id} shot={shot} />
+              ))}
+            </section>
+          ) : null}
 
           <TryIt text={mod.tryIt} done={progress.tryItDone} onToggle={onToggleTryIt} />
 

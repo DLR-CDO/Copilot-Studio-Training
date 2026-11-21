@@ -1,5 +1,31 @@
 import { getModuleById } from '../content/modules'
 import { houseRules } from '../content/links'
+import { useLearner } from '../lib/useLearner'
+
+/** Ticks are saved with the learner's progress, so they follow them across devices. */
+function CheckList({ section, items }: { section: string; items: string[] }) {
+  const { state, setCheatSheetCheck } = useLearner()
+  return (
+    <ul className="mt-3 space-y-2 text-sm print:space-y-1 print:text-[11px]">
+      {items.map((item) => {
+        const key = `${section}:${item}`
+        const id = `cheat-${section}-${items.indexOf(item)}`
+        return (
+          <li key={item} className="flex items-start gap-2">
+            <input
+              id={id}
+              type="checkbox"
+              checked={state.cheatSheet?.[key] === true}
+              onChange={(e) => setCheatSheetCheck(key, e.target.checked)}
+              className="mt-0.5 size-3.5 shrink-0 accent-violet"
+            />
+            <label htmlFor={id}>{item}</label>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
 
 export function CheatSheetPage() {
   const devTestProd = getModuleById(2)
@@ -62,17 +88,7 @@ export function CheatSheetPage() {
             <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em] text-sun">
               Pre-publish checklist
             </h2>
-            <ul className="mt-3 space-y-2 text-sm print:space-y-1 print:text-[11px]">
-              {prePublish.checklist.map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <span
-                    className="mt-0.5 size-3.5 shrink-0 rounded border border-ink print:border-black"
-                    aria-hidden="true"
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <CheckList section="prePublish" items={prePublish.checklist} />
           </section>
         ) : null}
 
@@ -81,17 +97,7 @@ export function CheatSheetPage() {
             <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em] text-violet">
               Weekly review ritual
             </h2>
-            <ul className="mt-3 space-y-2 text-sm print:space-y-1 print:text-[11px]">
-              {weeklyReview.checklist.map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <span
-                    className="mt-0.5 size-3.5 shrink-0 rounded border border-ink print:border-black"
-                    aria-hidden="true"
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <CheckList section="weeklyReview" items={weeklyReview.checklist} />
           </section>
         ) : null}
       </div>

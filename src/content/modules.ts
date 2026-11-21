@@ -13,7 +13,8 @@ import type {
   InlineToken,
   LinkItem,
   Module,
-  ScreenshotSlot,
+  Screenshot,
+  ScreenshotRequest,
 } from './types'
 import { getQuizForModule } from './quizzes'
 
@@ -79,167 +80,148 @@ export const courseMeta: CourseMeta = {
 }
 
 // ---------------------------------------------------------------------------
-// Module 1 — What is an agent?
+// Screenshots. `authorNotes` and `screenshotsToCapture` are for course authors and are never
+// rendered. A screenshot is only listed once its image exists under public/.
 // ---------------------------------------------------------------------------
 
-const m1ScreenshotSlots: ScreenshotSlot[] = [
+const m1Screenshots: Screenshot[] = [
   {
     id: 'm1-shot-1',
+    src: 'screenshots/1-1.png',
+    alt: 'Copilot Studio Overview page for an agent, with the instructions box in the middle and the test pane on the right.',
     caption:
       'AI Enablement Assistant Overview in CDO - DEV, with instructions visible and the test pane open on the right.',
-    annotation: 'Annotate: 1) left navigation, 2) instructions box, 3) test pane',
+    authorNotes: 'Annotate: 1) left navigation, 2) instructions box, 3) test pane',
+    capturedAt: '2026-08-04',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 2 — Pick the right environment
-// ---------------------------------------------------------------------------
-
-const m2ScreenshotSlots: ScreenshotSlot[] = [
+const m2Screenshots: Screenshot[] = [
   {
     id: 'm2-shot-1',
+    src: 'images/02-environment-picker.png',
+    alt: 'The Switch environment menu open over the Copilot Studio home page, listing the current environment and other environments.',
     caption: 'Switch environment menu, opened from the globe icon at the bottom left.',
-    annotation: 'Annotate: circle the current environment name, add "always check this first"',
-    image: 'images/02-environment-picker.png',
+    authorNotes: 'Annotate: circle the current environment name, add "always check this first"',
+    capturedAt: '2026-11-16',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 3 — Add knowledge
-// ---------------------------------------------------------------------------
-
-const m3ScreenshotSlots: ScreenshotSlot[] = [
+const m3Screenshots: Screenshot[] = [
   {
     id: 'm3-shot-1',
+    src: 'screenshots/3-1.png',
+    alt: 'The Add knowledge dialog with a file upload area and tiles for featured sources such as Public websites, SharePoint and Dataverse.',
     caption:
       'The Add knowledge dialog for AI Enablement Assistant (CDO - DEV), showing upload, SharePoint, and featured source options.',
-    annotation: 'Annotate: highlight SharePoint / file upload as the everyday starting sources',
+    authorNotes: 'Annotate: highlight SharePoint / file upload as the everyday starting sources',
+    capturedAt: '2026-08-04',
   },
   {
     id: 'm3-shot-2',
+    src: 'images/03-test-pane-sources.png',
+    alt: 'A test pane answer with its reference expanded, and a callout pointing to the cited source document.',
     caption: 'Always check the source the agent cites.',
-    annotation: 'Annotate: arrow to the citation with "always check the source"',
-    image: 'images/03-test-pane-sources.png',
+    authorNotes: 'Annotate: arrow to the citation with "always check the source"',
+    capturedAt: '2026-11-16',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 4 — Build topics
-// ---------------------------------------------------------------------------
-
-const m4ScreenshotSlots: ScreenshotSlot[] = [
+const m4Screenshots: Screenshot[] = [
   {
     id: 'm4-shot-1',
+    src: 'screenshots/4-1.png',
+    alt: 'The Topics list with All, Custom and System filters, showing each topic’s type, trigger and Enabled toggle.',
     caption:
       'The Topics list for AI Enablement Assistant showing custom topics (Greeting, Goodbye) and system topics.',
-    annotation: 'Annotate: Custom vs System filters, and the Enabled toggles',
+    authorNotes: 'Annotate: Custom vs System filters, and the Enabled toggles',
+    capturedAt: '2026-08-04',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 5 — Add tools
-// ---------------------------------------------------------------------------
-
-const m5ScreenshotSlots: ScreenshotSlot[] = [
+const m5Screenshots: Screenshot[] = [
   {
     id: 'm5-shot-1',
+    src: 'images/05-connector.png',
+    alt: 'A connector tool’s Details page with the Description field highlighted and labelled “this is how the agent decides”.',
     caption:
       'A connector tool’s Details page. The Description field is how the agent decides when to use it.',
-    annotation: 'Annotate: highlight the description field, "this is how the agent decides"',
-    image: 'images/05-connector.png',
+    authorNotes: 'Annotate: highlight the description field, "this is how the agent decides"',
+    capturedAt: '2026-11-16',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 6 — Work with multiple agents
-// ---------------------------------------------------------------------------
-
-const m6ScreenshotSlots: ScreenshotSlot[] = [
+const m6Screenshots: Screenshot[] = [
   {
     id: 'm6-shot-1',
+    src: 'images/06-child-agent.png',
+    alt: 'A child agent’s Details page showing the error “Missing required property Description” under an empty Description field.',
     caption: 'Child agent Details: the description is required before the agent can be saved.',
-    annotation:
+    authorNotes:
       'Annotate: the missing Description error — routing depends on a crisp one-line job description',
-    image: 'images/06-child-agent.png',
+    capturedAt: '2026-11-16',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 7 — Settings, orchestration & models
-// ---------------------------------------------------------------------------
-
-const m7ScreenshotSlots: ScreenshotSlot[] = [
+const m7Screenshots: Screenshot[] = [
   {
     id: 'm7-shot-1',
+    src: 'images/07-model-dropdown-1.png',
+    alt: 'The agent Overview page with the “Select your agent’s model” dropdown below the description.',
     caption: 'The model dropdown on the Overview page, under "Select your agent’s model".',
-    annotation: "Annotate: model choice sits next to instructions — this is the agent's brain",
-    image: 'images/07-model-dropdown-1.png',
+    authorNotes: "Annotate: model choice sits next to instructions — this is the agent's brain",
+    capturedAt: '2026-11-16',
   },
   {
     id: 'm7-shot-2',
+    src: 'images/07-model-dropdown-2.png',
+    alt: 'The model dropdown open, listing models with Preview and Experimental tags circled and labelled “not for production”.',
     caption: 'The model dropdown open. Preview and Experimental tags mean not for production.',
-    annotation: 'Annotate: circle Preview / Experimental tags — not for production',
-    image: 'images/07-model-dropdown-2.png',
+    authorNotes: 'Annotate: circle Preview / Experimental tags — not for production',
+    capturedAt: '2026-11-16',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 8 — Test, activity & evaluation
-// ---------------------------------------------------------------------------
-
-const m8ScreenshotSlots: ScreenshotSlot[] = [
+const m8ScreenshotsToCapture: ScreenshotRequest[] = [
   {
     id: 'm8-shot-1',
     caption:
       'The activity map for a test conversation, showing which knowledge, tools, and topics the agent used for one answer.',
-    annotation:
+    authorNotes:
       'Capture: open the Activity tab for a test conversation and expand one answer. Annotate: label each step the agent took, and circle the knowledge source it picked.',
-    placeholder: true,
   },
   {
     id: 'm8-shot-2',
     caption:
       'The results of an evaluation run on the Evaluation page, with pass and fail results for each test question.',
-    annotation:
+    authorNotes:
       'Capture: the finished run with at least one failed question visible. Annotate: point to a failed case with "this is gold, it tells you what to fix".',
-    placeholder: true,
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 9 — Monitor & improve
-// ---------------------------------------------------------------------------
-
-const m9ScreenshotSlots: ScreenshotSlot[] = [
+const m9ScreenshotsToCapture: ScreenshotRequest[] = [
   {
     id: 'm9-shot-1',
     caption:
       'The Analytics page of a published agent, showing sessions, engagement, resolution, and escalation.',
-    annotation:
+    authorNotes:
       'Capture: the Analytics summary for the last 7 days of a published agent. Annotate: circle the resolution rate and the escalation rate.',
-    placeholder: true,
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Module 10 — Channels & publishing
-// ---------------------------------------------------------------------------
-
-const m10ScreenshotSlots: ScreenshotSlot[] = [
+const m10ScreenshotsToCapture: ScreenshotRequest[] = [
   {
     id: 'm10-shot-1',
     caption:
       'The Channels page after publishing, showing the Demo website tile alongside Teams and Microsoft 365 and the other channel tiles.',
-    annotation:
-      'Capture: the full Channels page of your published practice agent. Annotate: circle the Demo website tile with "start here for stakeholder review".',
-    placeholder: true,
+    authorNotes:
+      'Capture: the full Channels page of your published practice agent. Annotate: circle the Demo website tile with "start here for stakeholder review". public/screenshots/10-1.png exists but shows a colleague’s name in “Published by”; recapture or blur before use.',
   },
   {
     id: 'm10-shot-2',
     caption: 'The demo website open in a browser, with the agent answering a test question.',
-    annotation:
+    authorNotes:
       'Capture: the demo website after you ask one question. Annotate: point to the browser address bar with "share this demo link for feedback before going live".',
-    placeholder: true,
   },
 ]
 
@@ -249,6 +231,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 1,
+    harness: 'standard',
     slug: 'what-is-an-agent',
     title: 'What is an agent?',
     whyItMatters:
@@ -448,7 +431,7 @@ export const modules: Module[] = [
       'Licensing and Copilot Credits are awareness level only for now — nothing to configure yet.',
       'Ask early, ask often — post questions in the shared FAQ so your question improves the course for the next cohort.',
     ],
-    screenshotSlots: m1ScreenshotSlots,
+    screenshots: m1Screenshots,
     tryIt:
       "Create your first agent in the DEV environment, inside a new solution. Add a description, instructions, and knowledge, then ask it three questions in the test pane. That's it, you've built an agent.",
     goDeeper: goDeeper([
@@ -484,6 +467,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 2,
+    harness: 'standard',
     slug: 'pick-the-right-environment',
     title: 'Pick the right environment',
     whyItMatters:
@@ -556,7 +540,7 @@ export const modules: Module[] = [
       'Why you never build directly in Production — work flows one direction: Dev → Test → Production.',
       "Environments come first — always confirm you're in Dev before touching anything. It's the check that prevents the most painful mistakes.",
     ],
-    screenshotSlots: m2ScreenshotSlots,
+    screenshots: m2Screenshots,
     tryIt:
       "Click the globe icon in the bottom left corner, above your name. Say out loud which environment you're in, and switch to DEV if you're not already there.",
     goDeeper: goDeeper([
@@ -587,6 +571,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 3,
+    harness: 'standard',
     slug: 'add-knowledge',
     title: 'Add knowledge',
     whyItMatters:
@@ -685,7 +670,7 @@ export const modules: Module[] = [
       'Always check the source — verify a citation actually backs up the answer before you trust it.',
       'Descriptions are a skill — the agent routes by reading your description of each knowledge source, so write it like you mean it.',
     ],
-    screenshotSlots: m3ScreenshotSlots,
+    screenshots: m3Screenshots,
     tryIt:
       'Add one SharePoint site or file to your practice agent. Ask five questions and verify the citations point where you expect.',
     goDeeper: goDeeper([
@@ -725,6 +710,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 4,
+    harness: 'standard',
     slug: 'build-topics',
     title: 'Build topics',
     whyItMatters:
@@ -877,7 +863,7 @@ export const modules: Module[] = [
     watchOuts: [
       'Descriptions are a skill — write trigger phrases and topic descriptions like you mean it, since the agent routes by reading them.',
     ],
-    screenshotSlots: m4ScreenshotSlots,
+    screenshots: m4Screenshots,
     tryIt:
       'Build one topic with a question and a two-way branch, for example: answer FAQs from knowledge, or offer to escalate.',
     goDeeper: goDeeper([
@@ -912,6 +898,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 5,
+    harness: 'standard',
     slug: 'add-tools',
     title: 'Add tools',
     whyItMatters:
@@ -1015,7 +1002,7 @@ export const modules: Module[] = [
     watchOuts: [
       "The tool's description decides whether the agent picks it at the right moment — a vague description means a missed tool.",
     ],
-    screenshotSlots: m5ScreenshotSlots,
+    screenshots: m5Screenshots,
     tryIt: 'Add one connector-based tool to your practice agent and trigger it from the test pane.',
     goDeeper: goDeeper([
       {
@@ -1053,6 +1040,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 6,
+    harness: 'standard',
     slug: 'work-with-multiple-agents',
     title: 'Work with multiple agents',
     whyItMatters:
@@ -1185,7 +1173,7 @@ export const modules: Module[] = [
     watchOuts: [
       'Write descriptions so the parent always routes to the right specialist — a vague description means the wrong child agent answers.',
     ],
-    screenshotSlots: m6ScreenshotSlots,
+    screenshots: m6Screenshots,
     tryIt:
       'Add one child agent with a narrow job and a crisp description. Ask a question that should route to it and watch what happens.',
     goDeeper: goDeeper([
@@ -1220,6 +1208,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 7,
+    harness: 'standard',
     slug: 'settings-orchestration-and-models',
     title: 'Settings, orchestration & models',
     whyItMatters:
@@ -1302,7 +1291,7 @@ export const modules: Module[] = [
       'Preview means not for production — preview and experimental model tags are fine to explore, but stay out of anything real.',
       'Your admin controls whether preview models appear at all — do not assume they are available everywhere.',
     ],
-    screenshotSlots: m7ScreenshotSlots,
+    screenshots: m7Screenshots,
     tryIt:
       "Open Settings on your practice agent. Write down (don't change) the current orchestration mode and model. That's your production-safe baseline.",
     goDeeper: goDeeper([
@@ -1342,6 +1331,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 8,
+    harness: 'standard',
     slug: 'test-activity-and-evaluation',
     title: 'Test, activity & evaluation',
     whyItMatters:
@@ -1445,7 +1435,8 @@ export const modules: Module[] = [
     watchOuts: [
       'Nothing ships untested — evaluation before publishing, every time. A 10-question test set is the minimum bar.',
     ],
-    screenshotSlots: m8ScreenshotSlots,
+    screenshots: [],
+    screenshotsToCapture: m8ScreenshotsToCapture,
     tryIt:
       'Write a 10-question test set from real user questions, run an evaluation, and fix your worst-scoring answer.',
     goDeeper: goDeeper([
@@ -1480,6 +1471,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 9,
+    harness: 'standard',
     slug: 'monitor-and-improve',
     title: 'Monitor & improve',
     whyItMatters:
@@ -1536,7 +1528,8 @@ export const modules: Module[] = [
     watchOuts: [
       "Publishing isn't the finish line — a 15-minute weekly review keeps a live agent healthy.",
     ],
-    screenshotSlots: m9ScreenshotSlots,
+    screenshots: [],
+    screenshotsToCapture: m9ScreenshotsToCapture,
     tryIt:
       "Open the analytics page of any live agent and name one thing you'd improve based on what you see.",
     goDeeper: goDeeper([
@@ -1567,6 +1560,7 @@ export const modules: Module[] = [
   // -------------------------------------------------------------------------
   {
     id: 10,
+    harness: 'standard',
     slug: 'channels-and-publishing',
     title: 'Channels & publishing',
     whyItMatters:
@@ -1665,7 +1659,8 @@ export const modules: Module[] = [
       'Run the pre-publish checklist first: knowledge verified, evaluation passed, right environment, right channel.',
       'Use the demo website for stakeholder review before broad rollout.',
     ],
-    screenshotSlots: m10ScreenshotSlots,
+    screenshots: [],
+    screenshotsToCapture: m10ScreenshotsToCapture,
     tryIt:
       "Publish your practice agent to the demo website and send the link to a classmate for feedback. Congratulations, you've shipped an agent.",
     goDeeper: goDeeper([

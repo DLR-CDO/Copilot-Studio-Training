@@ -1,4 +1,4 @@
-import { COURSE_NAME } from '../src/lib/completion'
+import { CERT_TITLE } from '../src/lib/completion'
 import type { CertificateRecord } from './store'
 
 export function escapeHtml(value: string): string {
@@ -16,7 +16,7 @@ function layout(title: string, body: string): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(title)} · ${escapeHtml(COURSE_NAME)}</title>
+<title>${escapeHtml(title)} · ${escapeHtml(CERT_TITLE)}</title>
 <style>
   :root { color-scheme: dark; }
   body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #12141c; color: #e8e9ee; }

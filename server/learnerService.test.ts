@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 import { quizzesByModule } from '../src/content/quizzes'
-import { COURSE_NAME } from '../src/lib/completion'
+import { CERT_TITLE } from '../src/lib/completion'
 import type { SignedInUser } from './auth'
 import {
   CERTIFICATE_ID_PATTERN,
@@ -49,7 +49,9 @@ describe('LearnerService', () => {
     expect(cert.id).toMatch(CERTIFICATE_ID_PATTERN)
     expect(cert.name).toBe('Alice Learner')
     expect(cert.email).toBe('alice@example.com')
-    expect(cert.course).toBe(COURSE_NAME)
+    expect(cert.course).toBe(CERT_TITLE)
+    expect(cert.id).toMatch(/^DR-CSF-/)
+    expect(cert.track).toBe('fundamentals')
     expect(cert.completedAt).toBe('2026-11-17T15:00:00.000Z')
     expect(cert.expiresAt).toBe('2027-11-17T15:00:00.000Z')
     expect(cert.scorePercent).toBe(98)
@@ -195,6 +197,7 @@ describe('newCertificateId', () => {
     const ids = new Set(Array.from({ length: 200 }, () => newCertificateId()))
     expect(ids.size).toBe(200)
     for (const id of ids) expect(id).toMatch(CERTIFICATE_ID_PATTERN)
-    expect(newCertificateId(() => new Uint8Array(12))).toBe('DR-CSA-0000-0000-0000')
+    expect(newCertificateId(() => new Uint8Array(12))).toBe('DR-CSF-0000-0000-0000')
+    expect(newCertificateId(() => new Uint8Array(12), 'DR-CSP')).toBe('DR-CSP-0000-0000-0000')
   })
 })

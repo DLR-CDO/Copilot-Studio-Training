@@ -1,6 +1,6 @@
 import { PASSING_PERCENT } from '../src/content/types'
-import { isExpired } from '../src/lib/completion'
-import { LOGOUT_URL, identify, type SignedInUser } from './auth'
+import { certificateTitle, isExpired } from '../src/lib/completion'
+import { LOGOUT_URL, identify, isAdmin as isAdminUser, type SignedInUser } from './auth'
 import { certificateContent, renderCertificatePdf, verifyUrlFor } from './certificatePdf'
 import type { ServerConfig } from './config'
 import {
@@ -10,6 +10,7 @@ import {
   type ProgressSnapshot,
 } from './learnerService'
 import { log } from './log'
+import { clientIp, type RateLimiter } from './rateLimit'
 import { completionsCsv } from './pages'
 import type { CertificateRecord, Store } from './store'
 
@@ -36,6 +37,8 @@ export interface ApiDeps {
   store: Store
   loadLogo: () => Promise<Uint8Array | null>
   now?: () => Date
+  /** Limits public certificate lookups per caller. */
+  verifyLimiter?: RateLimiter
 }
 
 export const MAX_BODY_BYTES = 64 * 1024
@@ -92,7 +95,7 @@ function certificateSummary(
   return {
     id: cert.id,
     name: cert.name,
-    course: cert.course,
+    course: certificateTitle(cert.track),
     completedAt: cert.completedAt,
     expiresAt: cert.expiresAt,
     scorePercent: cert.scorePercent,
@@ -154,7 +157,7 @@ async function signedInRoute(
 ): Promise<ApiResponse> {
   const { service, config } = deps
   const { path, method } = req
-  const isAdmin = config.adminEmails.has(user.email)
+  const isAdmin = isAdminUser(user, config)
 
   if (path === '/api/me' && method === 'GET') {
     return json(200, { email: user.email, isAdmin, logoutUrl: LOGOUT_URL })
@@ -221,19 +224,24 @@ async function signedInRoute(
   return json(404, { error: 'Not found.' })
 }
 
-/** Returns only name, course, completion date, and status — never email or score. */
+/** Returns name, title, dates, and status only — never email, score, or other personal data. */
 async function verify(req: ApiRequest, deps: ApiDeps): Promise<ApiResponse> {
+  const now = deps.now?.() ?? new Date()
+  if (deps.verifyLimiter && !deps.verifyLimiter.allow(clientIp(req.headers), now.getTime())) {
+    return json(429, { error: 'Too many lookups. Wait a minute and try again.' })
+  }
   const id = (req.query.get('id') ?? '').trim().toUpperCase()
   if (!CERTIFICATE_ID_PATTERN.test(id)) {
-    return json(400, { error: 'Certificate IDs look like DR-CSA-XXXX-XXXX-XXXX.' })
+    return json(400, { error: 'That is not a valid certificate ID.' })
   }
   const certificate = await deps.store.getCertificate(id)
   if (!certificate) return json(404, { error: 'No certificate was found with that ID.' })
   return json(200, {
     id: certificate.id,
     name: certificate.name,
-    course: certificate.course,
+    course: certificateTitle(certificate.track),
     completedAt: certificate.completedAt,
-    status: isExpired(certificate.expiresAt, deps.now?.() ?? new Date()) ? 'expired' : 'valid',
+    expiresAt: certificate.expiresAt,
+    status: isExpired(certificate.expiresAt, now) ? 'expired' : 'valid',
   })
 }

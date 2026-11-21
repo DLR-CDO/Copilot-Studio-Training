@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { verifyCertificate, type VerifyResult } from '../lib/api'
 import { formatCertificateDate } from '../lib/completion'
 
-/** Public page: shows only name, course, completion date, and status. */
+/** Public page: shows only name, certificate title, dates, and status. */
 export function VerifyPage() {
   const [params, setParams] = useSearchParams()
   const id = (params.get('id') ?? '').trim()
@@ -39,7 +39,7 @@ export function VerifyPage() {
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="DR-CSA-XXXX-XXXX-XXXX"
+            placeholder="DR-CSF-XXXX-XXXX-XXXX"
             maxLength={40}
             autoComplete="off"
             required
@@ -65,10 +65,12 @@ export function VerifyPage() {
           <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2">
             <dt className="text-muted">Learner</dt>
             <dd className="font-semibold">{current.name}</dd>
-            <dt className="text-muted">Course</dt>
+            <dt className="text-muted">Certificate</dt>
             <dd className="font-semibold">{current.course}</dd>
             <dt className="text-muted">Completed</dt>
             <dd className="font-semibold">{formatCertificateDate(current.completedAt)}</dd>
+            <dt className="text-muted">{current.status === 'valid' ? 'Expires' : 'Expired on'}</dt>
+            <dd className="font-semibold">{formatCertificateDate(current.expiresAt)}</dd>
             <dt className="text-muted">Status</dt>
             <dd
               className={`font-semibold ${current.status === 'valid' ? 'text-teal' : 'text-red'}`}

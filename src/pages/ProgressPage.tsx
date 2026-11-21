@@ -7,7 +7,8 @@ import { modules } from '../content/modules'
 import { ModuleBadge } from '../components/ui/ModuleBadge'
 
 export function ProgressPage() {
-  const { state, resetProgress } = useLearner()
+  const { state, resetProgress, session } = useLearner()
+  const onServer = session.mode === 'server'
   const [confirming, setConfirming] = useState(false)
   const completed = countCompletedModules(state)
   const avg = quizAverage(state)
@@ -84,7 +85,9 @@ export function ProgressPage() {
       <div className="mt-6 rounded-card border border-red-soft bg-red-soft/40 p-5">
         <h2 className="font-display text-lg font-bold">Reset progress</h2>
         <p className="mt-1 text-sm text-muted">
-          Clears all checklist, quiz, and completion data stored in this browser.
+          {onServer
+            ? 'Clears the checklists, build steps, notes, and cheat sheet ticks saved to your account. Your quiz scores and any certificate you have earned are kept.'
+            : 'Clears all checklist, quiz, and completion data stored in this browser. Nothing is stored on a server in this mode.'}
         </p>
         {!confirming ? (
           <button
@@ -104,7 +107,7 @@ export function ProgressPage() {
                 setConfirming(false)
               }}
             >
-              Yes, reset everything
+              Yes, reset
             </button>
             <button
               type="button"

@@ -29,6 +29,7 @@ export interface LearnerContextValue {
   setFreeRoam: (value: boolean) => void
   setTheme: (value: ThemeMode) => void
   updateModule: (moduleId: number, patch: Partial<ModuleProgress>) => void
+  setCheatSheetCheck: (key: string, checked: boolean) => void
   recordQuizResult: (moduleId: number, result: QuizResult) => Promise<void>
   /** Rejects with a message to show the learner if the name is not accepted. */
   saveName: (name: string) => Promise<void>

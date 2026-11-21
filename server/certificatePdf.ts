@@ -1,11 +1,13 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib'
-import { CERTIFICATE_ISSUER, formatCertificateDate } from '../src/lib/completion'
+import qrcode from 'qrcode-generator'
+import { CERTIFICATE_ISSUER, certificateTitle, formatCertificateDate } from '../src/lib/completion'
 import type { CertificateRecord } from './store'
 
 /** US Letter, landscape, in PDF points. */
 export const PAGE_WIDTH = 792
 export const PAGE_HEIGHT = 612
 const LOGO_BOX = { width: 240, height: 72 }
+const QR_SIZE = 72
 
 const INK = rgb(0, 0, 0)
 const MUTED = rgb(0.38, 0.4, 0.47)
@@ -32,7 +34,7 @@ export function certificateContent(cert: CertificateRecord, verifyUrl: string): 
   return {
     title: 'Certificate of Completion',
     learnerName: cert.name,
-    course: cert.course,
+    course: certificateTitle(cert.track),
     issuedBy: `Issued by ${CERTIFICATE_ISSUER}`,
     completionDate: formatCertificateDate(cert.completedAt),
     expirationDate: formatCertificateDate(cert.expiresAt),
@@ -118,6 +120,30 @@ async function drawLogo(
   )
 }
 
+/** Draws the QR code as vector squares so it stays sharp at any print size. */
+function drawQrCode(page: PDFPage, text: string, x: number, y: number, size: number): void {
+  const qr = qrcode(0, 'M')
+  qr.addData(text)
+  qr.make()
+  const count = qr.getModuleCount()
+  const quiet = 2
+  const cell = size / (count + quiet * 2)
+  page.drawRectangle({ x, y, width: size, height: size, color: rgb(1, 1, 1) })
+  for (let row = 0; row < count; row += 1) {
+    for (let col = 0; col < count; col += 1) {
+      if (!qr.isDark(row, col)) continue
+      page.drawRectangle({
+        x: x + (col + quiet) * cell,
+        // PDF y grows upward; QR rows grow downward.
+        y: y + size - (row + quiet + 1) * cell,
+        width: cell,
+        height: cell,
+        color: INK,
+      })
+    }
+  }
+}
+
 export async function renderCertificatePdf(
   content: CertificateContent,
   logoPng: Uint8Array | null,
@@ -185,7 +211,8 @@ export async function renderCertificatePdf(
   })
 
   drawCentered(page, `Certificate ID: ${content.certificateId}`, 86, bold, 10)
-  drawCentered(page, `Verify at ${content.verifyUrl}`, 70, regular, 10, MUTED)
+  drawCentered(page, `Verify at ${content.verifyUrl}`, 70, regular, 10, MUTED, PAGE_WIDTH - 280)
+  drawQrCode(page, content.verifyUrl, PAGE_WIDTH - 48 - QR_SIZE, 48, QR_SIZE)
 
   return doc.save()
 }

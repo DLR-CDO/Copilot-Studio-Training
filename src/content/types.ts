@@ -32,14 +32,24 @@ export interface BuildStep {
   verify?: boolean
 }
 
-export interface ScreenshotSlot {
+export interface Screenshot {
+  id: string
+  /** Path under `public/`, e.g. `images/02-environment-picker.png`. */
+  src: string
+  /** Describes the image for screen readers. */
+  alt: string
+  caption: string
+  /** Capture and annotation instructions for course authors. Never rendered. */
+  authorNotes?: string
+  /** ISO date the image was captured. */
+  capturedAt: string
+}
+
+/** A screenshot still to be captured. Never rendered. */
+export interface ScreenshotRequest {
   id: string
   caption: string
-  annotation: string
-  /** Path under `public/`, e.g. `images/02-environment-picker.png`. */
-  image?: string
-  /** Render a labeled gray box describing the screenshot still to be captured. */
-  placeholder?: boolean
+  authorNotes: string
 }
 
 export interface LinkItem {
@@ -72,8 +82,12 @@ export type QuizQuestion =
       explanation: string
     }
 
+/** The Copilot Studio runtime a module's instructions apply to. */
+export type Harness = 'standard' | 'copilot' | 'any'
+
 export interface Module {
   id: number
+  harness: Harness
   slug: string
   title: string
   whyItMatters: string
@@ -83,7 +97,9 @@ export interface Module {
   diagram: DiagramId
   buildSteps: BuildStep[]
   watchOuts: string[]
-  screenshotSlots: ScreenshotSlot[]
+  screenshots: Screenshot[]
+  /** Author-only list of screenshots still to capture. Never rendered. */
+  screenshotsToCapture?: ScreenshotRequest[]
   tryIt: string
   goDeeper: LinkItem[]
   quiz: QuizQuestion[]
@@ -117,6 +133,8 @@ export interface LearnerState {
   /** True only after the learner explicitly picks light/dark. */
   themeChosen: boolean
   modules: Record<string, ModuleProgress>
+  /** Ticked cheat sheet checklist items, keyed by `section:item text`. */
+  cheatSheet?: Record<string, boolean>
   migratedFrom?: string
   notice?: string
 }

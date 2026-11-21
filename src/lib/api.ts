@@ -39,6 +39,7 @@ export type VerifyResult =
       name: string
       course: string
       completedAt: string
+      expiresAt: string
       status: 'valid' | 'expired'
     }
   | { kind: 'not-found' | 'invalid' | 'error'; message: string }
@@ -142,11 +143,13 @@ export async function verifyCertificate(id: string): Promise<VerifyResult> {
         name: String(body.name ?? ''),
         course: String(body.course ?? ''),
         completedAt: String(body.completedAt ?? ''),
+        expiresAt: String(body.expiresAt ?? ''),
         status: body.status === 'valid' ? 'valid' : 'expired',
       }
     }
     if (res.status === 404) return { kind: 'not-found', message }
     if (res.status === 400) return { kind: 'invalid', message }
+    if (res.status === 429) return { kind: 'error', message }
     return { kind: 'error', message }
   } catch {
     return { kind: 'error', message: 'Verification is unavailable. Check your connection.' }

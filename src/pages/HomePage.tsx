@@ -12,6 +12,7 @@ import { courseMeta, modules } from '../content/modules'
 import { ProgressRing } from '../components/layout/ProgressRing'
 import { ModuleBadge } from '../components/ui/ModuleBadge'
 import { MODULE_COUNT } from '../content/types'
+import { HarnessBanner } from '../components/module/Harness'
 
 export function HomePage() {
   const { state } = useLearner()
@@ -41,7 +42,7 @@ export function HomePage() {
         <p className="mt-4 max-w-[60ch] text-lg text-muted">{courseMeta.lede}</p>
         <div className="mt-6 flex flex-wrap gap-2.5">
           <span className="rounded-pill border-[1.5px] border-ink bg-card px-3 py-1.5 font-mono text-xs">
-            10 modules
+            {modules.length} modules
           </span>
           <span className="rounded-pill border-[1.5px] border-teal bg-card px-3 py-1.5 font-mono text-xs text-teal">
             45-60 min each
@@ -50,6 +51,7 @@ export function HomePage() {
             1 agent, built by you
           </span>
         </div>
+        <HarnessBanner className="mt-6" />
       </header>
 
       {isFirstVisit ? (

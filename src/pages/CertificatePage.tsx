@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { MODULE_NAV } from '../content/moduleNav'
 import { CERTIFICATE_PDF_URL } from '../lib/api'
-import { COURSE_NAME, formatCertificateDate } from '../lib/completion'
+import { CERT_TITLE, formatCertificateDate } from '../lib/completion'
 import { getModuleProgress } from '../lib/progress'
 import { useLearner } from '../lib/useLearner'
 
@@ -96,7 +96,7 @@ export function CertificatePage() {
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="font-display text-3xl font-bold">My Certificate</h1>
-      <p className="mt-2 text-muted">{COURSE_NAME}</p>
+      <p className="mt-2 text-muted">{CERT_TITLE}</p>
 
       {certificate ? (
         <section

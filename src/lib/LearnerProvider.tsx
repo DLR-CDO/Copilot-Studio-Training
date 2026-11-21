@@ -152,6 +152,15 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, theme: value, themeChosen: true }))
   }, [])
 
+  const setCheatSheetCheck = useCallback((key: string, checked: boolean) => {
+    setState((prev) => {
+      const next = { ...prev.cheatSheet }
+      if (checked) next[key] = true
+      else delete next[key]
+      return { ...prev, cheatSheet: next }
+    })
+  }, [])
+
   const updateModule = useCallback((moduleId: number, patch: Partial<ModuleProgress>) => {
     setState((prev) => {
       const key = String(moduleId)
@@ -234,6 +243,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       setFreeRoam,
       setTheme,
       updateModule,
+      setCheatSheetCheck,
       recordQuizResult,
       saveName,
       resetProgress,
@@ -247,6 +257,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       setFreeRoam,
       setTheme,
       updateModule,
+      setCheatSheetCheck,
       recordQuizResult,
       saveName,
       resetProgress,

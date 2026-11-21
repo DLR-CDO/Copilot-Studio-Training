@@ -42,6 +42,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+const MAX_CHEAT_SHEET_CHECKS = 100
+
+function coerceChecks(raw: Record<string, unknown>): Record<string, boolean> {
+  return Object.fromEntries(
+    Object.entries(raw)
+      .filter(([k, v]) => v === true && k.length <= 200)
+      .slice(0, MAX_CHEAT_SHEET_CHECKS)
+      .map(([k]) => [k, true]),
+  )
+}
+
 function coerceModuleProgress(raw: unknown): ModuleProgress {
   const base = emptyModuleProgress()
   if (!isRecord(raw)) return base
@@ -112,6 +123,7 @@ export function migrateState(raw: unknown): LearnerState {
       theme,
       themeChosen,
       modules,
+      ...(isRecord(raw.cheatSheet) ? { cheatSheet: coerceChecks(raw.cheatSheet) } : {}),
       ...(typeof raw.migratedFrom === 'string' ? { migratedFrom: raw.migratedFrom } : {}),
       ...(typeof raw.notice === 'string' ? { notice: raw.notice } : {}),
     }
@@ -151,6 +163,7 @@ export function saveState(state: LearnerState, storage: Storage = localStorage):
     theme: state.theme,
     themeChosen: state.themeChosen,
     modules: state.modules,
+    ...(state.cheatSheet ? { cheatSheet: state.cheatSheet } : {}),
   }
   storage.setItem(STORAGE_KEY, JSON.stringify(toPersist))
   applyTheme(state.theme)

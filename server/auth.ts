@@ -2,6 +2,8 @@ import type { ServerConfig } from './config'
 
 export interface SignedInUser {
   email: string
+  /** Static Web Apps roles, e.g. `authenticated`, `admin`. */
+  roles?: string[]
 }
 
 export type Identity =
@@ -20,7 +22,9 @@ export function isValidEmail(value: string): boolean {
  * Decode the x-ms-client-principal header that Azure Static Web Apps adds to API requests.
  * Only Microsoft (aad) sign-ins are accepted; `userDetails` is the account's email address.
  */
-export function parseSwaPrincipal(header: string | undefined): string | null {
+export function parseSwaPrincipal(
+  header: string | undefined,
+): { email: string; roles: string[] } | null {
   if (!header) return null
   try {
     const principal = JSON.parse(Buffer.from(header, 'base64').toString('utf8')) as {
@@ -33,7 +37,9 @@ export function parseSwaPrincipal(header: string | undefined): string | null {
       return null
     }
     const email = typeof principal.userDetails === 'string' ? principal.userDetails.trim() : ''
-    return isValidEmail(email) ? email.toLowerCase() : null
+    if (!isValidEmail(email)) return null
+    const roles = principal.userRoles.filter((r): r is string => typeof r === 'string')
+    return { email: email.toLowerCase(), roles }
   } catch {
     return null
   }
@@ -47,14 +53,16 @@ export function readCookie(cookieHeader: string | undefined, name: string): stri
   return undefined
 }
 
-function emailForRequest(
+function principalForRequest(
   headers: Record<string, string | undefined>,
   config: ServerConfig,
-): string | null {
+): { email: string; roles: string[] } | null {
   if (config.authMode === 'mock') {
     const choice = readCookie(headers.cookie, MOCK_COOKIE)
     if (choice === 'none') return null
-    return config.mockUsers[Number(choice ?? 0)] ?? config.mockUsers[0] ?? null
+    const email = config.mockUsers[Number(choice ?? 0)] ?? config.mockUsers[0]
+    // Mock users get the admin role so ADMIN_EMAILS alone decides admin access locally.
+    return email ? { email, roles: ['authenticated', 'admin'] } : null
   }
   // Static Web Apps sets this header at its edge; managed APIs are only reachable through it.
   return parseSwaPrincipal(headers['x-ms-client-principal'])
@@ -64,10 +72,16 @@ export function identify(
   headers: Record<string, string | undefined>,
   config: ServerConfig,
 ): Identity {
-  const email = emailForRequest(headers, config)
-  if (!email) return { kind: 'anonymous' }
+  const principal = principalForRequest(headers, config)
+  if (!principal) return { kind: 'anonymous' }
+  const { email, roles } = principal
   if (!email.endsWith(`@${config.allowedEmailDomain}`)) return { kind: 'wrong-domain', email }
-  return { kind: 'signed-in', user: { email } }
+  return { kind: 'signed-in', user: { email, roles } }
+}
+
+/** Admins are on ADMIN_EMAILS and hold the Static Web Apps `admin` role (route rules need it). */
+export function isAdmin(user: SignedInUser, config: ServerConfig): boolean {
+  return config.adminEmails.has(user.email) && (user.roles ?? []).includes('admin')
 }
 
 /** Only same-site relative paths, so login and logout can't be used as open redirects. */
