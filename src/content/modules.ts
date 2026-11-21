@@ -253,20 +253,8 @@ const m7Screenshots: Screenshot[] = [
     width: 1024,
     height: 650,
     alt: 'The agent Overview page showing Details, an Agent status area with a 1 Warning badge, and the Select your agent’s model dropdown.',
-    caption:
-      'The Overview page. The 1 Warning badge is expected here: the practice agent uses No authentication so the demo website works.',
+    caption: '1 Warning: no end-user authentication, expected for the demo website.',
     afterStep: 'm7-step-6',
-    capturedAt: '2026-11-21',
-  },
-  {
-    id: 'm7-shot-2',
-    src: 'images/07-overview-two-warnings.png',
-    width: 1024,
-    height: 604,
-    alt: 'Practice Agent Overview page showing the Details card and the 2 Warnings badge',
-    caption:
-      "The Overview page with the 2 Warnings badge. The two warnings are 'no end-user authentication' and 'the agent searches the web'. Both are expected for a practice agent, so you don't need to fix them.",
-    afterStep: 'm7-step-7',
     capturedAt: '2026-11-21',
   },
   {
@@ -355,19 +343,19 @@ const m9Screenshots: Screenshot[] = [
   {
     id: 'm9-shot-publish',
     src: 'images/09-publish-dialog.png',
-    width: 1024,
-    height: 650,
-    alt: 'The Publish this agent dialog listing two items to review before publishing, about end user authentication and tools that use the author’s credentials, with an arrow pointing to Publish.',
-    caption: 'The Publish this agent dialog. Read the review items, then select Publish.',
+    width: 387,
+    height: 190,
+    alt: 'The Publish this agent dialog with the Force newest version option, and an arrow pointing to the Publish button.',
+    caption: 'The Publish this agent dialog. Select Publish.',
     afterStep: 'm9-step-5',
     capturedAt: '2026-11-21',
   },
   {
     id: 'm9-shot-channels',
     src: 'images/09-channels-published.png',
-    width: 1024,
-    height: 650,
-    alt: 'The Channels page after publishing, with the Published agent status section highlighted, above the Demo website, Microsoft 365 and Microsoft Teams, and other channel tiles.',
+    width: 859,
+    height: 493,
+    alt: 'The Channels page after publishing, with the Published agent status section highlighted and one risk, no end user authentication, above the Demo website, Microsoft 365 and Microsoft Teams, and other channel tiles.',
     caption:
       'The Channels page after publishing, with the published status and the Demo website tile.',
     afterStep: 'm9-step-7',
@@ -2392,8 +2380,8 @@ export const modules: Module[] = [
         shot: {
           id: 'm10-shot-share',
           src: 'images/10-share-agent-viewer.png',
-          width: 1024,
-          height: 650,
+          width: 567,
+          height: 330,
           alt: 'The Share window for an agent, with Agent viewer highlighted in the permissions list: it can view Analytics and Evaluation only, but not edit, configure, share, publish or delete the agent.',
           caption:
             'The Share window. Agent viewer (previously called Analytics viewer) gives read-only access.',
