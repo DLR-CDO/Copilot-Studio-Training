@@ -302,7 +302,16 @@ export const modules: Module[] = [
         ],
         [
           t(
-            'Licensing basics, awareness level only: on 1 September 2025, Copilot Credits replaced messages as the billing unit for agents',
+            'Licensing basics and Copilot Credits, the billing unit for agents, awareness level only',
+          ),
+        ],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'On 1 September 2025, Copilot Credits replaced messages as the billing unit for agents. Prepaid pack quantities and the pay-as-you-go rate did not change.',
           ),
         ],
       ]),
@@ -548,12 +557,21 @@ export const modules: Module[] = [
         ],
         [
           t(
-            'Which knowledge source types makers can add: file uploads, SharePoint and OneDrive, and public websites. Since October 2026, admins can restrict each one in the Power Platform admin center',
+            'Which knowledge sources makers can add, and whether people must sign in to use agents',
+          ),
+        ],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'Since October 2026, admins can restrict file uploads, SharePoint and OneDrive, or public websites as knowledge sources in the Power Platform admin center, separately or together. If an option is missing from your Add knowledge pop-up, this is the likely reason.',
           ),
         ],
         [
           t(
-            'Whether a data policy requires authentication. If it does, your agents cannot use the No authentication option',
+            'When a data policy requires authentication, your agents cannot use the No authentication option.',
           ),
         ],
       ]),
@@ -663,10 +681,7 @@ export const modules: Module[] = [
         headers: ['Source type', 'What it’s for'],
         rows: [
           ['SharePoint', 'Search a SharePoint site or document library your team already uses.'],
-          [
-            'OneDrive',
-            'Ground answers in files stored in OneDrive for Business. Microsoft Purview sensitivity labels are supported (October 2026).',
-          ],
+          ['OneDrive', 'Ground answers in files stored in your OneDrive.'],
           [
             'Uploaded files',
             'Ground answers in files you drag and drop in directly, like PDFs or Word docs.',
@@ -675,16 +690,22 @@ export const modules: Module[] = [
             'Public websites',
             'Pull answers from pages on the public web. Use web search only for broad agents that do not handle confidential information.',
           ],
-          [
-            'Also available',
-            'Dataverse tables, Azure SQL tables, Bing Custom Search, and enterprise data through connectors. Use these when the data your agent needs already lives there.',
-          ],
         ],
       },
-      para([
-        t(
-          'Limits apply: the agent searches a limited number of sources of each type, files have size limits, and in Teams an answer shows at most 20 citations. Check the knowledge limits page in Go deeper before you plan a large agent.',
-        ),
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'Other sources are available too: Dataverse tables, Azure SQL tables, Bing Custom Search, and enterprise data through connectors. Use them when the data your agent needs already lives there.',
+          ),
+        ],
+        [t('OneDrive for Business supports Microsoft Purview sensitivity labels (October 2026).')],
+        [
+          t(
+            'Limits apply: the agent searches a limited number of sources of each type, files have size limits, and in Teams an answer shows at most 20 citations. See the knowledge limits page in Go deeper before you plan a large agent.',
+          ),
+        ],
       ]),
     ],
     buildSteps: buildSteps(3, [
@@ -799,11 +820,6 @@ export const modules: Module[] = [
         ],
         [t('The three everyday nodes: message, question, condition')],
         [
-          t(
-            'Condition groups: several conditions inside one Message, Question, or prompt node, so the topic needs fewer branches (June 2026)',
-          ),
-        ],
-        [
           kw('Variables', 'variable'),
           t(' in plain terms: the '),
           kw('agent', 'agent'),
@@ -813,6 +829,15 @@ export const modules: Module[] = [
           t('System '),
           kw('topics', 'topic'),
           t(' like greeting, fallback, and escalate, and when to customize them'),
+        ],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'Condition groups (June 2026) keep several conditions inside one Message, Question, or prompt node, so a topic needs fewer branches. Useful once your topics grow.',
+          ),
         ],
       ]),
     ],
@@ -1001,26 +1026,26 @@ export const modules: Module[] = [
         [t('Prompts as reusable AI instructions, and adding a prompt as a '), kw('tool', 'tool')],
         [kw('Agent', 'agent'), t(' flows for multi-step automation, awareness level')],
         [
-          t('MCP servers as '),
-          kw('tools', 'tool'),
-          t(': a standard plug for external services, awareness level'),
-        ],
-        [
-          t(
-            'Computer use: the agent operates websites and desktop apps the way a person would. Generally available since May 2026',
-          ),
-        ],
-        [
-          t(
-            'On the Microsoft Copilot harness, workflows can also be added as tools (preview). This course uses the standard harness',
-          ),
-        ],
-        [
           t('Why the '),
           kw('tool', 'tool'),
           t("'s description decides whether the "),
           kw('agent', 'agent'),
           t(' picks it at the right moment'),
+        ],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [t('MCP servers can be added as tools: a standard plug for external services.')],
+        [
+          t(
+            'Computer use (generally available since May 2026) lets the agent operate websites and desktop apps the way a person would. It is high impact, so test it only in DEV.',
+          ),
+        ],
+        [
+          t(
+            'On the Microsoft Copilot harness, workflows can also be added as tools (preview). This course uses the standard harness.',
+          ),
         ],
       ]),
     ],
@@ -1160,15 +1185,9 @@ export const modules: Module[] = [
           kw('agent', 'agent'),
         ],
         [
-          kw('Connected agents', 'connected-agent'),
-          t(
-            ': an existing agent someone else built, in Copilot Studio, in Microsoft Foundry, or with the Microsoft 365 Agents SDK',
-          ),
-        ],
-        [
-          t(
-            'Agent2Agent (A2A) agents built outside Copilot Studio: the A2A protocol is generally available (April 2026), and adding an A2A agent as a connected agent is in preview',
-          ),
+          t('Connecting to an existing '),
+          kw('Copilot Studio agent', 'connected-agent'),
+          t(' someone else built'),
         ],
         [t('Writing descriptions so the parent always routes to the right specialist')],
         [
@@ -1176,6 +1195,20 @@ export const modules: Module[] = [
           t(' servers as '),
           kw('tools', 'tool'),
           t(', awareness level: a standard plug for external services (see Module 5)'),
+        ],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'Connected agents can also be agents in Microsoft Foundry or agents built with the Microsoft 365 Agents SDK.',
+          ),
+        ],
+        [
+          t(
+            'Agent2Agent (A2A) is a protocol for agents built outside Copilot Studio. It is generally available (April 2026); adding an A2A agent as a connected agent is in preview.',
+          ),
         ],
       ]),
     ],
@@ -1359,11 +1392,6 @@ export const modules: Module[] = [
           ),
         ],
         [
-          t('When Copilot Studio upgrades the default '),
-          kw('model', 'model'),
-          t(', you can keep your current one for up to 30 days to test and migrate (October 2026)'),
-        ],
-        [
           t('Separate '),
           kw('model', 'model'),
           t(' settings for '),
@@ -1379,6 +1407,15 @@ export const modules: Module[] = [
         ],
         [t('Content moderation and the general-knowledge toggle')],
         [t('Authentication, awareness level: who is allowed to use the '), kw('agent', 'agent')],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'When Copilot Studio upgrades the default model, you can keep your current one for up to 30 days to test and migrate (October 2026).',
+          ),
+        ],
       ]),
     ],
     buildSteps: buildSteps(7, [
@@ -1491,13 +1528,21 @@ export const modules: Module[] = [
           t(': real questions paired with expected answers'),
         ],
         [
-          kw('Evaluation', 'evaluation'),
           t(
-            ' is generally available. A test set is either single response (one question, one answer) or conversation (several turns)',
+            'A test set is either single response (one question, one answer) or conversation (several turns)',
           ),
         ],
-        [t('Choosing test methods and reading the results')],
+        [
+          t(
+            'Choosing test methods: start with General quality, and add Compare meaning when you have expected answers',
+          ),
+        ],
         [t('The improvement loop: fix descriptions and instructions, re-run, compare')],
+      ]),
+    ],
+    goodToKnow: [
+      para([
+        t('Evaluation is generally available. These are all the test methods you can choose from:'),
       ]),
       {
         type: 'table',
@@ -1678,14 +1723,18 @@ export const modules: Module[] = [
         [t('Turning analytics into fixes for conversational '), kw('agents', 'agent')],
         [t('Autonomous '), kw('agent', 'agent'), t(' health, where it applies')],
         [t('A simple weekly ritual: what to check, what "bad" looks like, who to tell')],
-        [t('User question and reaction lists, which you can filter and download as a CSV file')],
-        [t('Session transcripts, for people with the transcript viewer privilege')],
+      ]),
+    ],
+    goodToKnow: [
+      list([
+        [t('User question and reaction lists can be filtered and downloaded as a CSV file.')],
+        [t('Session transcripts are available to people with the transcript viewer privilege.')],
         [
           t(
-            'The Analytics Viewer role (April 2026): share analytics with colleagues without giving them maker rights',
+            'The Analytics Viewer role (April 2026) shares analytics with colleagues without giving them maker rights.',
           ),
         ],
-        [t('Custom metrics (preview): describe a business outcome and Copilot Studio scores it')],
+        [t('Custom metrics (preview): describe a business outcome and Copilot Studio scores it.')],
       ]),
     ],
     buildSteps: buildSteps(9, [
@@ -1796,7 +1845,7 @@ export const modules: Module[] = [
         [t('Using the demo website for stakeholder review before broad rollout')],
         [
           t(
-            'Teams + Microsoft 365: use Authenticate with Microsoft for this channel. To reach the whole organisation, submit the agent for admin approval so it appears under Built for your org in the Teams app store and Built by your org in the Microsoft 365 Agent Store',
+            'Teams + Microsoft 365: use Authenticate with Microsoft for sign-in, and submit the agent for admin approval to reach the whole organisation',
           ),
         ],
         [t('Single sign-on, awareness level')],
@@ -1808,21 +1857,6 @@ export const modules: Module[] = [
           t(' passed, right '),
           kw('channel', 'channel'),
         ],
-      ]),
-      para([t('Awareness only, so you recognise them when you see them:')]),
-      list([
-        [
-          t(
-            'Since 23 October 2026, new agents can no longer connect to WhatsApp through the Azure Communication Services channel. Agents connected before then keep working',
-          ),
-        ],
-        [t('MCP and Agent2Agent (A2A) channels let other tools and agents call yours (preview)')],
-        [
-          t(
-            'A display name suffix tells the DEV, TEST, and production copies of an agent apart in Teams (preview)',
-          ),
-        ],
-        [t('A privacy statement link can appear at the start of conversations (preview)')],
       ]),
       {
         type: 'table',
@@ -1837,6 +1871,27 @@ export const modules: Module[] = [
           ],
         ],
       },
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'After admin approval, the agent appears under Built for your org in the Teams app store and Built by your org in the Microsoft 365 Agent Store.',
+          ),
+        ],
+        [
+          t(
+            'Since 23 October 2026, new agents can no longer connect to WhatsApp through the Azure Communication Services channel. Agents connected before then keep working.',
+          ),
+        ],
+        [t('MCP and Agent2Agent (A2A) channels let other tools and agents call yours (preview).')],
+        [
+          t(
+            'A display name suffix tells the DEV, TEST, and production copies of an agent apart in Teams (preview).',
+          ),
+        ],
+        [t('A privacy statement link can appear at the start of conversations (preview).')],
+      ]),
     ],
     buildSteps: buildSteps(10, [
       [

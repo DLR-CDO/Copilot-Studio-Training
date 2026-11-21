@@ -127,6 +127,8 @@ export interface Module {
   verifiedAgainst: string
   badgeName: string
   concept: ConceptBlock[]
+  /** Extra detail shown collapsed under "In plain words". Never quizzed. */
+  goodToKnow?: ConceptBlock[]
   diagram: DiagramId
   buildSteps: BuildStep[]
   watchOuts: string[]

@@ -172,7 +172,7 @@ export function ModulePage() {
         </header>
 
         <div className="mt-10 space-y-10">
-          <ConceptSection blocks={mod.concept} />
+          <ConceptSection blocks={mod.concept} goodToKnow={mod.goodToKnow} />
 
           <section id="diagram" className="scroll-mt-28">
             <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-[0.06em]">

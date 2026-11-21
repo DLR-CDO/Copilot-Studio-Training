@@ -62,6 +62,15 @@ describe('ModulePage navigation', () => {
     expect(screen.getByText('Estimated time: 40 min')).toBeInTheDocument()
   })
 
+  it('keeps extra detail in a collapsed Good to know box', async () => {
+    renderAt('/module/10')
+    const summary = await screen.findByText('Good to know')
+    const details = summary.closest('details')!
+    expect(details).not.toHaveAttribute('open')
+    expect(details).toHaveTextContent(/not on the quiz/)
+    expect(details).toHaveTextContent(/WhatsApp/)
+  })
+
   it('points the last module at the final assessment', async () => {
     renderAt('/module/10')
     const cta = await screen.findByRole('link', { name: /take the final assessment/i })
