@@ -91,6 +91,21 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             Final assessment
           </NavLink>
         </li>
+        <li>
+          <NavLink
+            to="/help"
+            onClick={onClose}
+            className={({ isActive }) =>
+              `block rounded-inner border px-3 py-2 font-display text-[13.5px] font-semibold transition-colors ${
+                isActive
+                  ? 'border-violet bg-violet-soft'
+                  : 'border-line hover:border-violet hover:bg-card'
+              }`
+            }
+          >
+            Help and support
+          </NavLink>
+        </li>
       </ul>
     </nav>
   )

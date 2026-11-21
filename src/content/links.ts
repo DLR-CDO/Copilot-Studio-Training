@@ -36,7 +36,7 @@ export const houseRules: HouseRule[] = [
   },
   {
     title: 'Ask early, ask often',
-    body: 'If a step does not match your screen, ask your course admin. Screens change, and your question helps fix the course for the next group.',
+    body: 'If a step does not match your screen, email the agent support team (see Help). Screens change, and your question helps fix the course for the next group.',
   },
 ]
 

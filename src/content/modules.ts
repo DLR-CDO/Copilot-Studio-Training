@@ -526,7 +526,7 @@ export const modules: Module[] = [
     tips: [
       'One agent, built progressively: every module adds a layer to the same practice agent. You publish it in Module 9 and watch how it is used in Module 10.',
       'Licensing and Copilot Credits are awareness only for now. There is nothing to configure yet.',
-      'Ask early, ask often: if a step does not match your screen, ask your course admin. Screens change, and your question helps fix the course for the next group.',
+      'Ask early, ask often: if a step does not match your screen, email the agent support team (see Help at the top of the page). Screens change, and your question helps fix the course for the next group.',
     ],
     screenshots: m1Screenshots,
     tryIt:
@@ -1985,7 +1985,7 @@ export const modules: Module[] = [
               t(' and '),
               ui('Save'),
               t(
-                '. If the option is grayed out, a data policy requires sign-in: skip the demo website and ask your course admin how to share instead.',
+                '. If the option is grayed out, a data policy requires sign-in: skip the demo website and ask the agent support team how to share instead (see Help).',
               ),
             ],
             true,

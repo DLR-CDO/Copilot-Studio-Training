@@ -6,6 +6,7 @@ import { GlossaryPage } from './pages/GlossaryPage'
 import { CheatSheetPage } from './pages/CheatSheetPage'
 import { ProgressPage } from './pages/ProgressPage'
 import { ResourcesPage } from './pages/ResourcesPage'
+import { HelpPage } from './pages/HelpPage'
 import { CertificatePage } from './pages/CertificatePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { VerifyPage } from './pages/VerifyPage'
@@ -31,6 +32,7 @@ function Course() {
           <Route path="/cheatsheet" element={<CheatSheetPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/assessment" element={<AssessmentPage />} />
           <Route path="/certificate" element={<CertificatePage />} />
           <Route path="/admin/completions" element={<AdminPage />} />

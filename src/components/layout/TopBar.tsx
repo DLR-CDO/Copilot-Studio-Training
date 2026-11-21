@@ -21,6 +21,7 @@ export function TopBar({ onOpenSidebar, onOpenSettings, onOpenSearch }: TopBarPr
     { to: '/glossary', label: 'Glossary' },
     { to: '/cheatsheet', label: 'Cheat sheet' },
     { to: '/resources', label: 'Resources' },
+    { to: '/help', label: 'Help' },
     ...(user?.isAdmin ? [{ to: '/admin/completions', label: 'Admin' }] : []),
   ]
 
