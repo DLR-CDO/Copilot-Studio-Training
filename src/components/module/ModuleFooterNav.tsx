@@ -1,10 +1,12 @@
+import { useId } from 'react'
 import { Link } from 'react-router-dom'
 import { MODULE_COUNT } from '../../content/types'
 
 interface ModuleFooterNavProps {
   moduleId: number
   canComplete: boolean
-  remaining: string[]
+  /** Plain-English to-do items shown under the button until the module can be completed. */
+  missingItems: string[]
   completed: boolean
   onMarkComplete: () => void
 }
@@ -12,14 +14,12 @@ interface ModuleFooterNavProps {
 export function ModuleFooterNav({
   moduleId,
   canComplete,
-  remaining,
+  missingItems,
   completed,
   onMarkComplete,
 }: ModuleFooterNavProps) {
-  const tip =
-    remaining.length === 0
-      ? undefined
-      : `Still needed: ${remaining.slice(0, 3).join('; ')}${remaining.length > 3 ? '…' : ''}`
+  const missingId = useId()
+  const showMissing = !canComplete && !completed && missingItems.length > 0
 
   return (
     <nav
@@ -34,11 +34,11 @@ export function ModuleFooterNav({
         <span />
       )}
 
-      <div className="group relative">
+      <div className="flex max-w-sm flex-col items-center gap-2">
         <button
           type="button"
           disabled={!canComplete || completed}
-          title={!canComplete ? tip : undefined}
+          aria-describedby={showMissing ? missingId : undefined}
           onClick={onMarkComplete}
           className={`rounded-pill px-5 py-2.5 font-display text-sm font-semibold ${
             completed
@@ -50,10 +50,10 @@ export function ModuleFooterNav({
         >
           {completed ? 'Module complete' : 'Mark module complete'}
         </button>
-        {!canComplete && !completed ? (
-          <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden w-64 -translate-x-1/2 rounded-inner border border-line bg-card p-3 text-left text-xs text-muted shadow-lg group-hover:block group-focus-within:block">
-            {tip}
-          </span>
+        {showMissing ? (
+          <p id={missingId} className="text-center text-xs leading-relaxed text-muted">
+            {missingItems.join(' · ')}
+          </p>
         ) : null}
       </div>
 

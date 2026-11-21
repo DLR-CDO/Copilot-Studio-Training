@@ -4,6 +4,7 @@ import { getModuleById } from '../content/modules'
 import { useLearner } from '../lib/useLearner'
 import {
   canMarkModuleComplete,
+  describeMissingRequirements,
   getModuleProgress,
   getModuleStatus,
   isModuleUnlocked,
@@ -50,9 +51,9 @@ export function ModulePage() {
   const passPercent = passPercentFor(String(moduleId))
 
   const completion = useMemo(() => {
-    if (!mod) return { ready: false, remaining: ['Module not found'] }
+    if (!mod) return { ready: false, missingItems: [] }
     // Treat build steps as the checklist gate. The quiz must be passed at the module's pass mark.
-    return canMarkModuleComplete(
+    const result = canMarkModuleComplete(
       {
         ...progress,
         checklist: Object.fromEntries(
@@ -61,6 +62,10 @@ export function ModulePage() {
       },
       { checklistIds: stepIds, requireTryIt: true, passPercent },
     )
+    return {
+      ready: result.ready,
+      missingItems: describeMissingRequirements(result.missing, stepIds),
+    }
   }, [mod, progress, stepIds, passPercent])
 
   const onToggleStep = useCallback(
@@ -238,7 +243,7 @@ export function ModulePage() {
         <ModuleFooterNav
           moduleId={moduleId}
           canComplete={completion.ready}
-          remaining={completion.remaining}
+          missingItems={completion.missingItems}
           completed={progress.completed}
           onMarkComplete={onMarkComplete}
         />

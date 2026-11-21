@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
+import { getModuleById } from '../content/modules'
 import { createDefaultState } from '../lib/storage'
 import { installFakeServer } from '../test/fakeServer'
 
@@ -14,9 +15,11 @@ function renderAt(path: string) {
   )
 }
 
+let deps: ReturnType<typeof installFakeServer>
+
 beforeEach(async () => {
   localStorage.clear()
-  const deps = installFakeServer()
+  deps = installFakeServer()
   await deps.service.saveUiState(
     { email: deps.config.mockUsers[0]! },
     { ...createDefaultState(), freeRoam: true },
@@ -114,6 +117,64 @@ describe('ModulePage navigation', () => {
     renderAt('/module/10')
     const cta = await screen.findByRole('link', { name: /take the final assessment/i })
     expect(cta).toHaveAttribute('href', '/assessment')
+  })
+})
+
+describe('Mark module complete', () => {
+  const missingList = () => document.getElementById(markButton().getAttribute('aria-describedby')!)
+  const markButton = () => screen.getByRole('button', { name: 'Mark module complete' })
+
+  it('lists what is still needed by step number, without a hover tooltip', async () => {
+    const user = userEvent.setup()
+    const state = { ...createDefaultState(), freeRoam: true }
+    state.modules['1']!.buildSteps = { 'm1-step-harness': true, 'm1-step-solution': true }
+    await deps.service.saveUiState({ email: deps.config.mockUsers[0]! }, state)
+    renderAt('/module/1')
+
+    await screen.findByRole('button', { name: 'Mark module complete' })
+    expect(markButton()).toBeDisabled()
+    expect(markButton()).not.toHaveAttribute('title')
+    expect(markButton()).toHaveAccessibleName('Mark module complete')
+    expect(missingList()).toBeVisible()
+    expect(missingList()).toHaveTextContent(
+      'Tick build steps 2, 4, 5, 6 and 7 · Write what happened in Try it and tick I did this · Pass the knowledge check',
+    )
+    expect(markButton()).toHaveAccessibleDescription(/^Tick build steps 2, 4, 5, 6 and 7/)
+
+    await user.type(
+      screen.getByRole('textbox', { name: 'What happened when you tried it?' }),
+      'I set up my environment and it worked.',
+    )
+    await user.click(screen.getByRole('checkbox', { name: 'I did this' }))
+    expect(missingList()).toHaveTextContent(/^Tick build steps 2, 4, 5, 6 and 7 · Pass/)
+  })
+
+  it('hides the list once every requirement is met', async () => {
+    const user = userEvent.setup()
+    const email = deps.config.mockUsers[0]!
+    const state = { ...createDefaultState(), freeRoam: true }
+    const allSteps = getModuleById(7)!.buildSteps.map((s) => s.id)
+    expect(allSteps[4]).toBe('m7-step-retired-models')
+    state.modules['7']!.buildSteps = Object.fromEntries(
+      allSteps.filter((id) => id !== 'm7-step-retired-models').map((id) => [id, true]),
+    )
+    state.modules['7']!.tryItDone = true
+    state.modules['7']!.reflection = 'It worked as described.'
+    await deps.service.saveUiState({ email }, state)
+    const record = (await deps.store.getLearner(email))!
+    record.value.bestPercent['7'] = 100
+    await deps.store.saveLearner(record.value, record.etag)
+    renderAt('/module/7')
+
+    await screen.findByRole('button', { name: 'Mark module complete' })
+    expect(missingList()).toHaveTextContent(/^Tick build step 5$/)
+
+    const build = document.getElementById('build')!
+    const checkbox = build.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')[4]!
+    await user.click(checkbox)
+    expect(markButton()).toBeEnabled()
+    expect(markButton()).not.toHaveAttribute('aria-describedby')
+    expect(screen.queryByText(/Tick build step/)).not.toBeInTheDocument()
   })
 })
 

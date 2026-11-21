@@ -54,28 +54,61 @@ export function areBuildStepsComplete(progress: ModuleProgress, stepIds: string[
   return stepIds.every((id) => progress.buildSteps[id] === true)
 }
 
+export interface MissingRequirements {
+  checklistIds: string[]
+  tryIt: boolean
+  quiz: boolean
+}
+
 export function canMarkModuleComplete(
   progress: ModuleProgress,
   options: { checklistIds: string[]; requireTryIt: boolean; passPercent?: number },
-): { ready: boolean; remaining: string[] } {
+): { ready: boolean; remaining: string[]; missing: MissingRequirements } {
   const remaining: string[] = []
   const passPercent = options.passPercent ?? PASSING_PERCENT
+  const missing: MissingRequirements = {
+    checklistIds: options.checklistIds.filter((id) => !progress.checklist[id]),
+    tryIt: options.requireTryIt && !progress.tryItDone,
+    quiz: !isQuizPassed(progress, passPercent),
+  }
 
-  if (!isQuizPassed(progress, passPercent)) {
+  if (missing.quiz) {
     remaining.push(`Pass the knowledge check (${passPercent}% or more)`)
   }
 
-  for (const id of options.checklistIds) {
-    if (!progress.checklist[id]) {
-      remaining.push(`Complete checklist item: ${id}`)
-    }
+  for (const id of missing.checklistIds) {
+    remaining.push(`Complete checklist item: ${id}`)
   }
 
-  if (options.requireTryIt && !progress.tryItDone) {
+  if (missing.tryIt) {
     remaining.push('Mark the Try it exercise as done')
   }
 
-  return { ready: remaining.length === 0, remaining }
+  return { ready: remaining.length === 0, remaining, missing }
+}
+
+/** "1", "1 and 2", "1, 2 and 5" */
+export function formatEnglishList(items: string[]): string {
+  if (items.length <= 1) return items.join('')
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
+}
+
+/** Plain-English to-do items for a module, numbering build steps by their position in `stepIds`. */
+export function describeMissingRequirements(
+  missing: MissingRequirements,
+  stepIds: string[],
+): string[] {
+  const items: string[] = []
+  const numbers = stepIds
+    .map((id, index) => (missing.checklistIds.includes(id) ? String(index + 1) : null))
+    .filter((n): n is string => n !== null)
+
+  if (numbers.length > 0) {
+    items.push(`Tick build step${numbers.length === 1 ? '' : 's'} ${formatEnglishList(numbers)}`)
+  }
+  if (missing.tryIt) items.push('Write what happened in Try it and tick I did this')
+  if (missing.quiz) items.push('Pass the knowledge check')
+  return items
 }
 
 export function countCompletedModules(state: LearnerState): number {

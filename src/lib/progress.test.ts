@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { createDefaultState } from './storage'
 import {
   canMarkModuleComplete,
+  describeMissingRequirements,
   findResumeModuleId,
+  formatEnglishList,
   getModuleStatus,
   isModuleUnlocked,
   overallCompletionRatio,
@@ -73,6 +75,39 @@ describe('progress computation', () => {
     })
     expect(result.ready).toBe(false)
     expect(result.remaining.some((r) => r.includes('b'))).toBe(true)
+    expect(result.missing).toEqual({ checklistIds: ['b'], tryIt: false, quiz: false })
+  })
+})
+
+describe('missing requirements wording', () => {
+  it('joins 1, 2 and 3+ items as an English list', () => {
+    expect(formatEnglishList([])).toBe('')
+    expect(formatEnglishList(['3'])).toBe('3')
+    expect(formatEnglishList(['1', '2'])).toBe('1 and 2')
+    expect(formatEnglishList(['1', '2', '5'])).toBe('1, 2 and 5')
+  })
+
+  it('numbers steps by position, not by id', () => {
+    const stepIds = ['m1-step-harness', 'm1-step-1', 'm1-step-solution', 'm1-step-2']
+    expect(
+      describeMissingRequirements(
+        { checklistIds: ['m1-step-1', 'm1-step-2'], tryIt: true, quiz: true },
+        stepIds,
+      ),
+    ).toEqual([
+      'Tick build steps 2 and 4',
+      'Write what happened in Try it and tick I did this',
+      'Pass the knowledge check',
+    ])
+    expect(
+      describeMissingRequirements(
+        { checklistIds: ['m1-step-solution'], tryIt: false, quiz: false },
+        stepIds,
+      ),
+    ).toEqual(['Tick build step 3'])
+    expect(
+      describeMissingRequirements({ checklistIds: [], tryIt: false, quiz: false }, stepIds),
+    ).toEqual([])
   })
 })
 
