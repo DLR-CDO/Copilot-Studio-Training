@@ -25,6 +25,8 @@ const para = (tokens: InlineToken[]): ConceptBlock => ({ type: 'paragraph', toke
 const list = (items: InlineToken[][]): ConceptBlock => ({ type: 'list', items })
 
 interface StepDef {
+  /** Set for steps added after launch, so saved progress on positional ids stays aligned. */
+  id?: string
   tokens: InlineToken[]
   substeps?: BuildSubStep[]
   verify?: boolean
@@ -41,10 +43,12 @@ const verifyStep = (tokens: InlineToken[], substeps?: BuildSubStep[]): StepDef =
 })
 
 function buildSteps(moduleNum: number, steps: (InlineToken[] | StepDef)[]): BuildStep[] {
-  return steps.map((step, i) => ({
-    id: `m${moduleNum}-step-${i + 1}`,
-    ...(Array.isArray(step) ? { tokens: step } : step),
-  }))
+  let position = 0
+  return steps.map((step) => {
+    const def = Array.isArray(step) ? { tokens: step } : step
+    const id = def.id ?? `m${moduleNum}-step-${(position += 1)}`
+    return { ...def, id }
+  })
 }
 
 /** First step for every module after Module 1: get from the home screen to the practice agent. */
@@ -75,7 +79,7 @@ export interface CourseMeta {
 export const courseMeta: CourseMeta = {
   eyebrow: 'Internal Training · No coding required',
   titleParts: [{ text: 'Build your first agent with ' }, { text: 'Copilot Studio', accent: true }],
-  lede: "A 10-module path for business users. You'll build one practice agent step by step, and by the last module you'll publish it for real. Every source is official Microsoft documentation.",
+  lede: "A step-by-step path for business users. You'll build one practice agent step by step, and by the last module you'll publish it for real. Every source is official Microsoft documentation.",
 }
 
 // ---------------------------------------------------------------------------
@@ -212,7 +216,7 @@ const m10ScreenshotsToCapture: ScreenshotRequest[] = [
   {
     id: 'm10-shot-1',
     caption:
-      'The Channels page after publishing, showing the Demo website tile alongside Teams and Microsoft 365 and the other channel tiles.',
+      'The Channels page after publishing, showing the Demo website tile alongside Teams + Microsoft 365 and the other channel tiles.',
     authorNotes:
       'Capture: the full Channels page of your published practice agent. Annotate: circle the Demo website tile with "start here for stakeholder review". public/screenshots/10-1.png exists but shows a colleague’s name in “Published by”; recapture or blur before use.',
   },
@@ -243,7 +247,9 @@ export const modules: Module[] = [
     title: 'What is an agent?',
     whyItMatters:
       'Everything in Copilot Studio makes sense once you can picture the parts of an agent.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 60,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Agent Architect',
     diagram: 'fig1',
     concept: [
@@ -294,10 +300,24 @@ export const modules: Module[] = [
             'A tour of Copilot Studio: the Overview page, the tabs along the top, and the test pane',
           ),
         ],
-        [t('Licensing basics and Copilot Credits, awareness level only')],
+        [
+          t(
+            'Licensing basics, awareness level only: on 1 September 2025, Copilot Credits replaced messages as the billing unit for agents',
+          ),
+        ],
       ]),
     ],
     buildSteps: buildSteps(1, [
+      // VERIFY IN UI
+      {
+        id: 'm1-step-harness',
+        verify: true,
+        tokens: [
+          t(
+            'Check which harness you are on. This course teaches the standard harness, which follows the topics and rules you define. Agents on the Microsoft Copilot harness look and work differently, so if your screens do not match the steps here, check the harness first.',
+          ),
+        ],
+      },
       [
         t(
           'Before you do anything, make sure you are in the correct environment, which is the DEV environment. Do not do anything until it is selected. To change it, click the ',
@@ -305,13 +325,14 @@ export const modules: Module[] = [
         ui('globe icon'),
         t(' in the bottom left corner, above your name, and select the DEV environment.'),
       ],
-      [
+      // VERIFY IN UI
+      verifyStep([
         t('On the home screen, once logged in, select '),
         ui('Other ways to build'),
         t(', then select '),
         ui('Agent (standard)'),
         t('.'),
-      ],
+      ]),
       {
         tokens: [t('Name your agent and create the solution that will store it.')],
         substeps: [
@@ -455,8 +476,16 @@ export const modules: Module[] = [
         label: 'Use generative AI to build agents fast',
       },
       {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/harnesses-overview',
+        label: 'Harnesses overview',
+      },
+      {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing-subscriptions',
         label: 'Licensing and subscriptions',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing',
+        label: 'Billing and Copilot Credits',
       },
     ]),
     checklist: [
@@ -478,7 +507,9 @@ export const modules: Module[] = [
     title: 'Pick the right environment',
     whyItMatters:
       'The #1 beginner mistake is building in the wrong place. Learn this before you build anything you care about.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 15,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Environment Guardian',
     diagram: 'fig2',
     concept: [
@@ -515,6 +546,16 @@ export const modules: Module[] = [
           kw('models', 'model'),
           t(' are allowed'),
         ],
+        [
+          t(
+            'Which knowledge source types makers can add: file uploads, SharePoint and OneDrive, and public websites. Since October 2026, admins can restrict each one in the Power Platform admin center',
+          ),
+        ],
+        [
+          t(
+            'Whether a data policy requires authentication. If it does, your agents cannot use the No authentication option',
+          ),
+        ],
       ]),
     ],
     buildSteps: buildSteps(2, [
@@ -538,7 +579,7 @@ export const modules: Module[] = [
       ],
       [
         t(
-          'Note what your admin controls here: data policies, and whether preview AI models are allowed.',
+          'Note what your admin controls here: data policies, whether preview AI models are allowed, which knowledge source types you can add, and whether sign-in is required.',
         ),
       ],
     ]),
@@ -557,6 +598,10 @@ export const modules: Module[] = [
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/admin-data-loss-prevention',
         label: 'Data policies for agents',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-end-user-authentication',
+        label: 'Authentication and data policies',
       },
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing',
@@ -581,7 +626,9 @@ export const modules: Module[] = [
     title: 'Add knowledge',
     whyItMatters:
       'Knowledge is what turns a generic chatbot into your expert. Answers come from your content, with citations.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 40,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Knowledge Keeper',
     diagram: 'fig3',
     concept: [
@@ -616,7 +663,10 @@ export const modules: Module[] = [
         headers: ['Source type', 'What it’s for'],
         rows: [
           ['SharePoint', 'Search a SharePoint site or document library your team already uses.'],
-          ['OneDrive', 'Ground answers in files stored in your OneDrive.'],
+          [
+            'OneDrive',
+            'Ground answers in files stored in OneDrive for Business. Microsoft Purview sensitivity labels are supported (October 2026).',
+          ],
           [
             'Uploaded files',
             'Ground answers in files you drag and drop in directly, like PDFs or Word docs.',
@@ -625,11 +675,15 @@ export const modules: Module[] = [
             'Public websites',
             'Pull answers from pages on the public web. Use web search only for broad agents that do not handle confidential information.',
           ],
+          [
+            'Also available',
+            'Dataverse tables, Azure SQL tables, Bing Custom Search, and enterprise data through connectors. Use these when the data your agent needs already lives there.',
+          ],
         ],
       },
       para([
         t(
-          'Other sources: Copilot Studio also lists other options, such as Dataverse tables and other business systems. They are used less often here.',
+          'Limits apply: the agent searches a limited number of sources of each type, files have size limits, and in Teams an answer shows at most 20 citations. Check the knowledge limits page in Go deeper before you plan a large agent.',
         ),
       ]),
     ],
@@ -699,6 +753,10 @@ export const modules: Module[] = [
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-test',
         label: 'Test knowledge sources',
       },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-unstructured-data#limits-and-limitations',
+        label: 'Knowledge limits and limitations',
+      },
     ]),
     checklist: [
       'Added one SharePoint site or file as a knowledge source',
@@ -719,7 +777,9 @@ export const modules: Module[] = [
     title: 'Build topics',
     whyItMatters:
       'When a conversation must follow a script, like collecting details for a request, topics give you full control.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 50,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Topic Designer',
     diagram: 'fig4',
     concept: [
@@ -738,6 +798,11 @@ export const modules: Module[] = [
           t(')'),
         ],
         [t('The three everyday nodes: message, question, condition')],
+        [
+          t(
+            'Condition groups: several conditions inside one Message, Question, or prompt node, so the topic needs fewer branches (June 2026)',
+          ),
+        ],
         [
           kw('Variables', 'variable'),
           t(' in plain terms: the '),
@@ -887,6 +952,10 @@ export const modules: Module[] = [
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-variables',
         label: 'Work with variables',
       },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-condition-groups',
+        label: 'Use condition groups (advanced)',
+      },
     ]),
     checklist: [
       'Built one topic with a question node',
@@ -906,7 +975,9 @@ export const modules: Module[] = [
     title: 'Add tools',
     whyItMatters:
       'Tools let your agent do things, not just talk: look up records, send emails, kick off approvals.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 35,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Toolsmith',
     diagram: 'fig5',
     concept: [
@@ -929,6 +1000,21 @@ export const modules: Module[] = [
         ],
         [t('Prompts as reusable AI instructions, and adding a prompt as a '), kw('tool', 'tool')],
         [kw('Agent', 'agent'), t(' flows for multi-step automation, awareness level')],
+        [
+          t('MCP servers as '),
+          kw('tools', 'tool'),
+          t(': a standard plug for external services, awareness level'),
+        ],
+        [
+          t(
+            'Computer use: the agent operates websites and desktop apps the way a person would. Generally available since May 2026',
+          ),
+        ],
+        [
+          t(
+            'On the Microsoft Copilot harness, workflows can also be added as tools (preview). This course uses the standard harness',
+          ),
+        ],
         [
           t('Why the '),
           kw('tool', 'tool'),
@@ -1004,6 +1090,7 @@ export const modules: Module[] = [
     ]),
     watchOuts: [
       "The tool's description decides whether the agent picks it at the right moment — a vague description means a missed tool.",
+      'Computer use is high impact — it clicks and types in real apps on someone’s behalf. Test it only in DEV, with test accounts and test data.',
     ],
     screenshots: m5Screenshots,
     tryIt: 'Add one connector-based tool to your practice agent and trigger it from the test pane.',
@@ -1028,6 +1115,14 @@ export const modules: Module[] = [
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/flow-nl',
         label: 'Build an agent flow with natural language',
       },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp',
+        label: 'MCP servers as tools',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/computer-use',
+        label: 'Computer use',
+      },
     ]),
     checklist: [
       'Added one connector-based tool to my practice agent',
@@ -1047,7 +1142,9 @@ export const modules: Module[] = [
     title: 'Work with multiple agents',
     whyItMatters:
       'One giant do-everything agent gets messy. Specialists with clear jobs are easier to build, test, and trust.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 45,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Team Orchestrator',
     diagram: 'fig6',
     concept: [
@@ -1063,15 +1160,22 @@ export const modules: Module[] = [
           kw('agent', 'agent'),
         ],
         [
-          t('Connecting to an existing '),
-          kw('Copilot Studio agent', 'connected-agent'),
-          t(' someone else built'),
+          kw('Connected agents', 'connected-agent'),
+          t(
+            ': an existing agent someone else built, in Copilot Studio, in Microsoft Foundry, or with the Microsoft 365 Agents SDK',
+          ),
+        ],
+        [
+          t(
+            'Agent2Agent (A2A) agents built outside Copilot Studio: the A2A protocol is generally available (April 2026), and adding an A2A agent as a connected agent is in preview',
+          ),
         ],
         [t('Writing descriptions so the parent always routes to the right specialist')],
         [
           kw('MCP', 'mcp'),
-          t(' servers, awareness level: a standard plug for external '),
+          t(' servers as '),
           kw('tools', 'tool'),
+          t(', awareness level: a standard plug for external services (see Module 5)'),
         ],
       ]),
     ],
@@ -1192,8 +1296,16 @@ export const modules: Module[] = [
         label: 'Connect to an existing Copilot Studio agent',
       },
       {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-agent-foundry-agent',
+        label: 'Connect a Microsoft Foundry agent',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-agent-agent-to-agent',
+        label: 'Connect an Agent2Agent (A2A) agent',
+      },
+      {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp',
-        label: 'MCP in Copilot Studio',
+        label: 'MCP servers as tools',
       },
     ]),
     checklist: [
@@ -1214,7 +1326,9 @@ export const modules: Module[] = [
     title: 'Settings, orchestration & models',
     whyItMatters:
       'The Settings page is where the agent\'s "brain" is configured. Understand it so defaults are a choice, not an accident.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 25,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Model Steward',
     diagram: 'fig7',
     concept: [
@@ -1240,7 +1354,14 @@ export const modules: Module[] = [
         [
           t('Picking a primary '),
           kw('model', 'model'),
-          t(' from the dropdown: the trade-off is reasoning depth vs speed vs cost'),
+          t(
+            ' from the dropdown: the trade-off is reasoning depth vs speed vs cost. The list changes often, so check the dropdown instead of memorising model names',
+          ),
+        ],
+        [
+          t('When Copilot Studio upgrades the default '),
+          kw('model', 'model'),
+          t(', you can keep your current one for up to 30 days to test and migrate (October 2026)'),
         ],
         [
           t('Separate '),
@@ -1336,7 +1457,9 @@ export const modules: Module[] = [
     title: 'Test, activity & evaluation',
     whyItMatters:
       '"It seemed fine when I tried it" is not testing. A repeatable test set is how you know the agent actually works.',
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 50,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Test Pilot',
     diagram: 'fig8',
     concept: [
@@ -1367,9 +1490,62 @@ export const modules: Module[] = [
           kw('test set', 'test-set'),
           t(': real questions paired with expected answers'),
         ],
-        [t('Choosing '), kw('evaluation', 'evaluation'), t(' methods and reading the results')],
+        [
+          kw('Evaluation', 'evaluation'),
+          t(
+            ' is generally available. A test set is either single response (one question, one answer) or conversation (several turns)',
+          ),
+        ],
+        [t('Choosing test methods and reading the results')],
         [t('The improvement loop: fix descriptions and instructions, re-run, compare')],
       ]),
+      {
+        type: 'table',
+        caption: 'Test methods',
+        headers: ['Test method', 'What it checks', 'Test set type'],
+        rows: [
+          [
+            'General quality',
+            'How good the response is overall. Every test set starts with it.',
+            'Single response or conversation',
+          ],
+          [
+            'Compare meaning',
+            'How closely the meaning matches your expected answer',
+            'Single response',
+          ],
+          [
+            'Text similarity',
+            'How closely the wording matches your expected answer',
+            'Single response',
+          ],
+          [
+            'Exact match',
+            'Whether the answer matches your expected answer exactly',
+            'Single response',
+          ],
+          [
+            'Keyword match',
+            'Whether the answer uses the keywords or phrases you expect',
+            'Single response or conversation',
+          ],
+          [
+            'Tool use',
+            'Whether the agent used the tools and resources you expect',
+            'Single response',
+          ],
+          [
+            'Content safety',
+            'Whether the response contains harmful content',
+            'Single response or conversation',
+          ],
+          [
+            'Custom',
+            'Whether the response meets criteria you write yourself',
+            'Single response or conversation',
+          ],
+        ],
+      },
     ],
     buildSteps: buildSteps(8, [
       openPracticeAgent(),
@@ -1416,7 +1592,11 @@ export const modules: Module[] = [
       ]),
       // VERIFY IN UI
       verifyStep([
-        t('Choose an evaluation method, then select '),
+        t('Select '),
+        ui('Add test method'),
+        t(
+          ' and choose the methods that fit your questions, such as Compare meaning when you have expected answers. Set a pass score if the method asks for one, then select ',
+        ),
         ui('Evaluate'),
         t(' to start the run.'),
       ]),
@@ -1456,6 +1636,10 @@ export const modules: Module[] = [
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-agent-evaluation-results',
         label: 'Run tests and view results',
       },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-agent-evaluation-multi-turn',
+        label: 'Conversation (multi-turn) tests',
+      },
     ]),
     checklist: [
       'Wrote a 10-question test set from real user questions',
@@ -1475,7 +1659,9 @@ export const modules: Module[] = [
     title: 'Monitor & improve',
     whyItMatters:
       "Publishing isn't the finish line. A 15-minute weekly review keeps a live agent healthy and improving.",
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 25,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Pulse Checker',
     diagram: 'fig9',
     concept: [
@@ -1492,6 +1678,14 @@ export const modules: Module[] = [
         [t('Turning analytics into fixes for conversational '), kw('agents', 'agent')],
         [t('Autonomous '), kw('agent', 'agent'), t(' health, where it applies')],
         [t('A simple weekly ritual: what to check, what "bad" looks like, who to tell')],
+        [t('User question and reaction lists, which you can filter and download as a CSV file')],
+        [t('Session transcripts, for people with the transcript viewer privilege')],
+        [
+          t(
+            'The Analytics Viewer role (April 2026): share analytics with colleagues without giving them maker rights',
+          ),
+        ],
+        [t('Custom metrics (preview): describe a business outcome and Copilot Studio scores it')],
       ]),
     ],
     buildSteps: buildSteps(9, [
@@ -1504,9 +1698,11 @@ export const modules: Module[] = [
       ],
       // VERIFY IN UI
       verifyStep([
-        t('In the row of tabs along the top of the page, select '),
-        ui('+2'),
-        t(' at the right end to show the hidden tabs.'),
+        t('Find '),
+        ui('Analytics'),
+        t(
+          ' in the row of tabs along the top of the page. On a narrow screen it may be under the overflow menu at the right end.',
+        ),
       ]),
       // VERIFY IN UI
       verifyStep([t('Select '), ui('Analytics'), t('. The analytics summary opens.')]),
@@ -1544,6 +1740,18 @@ export const modules: Module[] = [
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-improve-agent-health',
         label: 'Analyze autonomous agent health',
       },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-question-reaction-lists',
+        label: 'User question and reaction lists',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-transcripts-studio',
+        label: 'Session transcripts',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-custom-metrics',
+        label: 'Custom metrics (preview)',
+      },
     ]),
     checklist: [
       'Opened the Analytics summary page of a live or demo agent',
@@ -1563,7 +1771,9 @@ export const modules: Module[] = [
     title: 'Channels & publishing',
     whyItMatters:
       "Nothing is live until you press Publish. That's a feature: it means you decide exactly when users see changes.",
-    estimatedMinutes: '45–60 min',
+    estimatedMinutes: 35,
+    lastReviewed: '2026-11-21',
+    verifiedAgainst: '2026-11',
     badgeName: 'Ship It',
     diagram: 'fig10',
     concept: [
@@ -1582,9 +1792,13 @@ export const modules: Module[] = [
           kw('publish', 'publish'),
           t(', on purpose'),
         ],
-        [kw('Channels', 'channel'), t(': demo website, live website, Teams and Microsoft 365')],
+        [kw('Channels', 'channel'), t(': demo website, live website, Teams + Microsoft 365')],
         [t('Using the demo website for stakeholder review before broad rollout')],
-        [t('Teams and M365 deployment, including the admin approval step')],
+        [
+          t(
+            'Teams + Microsoft 365: use Authenticate with Microsoft for this channel. To reach the whole organisation, submit the agent for admin approval so it appears under Built for your org in the Teams app store and Built by your org in the Microsoft 365 Agent Store',
+          ),
+        ],
         [t('Single sign-on, awareness level')],
         [
           t('The pre-publish checklist, in order: right '),
@@ -1595,6 +1809,21 @@ export const modules: Module[] = [
           kw('channel', 'channel'),
         ],
       ]),
+      para([t('Awareness only, so you recognise them when you see them:')]),
+      list([
+        [
+          t(
+            'Since 23 October 2026, new agents can no longer connect to WhatsApp through the Azure Communication Services channel. Agents connected before then keep working',
+          ),
+        ],
+        [t('MCP and Agent2Agent (A2A) channels let other tools and agents call yours (preview)')],
+        [
+          t(
+            'A display name suffix tells the DEV, TEST, and production copies of an agent apart in Teams (preview)',
+          ),
+        ],
+        [t('A privacy statement link can appear at the start of conversations (preview)')],
+      ]),
       {
         type: 'table',
         caption: 'Channels and their role in rollout',
@@ -1603,8 +1832,8 @@ export const modules: Module[] = [
           ['Demo website', 'Share with stakeholders for review before broad rollout.'],
           ['Live website', 'The public-facing channel once the agent is ready to go live.'],
           [
-            'Teams & Microsoft 365',
-            'Deploy where people already work; requires an admin approval step.',
+            'Teams + Microsoft 365',
+            'Deploy where people already work. Use Authenticate with Microsoft. Organisation-wide availability goes through admin approval.',
           ],
         ],
       },
@@ -1630,11 +1859,11 @@ export const modules: Module[] = [
       ]),
       // VERIFY IN UI
       verifyStep([
-        t('In the row of tabs along the top of the page, select '),
-        ui('+2'),
-        t(' at the right end, then select '),
+        t('Select '),
         ui('Channels'),
-        t('.'),
+        t(
+          ' in the row of tabs along the top of the page. On a narrow screen it may be under the overflow menu at the right end.',
+        ),
       ]),
       // VERIFY IN UI
       verifyStep([
@@ -1672,11 +1901,15 @@ export const modules: Module[] = [
       },
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/publication-add-bot-to-microsoft-teams',
-        label: 'Connect an agent to Teams and Microsoft 365',
+        label: 'Connect an agent to Teams + Microsoft 365',
       },
       {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/microsoft-365-copilot-extend-with-agents',
         label: 'Extend Microsoft 365 Copilot with agents',
+      },
+      {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/publication-channels-mcp-agent-to-agent',
+        label: 'MCP and A2A channels (preview)',
       },
     ]),
     checklist: [

@@ -119,7 +119,12 @@ export interface Module {
   slug: string
   title: string
   whyItMatters: string
-  estimatedMinutes: string
+  /** Typical time to work through the module, in minutes. */
+  estimatedMinutes: number
+  /** Date (YYYY-MM-DD) the content was last checked against Microsoft Learn. */
+  lastReviewed: string
+  /** Month (YYYY-MM) of the Copilot Studio docs the content was checked against. */
+  verifiedAgainst: string
   badgeName: string
   concept: ConceptBlock[]
   diagram: DiagramId

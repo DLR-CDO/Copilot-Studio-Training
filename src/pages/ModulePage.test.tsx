@@ -52,6 +52,16 @@ describe('ModulePage navigation', () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' })
   })
 
+  it('shows when the module was last reviewed and its time estimate', async () => {
+    renderAt('/module/3')
+    expect(
+      await screen.findByText(
+        /Last reviewed: .+ · Verified against Copilot Studio docs \d{4}-\d{2}/,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Estimated time: 40 min')).toBeInTheDocument()
+  })
+
   it('points the last module at the final assessment', async () => {
     renderAt('/module/10')
     const cta = await screen.findByRole('link', { name: /take the final assessment/i })

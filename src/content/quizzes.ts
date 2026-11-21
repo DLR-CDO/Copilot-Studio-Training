@@ -48,6 +48,12 @@ const src = {
   publish: `${LEARN}/publication-fundamentals-publish-channels`,
   webChannels: `${LEARN}/publication-connect-bot-to-web-channels`,
   teams: `${LEARN}/publication-add-bot-to-microsoft-teams`,
+  billing: `${LEARN}/billing-licensing`,
+  whatsNew: `${LEARN}/whats-new`,
+  conditionGroups: `${LEARN}/authoring-condition-groups`,
+  computerUse: `${LEARN}/computer-use`,
+  a2a: `${LEARN}/add-agent-agent-to-agent`,
+  multiTurn: `${LEARN}/analytics-agent-evaluation-multi-turn`,
 }
 
 export const quizzesByModule: Record<number, QuizQuestion[]> = {
@@ -219,7 +225,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       options: ['In channels', 'In the test pane', 'In the solution', 'In the Overview page'],
       correctIndex: 0,
       explanation:
-        'Channels, such as a website or Teams and Microsoft 365, are where people use a published agent. The test pane is only for building.',
+        'Channels, such as a website or Teams + Microsoft 365, are where people use a published agent. The test pane is only for building.',
       sourceUrl: src.publish,
     },
     {
@@ -266,6 +272,16 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'Suggested prompts are starters, each with a title, that show users the kind of thing they can ask the agent.',
       sourceUrl: src.getStarted,
+    },
+    {
+      id: 'm1-q16',
+      type: 'multiple-choice',
+      prompt: "What replaced 'messages' as the billing unit for agents in September 2025?",
+      options: ['Tokens', 'Copilot Credits', 'Sessions', 'Licenses'],
+      correctIndex: 1,
+      explanation:
+        'On 1 September 2025, the common currency for agents changed from messages to Copilot Credits.',
+      sourceUrl: src.billing,
     },
   ],
 
@@ -477,6 +493,23 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'Agents stay in the environment where they were created. Switching only changes which environment you are looking at.',
       sourceUrl: src.environments,
+    },
+    {
+      id: 'm2-q16',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        "Your Add knowledge pop-up has no 'Public websites' option. What is the most likely reason?",
+      options: [
+        'Your license expired',
+        'An admin restricted that source type in the Power Platform admin center',
+        'The agent is already published',
+        'You picked the wrong model',
+      ],
+      correctIndex: 1,
+      explanation:
+        'Since October 2026, admins can restrict file uploads, SharePoint and OneDrive, or public websites as knowledge sources, separately or together.',
+      sourceUrl: src.whatsNew,
     },
   ],
 
@@ -888,6 +921,21 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Every topic has a trigger. You can change the trigger type to control when the topic starts.',
       sourceUrl: src.triggers,
     },
+    {
+      id: 'm4-q16',
+      type: 'multiple-choice',
+      prompt: 'What do condition groups let you do?',
+      options: [
+        'Manage several conditions inside one Message, Question, or prompt node',
+        'Group topics into folders',
+        'Share variables between agents',
+        'Run two topics at the same time',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Condition groups keep several conditions in a single node, which reduces branching and makes topics easier to review.',
+      sourceUrl: src.conditionGroups,
+    },
   ],
 
   // ---------------------------------------------------------------------
@@ -1092,6 +1140,23 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'There are connectors for many services from other companies too, not only Microsoft products.',
       sourceUrl: src.connectors,
+    },
+    {
+      id: 'm5-q16',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You want to try computer use so your agent can fill in a form in an internal web app. Where do you test it?',
+      options: [
+        'In DEV, with test accounts and test data',
+        'In production, so it sees real data',
+        'In the Default environment',
+        'Directly in Teams with real users',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Computer use controls real browsers and desktop apps on someone’s behalf. That is high impact, so test it only in DEV.',
+      sourceUrl: src.computerUse,
     },
   ],
 
@@ -1304,6 +1369,16 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'A child agent can have its own instructions, knowledge, and tools, chosen for its narrow job.',
       sourceUrl: src.childAgent,
+    },
+    {
+      id: 'm6-q16',
+      type: 'multiple-choice',
+      prompt: 'Which protocol lets your agent delegate to agents built outside Copilot Studio?',
+      options: ['SMTP', 'Agent2Agent (A2A)', 'OData', 'Direct Line'],
+      correctIndex: 1,
+      explanation:
+        'The Agent2Agent (A2A) protocol connects agents across platforms. Adding an A2A agent as a connected agent is in preview.',
+      sourceUrl: src.a2a,
     },
   ],
 
@@ -1520,6 +1595,23 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Record the baseline, try the change in DEV, compare against the baseline, and only then decide.',
       sourceUrl: src.selectModel,
     },
+    {
+      id: 'm7-q16',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Copilot Studio has just upgraded the default model, and you need time to re-test your agent. What can you do?',
+      options: [
+        'Keep the current model for up to 30 days while you test and migrate',
+        'Nothing; the upgrade applies immediately with no way back',
+        'Switch to a preview model in production',
+        'Unpublish the agent until the next model release',
+      ],
+      correctIndex: 0,
+      explanation:
+        'You can keep your agent on its current model for up to 30 days after a default upgrade, to test and migrate.',
+      sourceUrl: src.whatsNew,
+    },
   ],
 
   // ---------------------------------------------------------------------
@@ -1725,6 +1817,21 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Create the test set, fill it with real questions and expected answers, run it, then read the results.',
       sourceUrl: src.evalCreate,
     },
+    {
+      id: 'm8-q16',
+      type: 'multiple-choice',
+      prompt: 'What two kinds of test set can you create for an evaluation?',
+      options: [
+        'Single response and conversation (multi-turn)',
+        'Draft and published',
+        'Manual and automatic',
+        'Internal and external',
+      ],
+      correctIndex: 0,
+      explanation:
+        'A single response test checks one question and answer. A conversation test checks how the agent handles several turns.',
+      sourceUrl: src.multiTurn,
+    },
   ],
 
   // ---------------------------------------------------------------------
@@ -1926,6 +2033,23 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Knowing who to tell turns a finding into a fix, which is why it is part of the ritual.',
       sourceUrl: src.effectiveness,
     },
+    {
+      id: 'm9-q16',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your manager wants to see your agent’s analytics but should not be able to edit the agent. What do you give them?',
+      options: [
+        'The Analytics Viewer role',
+        'Co-owner rights on the agent',
+        'The environment admin role',
+        'A copy of the agent in their own environment',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The Analytics Viewer role shares analytics access without granting maker permissions.',
+      sourceUrl: src.whatsNew,
+    },
   ],
 
   // ---------------------------------------------------------------------
@@ -1960,7 +2084,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       id: 'm10-q3',
       type: 'multiple-choice',
       prompt:
-        "What does deploying to Teams and Microsoft 365 for your whole organisation need that the demo website doesn't?",
+        "What does deploying to Teams + Microsoft 365 for your whole organisation need that the demo website doesn't?",
       options: [
         'An admin approval step',
         'A new environment',
@@ -1969,7 +2093,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       ],
       correctIndex: 0,
       explanation:
-        'To make the agent available to your organisation in Teams and Microsoft 365, you submit it for admin approval.',
+        'To make the agent available to your organisation, submit it for admin approval so it appears under Built for your org in the Teams app store.',
       sourceUrl: src.teams,
     },
     {
@@ -2014,15 +2138,10 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       id: 'm10-q7',
       type: 'multiple-choice',
       prompt: 'Which channel puts the agent where people already work every day?',
-      options: [
-        'Teams and Microsoft 365',
-        'The demo website',
-        'The test pane',
-        'The Overview page',
-      ],
+      options: ['Teams + Microsoft 365', 'The demo website', 'The test pane', 'The Overview page'],
       correctIndex: 0,
       explanation:
-        'Teams and Microsoft 365 bring the agent into the apps people already use at work.',
+        'Teams + Microsoft 365 bring the agent into the apps people already use at work.',
       sourceUrl: src.teams,
     },
     {
@@ -2121,7 +2240,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       ],
       correctIndex: 0,
       explanation:
-        'Making the agent available to the whole organisation in Teams and Microsoft 365 goes through admin approval.',
+        'After an admin approves it, the agent appears under Built for your org in the Teams app store and Built by your org in the Microsoft 365 Agent Store.',
       sourceUrl: src.teams,
     },
     {
@@ -2138,6 +2257,21 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         "Nothing is live until you publish. That's a feature: you decide exactly when users see changes.",
       sourceUrl: src.publish,
+    },
+    {
+      id: 'm10-q16',
+      type: 'multiple-choice',
+      prompt: 'Which authentication option should you use for the Teams + Microsoft 365 channel?',
+      options: [
+        'Authenticate with Microsoft',
+        'No authentication',
+        'A shared password',
+        'Manual authentication with a personal account',
+      ],
+      correctIndex: 0,
+      explanation:
+        'For publishing through the built-in Teams + Microsoft 365 channel, Learn recommends Authenticate with Microsoft.',
+      sourceUrl: src.authentication,
     },
   ],
 }

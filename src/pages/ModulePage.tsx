@@ -24,6 +24,7 @@ import { Quiz } from '../components/module/Quiz'
 import { MODULE_QUIZ_SIZE, passPercentFor } from '../lib/assessments'
 import { Celebration } from '../components/module/Celebration'
 import { Callout } from '../components/ui/Callout'
+import { formatMinutes, freshnessLine } from '../lib/moduleMeta'
 
 export function ModulePage() {
   const { id } = useParams()
@@ -150,13 +151,14 @@ export function ModulePage() {
             </span>
             <HarnessTag harness={mod.harness} />
           </div>
+          <p className="mt-2 font-mono text-xs text-muted">{freshnessLine(mod)}</p>
           <div className="mt-4">
             <Callout variant="why">
               <strong className="text-teal">Why it matters:</strong> {mod.whyItMatters}
             </Callout>
           </div>
           <p className="mt-3 font-mono text-xs text-muted">
-            Estimated time: {mod.estimatedMinutes}
+            Estimated time: {formatMinutes(mod.estimatedMinutes)}
           </p>
           <div className="mt-4 flex flex-wrap gap-2 print:hidden">
             <button

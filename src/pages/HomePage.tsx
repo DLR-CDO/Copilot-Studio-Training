@@ -13,6 +13,7 @@ import { ProgressRing } from '../components/layout/ProgressRing'
 import { ModuleBadge } from '../components/ui/ModuleBadge'
 import { MODULE_COUNT } from '../content/types'
 import { HarnessBanner } from '../components/module/Harness'
+import { totalMinutes } from '../lib/moduleMeta'
 
 export function HomePage() {
   const { state } = useLearner()
@@ -45,7 +46,7 @@ export function HomePage() {
             {modules.length} modules
           </span>
           <span className="rounded-pill border-[1.5px] border-teal bg-card px-3 py-1.5 font-mono text-xs text-teal">
-            45-60 min each
+            About {Math.round(totalMinutes(modules) / 60)} hours in total
           </span>
           <span className="rounded-pill border-[1.5px] border-violet bg-card px-3 py-1.5 font-mono text-xs text-violet">
             1 agent, built by you
