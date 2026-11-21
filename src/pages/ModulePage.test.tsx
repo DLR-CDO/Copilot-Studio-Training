@@ -52,6 +52,21 @@ describe('ModulePage navigation', () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' })
   }, 20_000)
 
+  it('asks what happened before Try it can be ticked off', async () => {
+    const user = userEvent.setup()
+    renderAt('/module/2')
+    const tick = await screen.findByRole('checkbox', { name: 'I did this' })
+    expect(tick).toBeDisabled()
+    expect(tick).toHaveAccessibleDescription('Write what happened first, then tick this off.')
+
+    const box = screen.getByRole('textbox', { name: 'What happened when you tried it?' })
+    expect(box).toHaveAccessibleDescription(/Don't paste confidential data/)
+    await user.type(box, 'I was in Default, so I switched to Dev.')
+    expect(tick).toBeEnabled()
+    await user.click(tick)
+    expect(tick).toBeChecked()
+  })
+
   it('shows when the module was last reviewed and its time estimate', async () => {
     renderAt('/module/3')
     expect(

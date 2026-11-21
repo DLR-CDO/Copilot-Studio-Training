@@ -7,7 +7,7 @@ export const MODULE_QUIZ_MAX_TRUE_FALSE = 2
 /** Fewest scenario questions in one module attempt. */
 export const MODULE_QUIZ_MIN_SCENARIO = 2
 /** Smallest bank a published module may have. */
-export const MIN_BANK_SIZE = 15
+export const MIN_BANK_SIZE = 20
 
 export interface FinalAssessment {
   scope: QuizScope

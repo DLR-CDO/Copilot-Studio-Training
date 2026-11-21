@@ -36,7 +36,7 @@ export function HelpPage() {
           className="rounded-card border border-line bg-card p-5"
         >
           <h2 id="builder-heading" className="font-display text-lg font-bold text-teal">
-            Course builder
+            Course site contact
           </h2>
           <p className="mt-2 text-sm text-muted">
             For problems with this course site: quizzes, progress, or certificates.

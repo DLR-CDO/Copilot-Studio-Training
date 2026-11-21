@@ -1,5 +1,5 @@
 /**
- * Quiz banks, 15+ questions per module. The server draws 8 per attempt (see
+ * Quiz banks, 20+ questions per module. The server draws 10 per attempt (see
  * `server/quizEngine.ts`) and 2 per module for the final assessment.
  *
  * Server only: this file holds the answers. Browser code must never import it; a test enforces
@@ -51,6 +51,13 @@ const src = {
   billing: `${LEARN}/billing-licensing`,
   whatsNew: `${LEARN}/whats-new`,
   multiTurn: `${LEARN}/analytics-agent-evaluation-multi-turn`,
+  computerUse: `${LEARN}/computer-use`,
+  a2a: `${LEARN}/add-agent-agent-to-agent`,
+  foundry: `${LEARN}/add-agent-foundry-agent`,
+  retiredModel: `${LEARN}/authoring-retired-model`,
+  modelLifecycle: `${LEARN}/guidance/plan-agent-model-lifecycle`,
+  shareAnalytics: `${LEARN}/admin-share-bots`,
+  monitorOverview: `${LEARN}/analytics-overview`,
 }
 
 export const quizzesByModule: Record<number, QuizQuestion[]> = {
@@ -286,6 +293,86 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Agents are billed in Copilot Credits. They replaced messages as the billing unit on September 1, 2025.',
       sourceUrl: src.billing,
     },
+    {
+      id: 'm1-q17',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt: 'Sam’s HR agent answers well, but nobody knows what to ask it. What helps most?',
+      options: [
+        'Add suggested prompts that show what to ask',
+        'Switch the agent to a preview model',
+        'Move the agent to the Production environment',
+        'Add trigger phrases to every system topic',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Suggested prompts are starters that show users the kind of thing they can ask the agent.',
+      sourceUrl: src.getStarted,
+    },
+    {
+      id: 'm1-q18',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Copilot Studio just created your agent from a plain-English description. What do you do before trusting it?',
+      options: [
+        'Ask it real questions in the test pane and check the answers',
+        'Publish it to Teams so colleagues can try it out first',
+        'Delete the description, since the agent no longer needs it',
+        'Turn on web search so it can answer any question at all',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Always try a new agent in the test pane first, and check its answers before anyone else uses it.',
+      sourceUrl: src.getStarted,
+    },
+    {
+      id: 'm1-q19',
+      type: 'multiple-choice',
+      prompt: 'What does an agent’s description mainly do?',
+      options: [
+        'Says what the agent is for, so requests can be matched to it',
+        'Sets the colors and icon users see in Microsoft Teams',
+        'Lists the people who are allowed to chat with the agent',
+        'Stores the expected answers that are used for testing',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The description says what the agent does. Orchestration and other agents use it to decide when to send requests to it.',
+      sourceUrl: src.getStarted,
+    },
+    {
+      id: 'm1-q20',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'A teammate wants to put real customer contract data into a practice agent "just to see if it works". What do you say?',
+      options: [
+        'Use made-up practice data, never real confidential data',
+        'Fine, as long as the agent stays in the DEV environment',
+        'Fine, if the file is uploaded rather than linked',
+        'Fine, once web search has been turned off for the agent',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Uploaded files need no sign-in, so anyone who can chat with the agent can get answers from them. Practice agents use made-up data only.',
+      sourceUrl: src.fileUpload,
+    },
+    {
+      id: 'm1-q21',
+      type: 'multiple-choice',
+      prompt: 'Which of these could start an autonomous agent?',
+      options: [
+        'A new email arriving in a shared mailbox',
+        'A user typing a question in Teams',
+        'A maker selecting Test in Copilot Studio',
+        'A colleague opening the demo website',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Autonomous agents act on triggers, such as a new email arriving, without anyone opening a chat.',
+      sourceUrl: src.whatIs,
+    },
   ],
 
   // ---------------------------------------------------------------------
@@ -514,6 +601,86 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Since October 2026, admins can restrict file uploads, SharePoint and OneDrive, or public websites as knowledge sources, separately or together.',
       sourceUrl: src.whatsNew,
     },
+    {
+      id: 'm2-q17',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Two teammates built practice agents, but one can’t see the other’s, even though both are in Copilot Studio. What do you check first?',
+      options: [
+        'Whether both are in the same environment',
+        'Whether both used the same model',
+        'Whether both agents are published to Teams',
+        'Whether both turned on web search',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Each environment holds its own agents. If two people are in different environments, they can’t see each other’s agents.',
+      sourceUrl: src.environments,
+    },
+    {
+      id: 'm2-q18',
+      type: 'multiple-choice',
+      prompt: 'What is the Dev environment for?',
+      options: [
+        'Building and trying out changes safely',
+        'Hosting the agent your users rely on',
+        'Storing Copilot Credits for billing',
+        'Final sign-off right before go-live',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Dev is where you build and try ideas. Test is for checking before go-live, and Production is what users rely on.',
+      sourceUrl: src.environments,
+    },
+    {
+      id: 'm2-q19',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You want to move your finished practice agent from DEV to Test. What makes that possible?',
+      options: [
+        'Building it inside a solution',
+        'Copying its instructions into a new agent',
+        'Publishing it to the demo website',
+        'Switching the globe icon to Test',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Solutions package an agent and its parts so it can be moved between environments.',
+      sourceUrl: src.solutions,
+    },
+    {
+      id: 'm2-q20',
+      type: 'multiple-choice',
+      prompt: 'Who sets the data policies for an environment?',
+      options: [
+        'Your Power Platform admin',
+        'Each maker, separately for each agent',
+        'Microsoft, the same for every company',
+        'The first person who builds an agent',
+      ],
+      correctIndex: 0,
+      explanation: 'Admins set data policies (DLP) for an environment. Makers work within them.',
+      sourceUrl: src.dataPolicies,
+    },
+    {
+      id: 'm2-q21',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your agent works in DEV, but a connector it uses is blocked in Test. What is a likely cause?',
+      options: [
+        'Test has different data policies than DEV',
+        'Test environments always use older models',
+        'Agents forget their tools when they are moved',
+        'Connectors only work in the environment they were added in',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Each environment can have its own data policies, so a connector allowed in one can be blocked in another.',
+      sourceUrl: src.dataPolicies,
+    },
   ],
 
   // ---------------------------------------------------------------------
@@ -737,6 +904,86 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'Add the library as a knowledge source, then turn off Allow ungrounded responses so the agent does not fall back on the model’s general knowledge.',
       sourceUrl: src.knowledge,
     },
+    {
+      id: 'm3-q16',
+      type: 'multiple-choice',
+      prompt:
+        'Which knowledge sources need the user to sign in with their work account to give answers?',
+      options: [
+        'SharePoint, OneDrive, and Dataverse',
+        'Uploaded files and public websites',
+        'Only public websites',
+        'None, knowledge never needs sign-in',
+      ],
+      correctIndex: 0,
+      explanation:
+        'SharePoint, OneDrive, and Dataverse answer using the user’s own access, so the user must sign in. Uploaded files and public websites need no sign-in.',
+      sourceUrl: src.knowledge,
+    },
+    {
+      id: 'm3-q17',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your SharePoint source answers in the test pane, but people on the demo website (set to No authentication) get nothing. Why?',
+      options: [
+        'SharePoint needs users to sign in, and the demo site has no sign-in',
+        'SharePoint sources only work after a month of indexing data',
+        'The demo website always uses a different model than the test pane',
+        'Knowledge sources are removed each time the agent is published',
+      ],
+      correctIndex: 0,
+      explanation:
+        'SharePoint answers use the signed-in user’s access. With No authentication, nobody is signed in, so the agent can’t search SharePoint for them.',
+      sourceUrl: src.authentication,
+    },
+    {
+      id: 'm3-q18',
+      type: 'multiple-choice',
+      prompt: 'What does web search ("Use information from the web") search?',
+      options: [
+        'All of Bing, not just the sites you added',
+        'Only the public websites you added as knowledge',
+        'Only SharePoint sites in your organization',
+        'Only Microsoft Learn and other Microsoft sites',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Web search uses all of Bing. Public website knowledge sources only search the sites you add.',
+      sourceUrl: src.publicWebsite,
+    },
+    {
+      id: 'm3-q19',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your agent quotes last year’s travel policy. The new one is in a different SharePoint folder. What do you do?',
+      options: [
+        'Point the knowledge at the current file and remove the old one',
+        'Turn on web search so it can find newer versions online',
+        'Switch to classic orchestration to stop it guessing',
+        'Add a system topic that tells users to ignore any outdated answers',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The agent answers from the knowledge you give it. Keep sources current and remove outdated ones.',
+      sourceUrl: src.knowledge,
+    },
+    {
+      id: 'm3-q20',
+      type: 'multiple-choice',
+      prompt: 'You uploaded a file as knowledge. Who can get answers from it?',
+      options: [
+        'Anyone who can chat with the agent',
+        'Only people who can open it in SharePoint',
+        'Only the maker who uploaded it',
+        'Only people with an admin role',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Uploaded files need no sign-in, so everyone who can chat with the agent can get answers from them. Never upload confidential files to a practice agent.',
+      sourceUrl: src.fileUpload,
+    },
   ],
 
   // ---------------------------------------------------------------------
@@ -931,6 +1178,86 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'Every topic has a trigger. You can change the trigger type to control when the topic starts.',
       sourceUrl: src.triggers,
+    },
+    {
+      id: 'm4-q16',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Users answer "Which site?" with typos, so your condition never matches. What helps most?',
+      options: [
+        'Ask the question with a fixed list of options to pick from',
+        'Add many more trigger phrases so the topic starts more often',
+        'Replace the question node with a message node',
+        'Turn off generative orchestration for the agent',
+      ],
+      correctIndex: 0,
+      explanation:
+        'A question node can offer multiple-choice options, so the answer always matches one of your condition values.',
+      sourceUrl: src.topics,
+    },
+    {
+      id: 'm4-q17',
+      type: 'multiple-choice',
+      prompt: 'What is a trigger phrase?',
+      options: [
+        'An example of what a user might say to start a topic',
+        'A word that ends the conversation immediately',
+        'The message the agent always sends first to greet every user',
+        'A password that unlocks admin-only topics',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Trigger phrases are examples of what users say. They help the agent decide when to start the topic.',
+      sourceUrl: src.triggers,
+    },
+    {
+      id: 'm4-q18',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your topic asks for a laptop model, then for urgency, then branches on urgency. Where does the condition node go?',
+      options: [
+        'After the urgency question, so it can use the answer',
+        'Before any question, at the top of the topic',
+        'Inside the trigger, next to the trigger phrases',
+        'In a separate system topic called Conditions',
+      ],
+      correctIndex: 0,
+      explanation:
+        'A condition can only branch on an answer the topic has already collected, so it goes after that question.',
+      sourceUrl: src.topics,
+    },
+    {
+      id: 'm4-q19',
+      type: 'multiple-choice',
+      prompt: 'Where do you find the Fallback topic to customize it?',
+      options: [
+        'On the Topics page, with the system topics',
+        'In Settings, under Security',
+        'On the Channels page, next to the demo website',
+        'In the Power Platform admin center',
+      ],
+      correctIndex: 0,
+      explanation:
+        'System topics such as Greeting, Fallback, and Escalate are listed on the Topics page, and you can edit them there.',
+      sourceUrl: src.systemTopics,
+    },
+    {
+      id: 'm4-q20',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt: 'In the test pane, a question starts the wrong topic. How do you find out why?',
+      options: [
+        'Check which topic ran, and why, in the activity map',
+        'Delete the topic and build it again from scratch',
+        'Publish the agent and wait for the analytics',
+        'Switch the model to one tagged Preview',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The test pane shows which topic is running, and the activity map shows why the agent picked it.',
+      sourceUrl: src.testPane,
     },
   ],
 
@@ -1136,6 +1463,85 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       correct: false,
       explanation:
         'There are connectors for many services from other companies too, not only Microsoft products.',
+      sourceUrl: src.connectors,
+    },
+    {
+      id: 'm5-q16',
+      type: 'multiple-choice',
+      prompt: 'What kind of credentials does a new tool use by default?',
+      options: [
+        'End user: each person signs in as themselves',
+        'Maker-provided: your own connection for everyone',
+        'Admin: one account shared across the environment',
+        'None, because tools never need to sign in',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Tools use end user credentials by default, so each person acts with their own access. Maker-provided is a choice you make on purpose.',
+      sourceUrl: src.tools,
+    },
+    {
+      id: 'm5-q17',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'A tool that reads a shared mailbox is set to Maker-provided credentials. What is the risk?',
+      options: [
+        'Everyone who chats can act with your access',
+        'The tool stops working when you publish',
+        'Users have to sign in twice for every message',
+        'The agent can no longer use any knowledge',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Maker-provided credentials run the tool with your access for everyone who chats with the agent.',
+      sourceUrl: src.tools,
+    },
+    {
+      id: 'm5-q18',
+      type: 'multiple-choice',
+      prompt: 'What is computer use, at an awareness level?',
+      options: [
+        'A tool that works apps and websites through their screen',
+        'A setting that limits how many computers can chat',
+        'A report showing which devices used the agent',
+        'A way to install Copilot Studio on your own laptop',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Computer use lets an agent work with apps and websites through their user interface, the way a person would.',
+      sourceUrl: src.computerUse,
+    },
+    {
+      id: 'm5-q19',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You want the agent to create a ticket in a system that has a connector. Where do you start?',
+      options: [
+        'Add a tool and search for that connector',
+        'Add the system’s website as a knowledge source',
+        'Write a topic that tells users to email IT',
+        'Ask your admin to turn on web search',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Connectors are added as tools, which let the agent take actions such as creating a ticket.',
+      sourceUrl: src.connectors,
+    },
+    {
+      id: 'm5-q20',
+      type: 'multiple-choice',
+      prompt: 'Which of these is an example of a connector action?',
+      options: [
+        'Create an item in a SharePoint list',
+        'Answer from an uploaded PDF file',
+        'Greet the user when a chat starts',
+        'Score answers against a test set',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Connector actions do things in other systems, such as creating a SharePoint list item.',
       sourceUrl: src.connectors,
     },
   ],
@@ -1349,6 +1755,86 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'A child agent can have its own instructions, knowledge, and tools, chosen for its narrow job.',
       sourceUrl: src.childAgent,
+    },
+    {
+      id: 'm6-q16',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your parent agent keeps answering travel questions itself instead of using the Travel child agent. What do you fix first?',
+      options: [
+        'The child agent’s description, so it says what it handles',
+        'The parent’s model, by switching to a preview one',
+        'The channel, by moving the agent to Teams',
+        'The environment, by moving everything to Test',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The parent routes to a child agent based on its description, so make it say clearly what the child handles.',
+      sourceUrl: src.childAgent,
+    },
+    {
+      id: 'm6-q17',
+      type: 'multiple-choice',
+      prompt: 'What is a connected agent?',
+      options: [
+        'A separate, existing agent yours can call',
+        'A child agent that lives inside your agent',
+        'An agent that only runs in Microsoft Teams',
+        'A backup copy made when you publish',
+      ],
+      correctIndex: 0,
+      explanation:
+        'A connected agent is a separate agent, often built and published by someone else, that your agent can hand work to.',
+      sourceUrl: src.connectedAgent,
+    },
+    {
+      id: 'm6-q18',
+      type: 'multiple-choice',
+      prompt: 'What is A2A (Agent2Agent), at an awareness level?',
+      options: [
+        'A standard way for agents to talk to other agents',
+        'A billing plan that shares credits between agents',
+        'A test method that compares two agents’ answers',
+        'A channel that publishes agents to websites',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Agent2Agent (A2A) is an open protocol that lets your agent connect to agents built elsewhere.',
+      sourceUrl: src.a2a,
+    },
+    {
+      id: 'm6-q19',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your company already has an agent built in Microsoft Foundry. How can your Copilot Studio agent use it?',
+      options: [
+        'Connect it as another agent',
+        'Rebuild it as a topic',
+        'Upload it as a knowledge file',
+        'Add it as a suggested prompt',
+      ],
+      correctIndex: 0,
+      explanation:
+        'You can connect a Microsoft Foundry agent to your Copilot Studio agent instead of rebuilding it.',
+      sourceUrl: src.foundry,
+    },
+    {
+      id: 'm6-q20',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt: 'When does a child agent make more sense than a connected agent?',
+      options: [
+        'When only your agent needs it and you manage both',
+        'When another team owns and publishes it separately',
+        'When it has to be shared by many different agents',
+        'When it runs in a different environment',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Child agents live inside your agent and are managed with it. Connected agents are separate agents that can be reused and managed on their own.',
+      sourceUrl: src.otherAgents,
     },
   ],
 
@@ -1564,6 +2050,75 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'Record the baseline, try the change in DEV, compare against the baseline, and only then decide.',
       sourceUrl: src.selectModel,
+    },
+    {
+      id: 'm7-q16',
+      type: 'multiple-choice',
+      prompt:
+        'Copilot Studio upgraded your agent from a retired model. How long can "Continue using retired models" keep the old one?',
+      options: ['Up to 30 days', 'Up to 7 days', 'Up to 1 year', 'Forever, until you change it'],
+      correctIndex: 0,
+      explanation:
+        'Continue using retired models keeps the old model for up to 30 days after an automatic upgrade, for models that offer the extension.',
+      sourceUrl: src.retiredModel,
+    },
+    {
+      id: 'm7-q17',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt: 'A model your agent uses retires next month. What is the safest plan?',
+      options: [
+        'Test the replacement model with your test set before the date',
+        'Do nothing, because the 30-day setting keeps the old model forever',
+        'Pick a preview model so the agent never has to change',
+        'Turn off orchestration until the retirement date passes',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Treat a model change like a release: evaluate the new model, adjust instructions, and only then rely on it.',
+      sourceUrl: src.modelLifecycle,
+    },
+    {
+      id: 'm7-q18',
+      type: 'multiple-choice',
+      prompt: 'Where do you set content moderation for the whole agent?',
+      options: [
+        'Settings > Generative AI',
+        'Settings > Security',
+        'The Channels page',
+        'Power Platform admin center',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Agent-level content moderation is in the Generative AI settings. A generative answers node can override it for one topic.',
+      sourceUrl: src.knowledge,
+    },
+    {
+      id: 'm7-q19',
+      type: 'multiple-choice',
+      prompt: 'What is the default content moderation level for an agent’s generated answers?',
+      options: ['High', 'Lowest', 'Moderate', 'Off'],
+      correctIndex: 0,
+      explanation:
+        'The default is High. Lower levels let more answers through, including potentially harmful ones. (Prompts in prompt builder default to Moderate.)',
+      sourceUrl: src.knowledge,
+    },
+    {
+      id: 'm7-q20',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Moderation is High for the agent, but one topic’s generative answers node is set to Moderate. Which applies in that topic?',
+      options: [
+        'The topic’s setting',
+        'The agent’s setting',
+        'Whichever is stricter',
+        'Neither, moderation turns off',
+      ],
+      correctIndex: 0,
+      explanation:
+        'At runtime the topic-level setting takes precedence. Without one, the agent-level setting applies.',
+      sourceUrl: src.knowledge,
     },
   ],
 
@@ -1792,6 +2347,83 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'A single response test checks one question and answer. A conversation test checks how the agent handles several turns.',
       sourceUrl: src.multiTurn,
+    },
+    {
+      id: 'm8-q17',
+      type: 'multiple-choice',
+      prompt: 'Which four things does General quality check?',
+      options: [
+        'Relevance, groundedness, completeness, and abstention',
+        'Speed, cost, answer length, and tone of voice',
+        'Spelling, grammar, formatting, and politeness',
+        'Citations, keywords, exact wording, and tools used',
+      ],
+      correctIndex: 0,
+      explanation:
+        'General quality checks relevance, groundedness, completeness, and abstention. An answer must pass all four to be high quality.',
+      sourceUrl: src.evalOverview,
+    },
+    {
+      id: 'm8-q18',
+      type: 'multiple-choice',
+      prompt: 'What does the Content safety test method check?',
+      options: [
+        'Whether answers contain the harmful content you pick',
+        'Whether answers quote your knowledge sources correctly',
+        'Whether the agent is safe to publish to Teams',
+        'Whether users are signed in before chatting',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Content safety fails any answer with harmful content of the selected type: violent, hateful, self-harm, or sexual.',
+      sourceUrl: src.evalOverview,
+    },
+    {
+      id: 'm8-q19',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your agent should politely refuse salary questions, but General quality keeps flagging those refusals. What do you do?',
+      options: [
+        'Add a Custom test method that describes the expected refusal',
+        'Delete those questions so the test set always passes',
+        'Turn content moderation down to Lowest for those answers',
+        'Switch every question in the test set to Exact match',
+      ],
+      correctIndex: 0,
+      explanation:
+        'General quality checks whether the agent tried to answer, so it can flag a correct refusal. A Custom method with your own criteria can treat the refusal as a pass.',
+      sourceUrl: src.evalOverview,
+    },
+    {
+      id: 'm8-q20',
+      type: 'multiple-choice',
+      prompt: 'What is the difference between content safety and content moderation?',
+      options: [
+        'Safety is a test; moderation filters live answers',
+        'They are two names for exactly the same setting',
+        'Safety is for Teams; moderation is for websites',
+        'Moderation is a test; safety filters live answers',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Content safety is a test method in evaluation. Content moderation is the setting that filters answers while people chat.',
+      sourceUrl: src.evalOverview,
+    },
+    {
+      id: 'm8-q21',
+      type: 'multiple-choice',
+      prompt: 'Which test methods need an expected answer on every question?',
+      options: [
+        'Compare meaning, Text similarity, and Exact match',
+        'General quality, Content safety, and Custom',
+        'Keyword match, Tool use, General quality, and Custom',
+        'Only General quality',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Compare meaning, Text similarity, and Exact match compare the agent’s answer with the one you expect, so each question needs one.',
+      sourceUrl: src.evalOverview,
     },
   ],
 
@@ -2042,6 +2674,84 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'For publishing through the built-in Teams + Microsoft 365 channel, Learn recommends Authenticate with Microsoft.',
       sourceUrl: src.authentication,
     },
+    {
+      id: 'm9-q17',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'You switched sign-in to Authenticate with Microsoft and saved, but the demo site still lets anyone chat. Why?',
+      options: [
+        'Sign-in changes apply only after you publish',
+        'Sign-in takes a week to reach the demo site',
+        'The demo site ignores every sign-in setting',
+        'You must also turn off web search first',
+      ],
+      correctIndex: 0,
+      explanation: 'Authentication changes take effect only after you publish the agent again.',
+      sourceUrl: src.authentication,
+    },
+    {
+      id: 'm9-q18',
+      type: 'multiple-choice',
+      prompt: 'Which channel lets a classmate try your agent from a link before a wide rollout?',
+      options: [
+        'The demo website',
+        'Teams + Microsoft 365',
+        'A custom live website',
+        'The test pane',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The demo website gives you a link for quick reviews. It isn’t meant for production use.',
+      sourceUrl: src.webChannels,
+    },
+    {
+      id: 'm9-q19',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your demo site link, with No authentication on, was posted in a public forum by mistake. What is the quickest fix?',
+      options: [
+        'Turn on Authenticate with Microsoft and publish again',
+        'Delete the forum post and change nothing else',
+        'Rename the agent so the old link stops working',
+        'Switch the agent to classic orchestration',
+      ],
+      correctIndex: 0,
+      explanation:
+        'With No authentication, anyone with the link can chat. Requiring sign-in, then publishing, closes it.',
+      sourceUrl: src.authentication,
+    },
+    {
+      id: 'm9-q20',
+      type: 'multiple-choice',
+      prompt: 'What should you check about tools before sharing an agent?',
+      options: [
+        'Whether any use Maker-provided credentials',
+        'Whether each tool has its own custom icon',
+        'Whether tools are listed in alphabetical order',
+        'Whether every tool was added on the same day',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Maker-provided credentials let everyone who chats act with your access, so check them before sharing.',
+      sourceUrl: src.tools,
+    },
+    {
+      id: 'm9-q21',
+      type: 'multiple-choice',
+      prompt: 'Which three things does the sign-in check before sharing cover?',
+      options: [
+        'Sign-in setting, uploaded files, and tool credentials',
+        'Model, orchestration mode, and moderation level',
+        'Channels, analytics, and weekly review owner',
+        'Topic names, trigger phrases, and variables',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Before sharing, check who can chat (sign-in), what they could reach (uploaded files), and whose access tools use (credentials).',
+      sourceUrl: src.authentication,
+    },
   ],
   // ---------------------------------------------------------------------
   // Module 10 — Monitor & improve
@@ -2264,6 +2974,80 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       explanation:
         'The Monitor page only covers real conversations. Activity in the test pane never shows up, so review a published agent.',
       sourceUrl: src.analytics,
+    },
+    {
+      id: 'm10-q17',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your manager wants to watch your agent’s numbers each week but must not change anything. What do you do?',
+      options: [
+        'Share it with the Analytics Viewer role',
+        'Share it with them as an editor',
+        'Send screenshots of the Monitor page',
+        'Give them your Copilot Studio login',
+      ],
+      correctIndex: 0,
+      explanation:
+        'The Analytics Viewer role gives read-only access to the agent’s analytics, without edit rights. Never share your own login.',
+      sourceUrl: src.shareAnalytics,
+    },
+    {
+      id: 'm10-q18',
+      type: 'multiple-choice',
+      prompt: 'What can someone with the Analytics Viewer role do?',
+      options: [
+        'See the Monitor page only',
+        'Edit topics but not publish',
+        'Publish but not edit topics',
+        'Share the agent with others',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Analytics Viewers see the agent’s analytics only. They can’t edit, test, publish, or share it.',
+      sourceUrl: src.shareAnalytics,
+    },
+    {
+      id: 'm10-q19',
+      type: 'multiple-choice',
+      scenario: true,
+      prompt:
+        'Your analyst has Analytics Viewer but can’t open the transcripts behind a metric. What else do they need?',
+      options: [
+        'The Bot Transcript Viewer security role',
+        'The Environment Maker security role',
+        'Editor rights on the agent',
+        'A second Analytics Viewer role',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Drill-downs into transcripts also need the Bot Transcript Viewer security role, which an admin grants for the environment.',
+      sourceUrl: src.shareAnalytics,
+    },
+    {
+      id: 'm10-q20',
+      type: 'multiple-choice',
+      prompt: 'Can you give the Analytics Viewer role to a group?',
+      options: [
+        'No, only to individual people',
+        'Yes, to any Microsoft 365 group',
+        'Yes, but only to admin groups',
+        'Only to groups in Production',
+      ],
+      correctIndex: 0,
+      explanation:
+        'Agent owners can share the Analytics Viewer role with individuals only, not with groups.',
+      sourceUrl: src.shareAnalytics,
+    },
+    {
+      id: 'm10-q21',
+      type: 'multiple-choice',
+      prompt: 'How long are session details and transcripts available on the Monitor page?',
+      options: ['The last 28 days', 'The last 7 days', 'The last 360 days', 'Forever'],
+      correctIndex: 0,
+      explanation:
+        'Monitor data is kept for up to 360 days, but session details and transcripts only for the last 28 days.',
+      sourceUrl: src.monitorOverview,
     },
   ],
 }

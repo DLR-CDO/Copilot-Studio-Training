@@ -79,6 +79,13 @@ export function ModulePage() {
     [moduleId, updateModule],
   )
 
+  const onReflection = useCallback(
+    (reflection: string) => {
+      updateModule(moduleId, { reflection })
+    },
+    [moduleId, updateModule],
+  )
+
   const onNotes = useCallback(
     (notes: string) => {
       updateModule(moduleId, { notes })
@@ -207,7 +214,13 @@ export function ModulePage() {
             </section>
           ) : null}
 
-          <TryIt text={mod.tryIt} done={progress.tryItDone} onToggle={onToggleTryIt} />
+          <TryIt
+            text={mod.tryIt}
+            done={progress.tryItDone}
+            reflection={progress.reflection}
+            onToggle={onToggleTryIt}
+            onReflection={onReflection}
+          />
 
           <Quiz
             scope={String(moduleId)}

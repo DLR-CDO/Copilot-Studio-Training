@@ -1555,7 +1555,21 @@ export const modules: Module[] = [
             ' tags: fine to explore, never for production, and your admin controls whether they appear at all',
           ),
         ],
-        [t('Content moderation, and the Allow ungrounded responses setting you met in Module 3')],
+        [
+          t('When a '),
+          kw('model', 'model'),
+          t(' retires, Copilot Studio upgrades your '),
+          kw('agent', 'agent'),
+          t(' automatically. Turn on '),
+          ui('Continue using retired models'),
+          t(
+            ' in the Model section of Settings to keep the old one for up to 30 days while you test the new one. Not every model offers this, so check the retirement table on Microsoft Learn',
+          ),
+        ],
+        [
+          kw('Content moderation', 'content-moderation'),
+          t(', and the Allow ungrounded responses setting you met in Module 3'),
+        ],
         [
           kw('Authentication', 'authentication'),
           t(': who is allowed to chat with the '),
@@ -1568,7 +1582,12 @@ export const modules: Module[] = [
       list([
         [
           t(
-            'When Copilot Studio upgrades the default model, you can keep your current one for up to 30 days to test and migrate (October 2026).',
+            'While the 30-day setting is on, you can switch between the retired and upgraded model at any time, and it applies to future upgrades until you turn it off.',
+          ),
+        ],
+        [
+          t(
+            'Treat any model change like a release: run your test set from Module 8 on the new model before you rely on it.',
           ),
         ],
       ]),
@@ -1582,6 +1601,17 @@ export const modules: Module[] = [
         t(' to find the orchestration section.'),
       ],
       [t('Write down the current orchestration mode (generative vs classic) without changing it.')],
+      // VERIFY IN UI
+      {
+        ...verifyStep([
+          t('Still in Settings, find '),
+          ui('Continue using retired models'),
+          t(
+            ' in the Model section. Write down whether it is on, without changing it. If you can’t see it, your model doesn’t offer the 30-day extension.',
+          ),
+        ]),
+        id: 'm7-step-retired-models',
+      },
       [
         t('Go back to the Overview page. Close Settings, then select '),
         ui('Overview'),
@@ -1624,6 +1654,10 @@ export const modules: Module[] = [
         label: 'Preview models for generative responses',
       },
       {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-retired-model',
+        label: 'Continue using a retired AI model',
+      },
+      {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompt-model-settings',
         label: 'Prompt builder model settings',
       },
@@ -1636,6 +1670,7 @@ export const modules: Module[] = [
       'Opened Settings on my practice agent',
       'Wrote down the current orchestration mode without changing it',
       'Wrote down the current primary model without changing it',
+      'Checked whether Continue using retired models is on',
       'Can point out any preview or experimental tags',
       'Know who controls whether preview models are allowed',
     ],
@@ -1698,11 +1733,37 @@ export const modules: Module[] = [
         ],
         [t('The improvement loop: fix descriptions and instructions, re-run, compare')],
       ]),
-    ],
-    goodToKnow: [
       para([
-        t('Evaluation is generally available. These are all the test methods you can choose from:'),
+        t(
+          'Every test set starts with General quality. It needs no expected answers, and it scores each answer on four things. A high-quality answer must pass all four:',
+        ),
       ]),
+      list([
+        [t('Relevance: does it stay on the subject and answer the question?')],
+        [t('Groundedness: is it based on your knowledge, not made up?')],
+        [t('Completeness: does it cover every part of the question?')],
+        [t('Abstention: did the agent try to answer at all?')],
+      ]),
+      para([
+        kw('Content safety', 'content-safety'),
+        t(
+          ' is a test method that fails any answer containing harmful content of the type you choose: violent, hateful, self-harm, or sexual. It is pass or fail, and works on single response and conversation test sets. Add it to every test set for an agent that will face real users.',
+        ),
+      ]),
+      para([
+        t('Content safety tests the answers. '),
+        kw('Content moderation', 'content-moderation'),
+        t(
+          ' is the setting that filters them in the first place, from Lowest to Highest. The default is High. Set it for the whole agent in ',
+        ),
+        ui('Settings'),
+        t(' > '),
+        ui('Generative AI'),
+        t(
+          ', or for one topic in its generative answers node, which wins at runtime. Lowering it lets more answers through, including potentially harmful ones, so leave it at High unless you have a reason and your admin agrees.',
+        ),
+      ]),
+      para([t('These are all the test methods you can choose from:')]),
       {
         type: 'table',
         caption: 'Test methods',
@@ -1750,6 +1811,25 @@ export const modules: Module[] = [
           ],
         ],
       },
+    ],
+    goodToKnow: [
+      list([
+        [
+          t(
+            'You can add up to five test methods to one evaluation. Compare meaning, Text similarity, and Exact match need an expected answer on every question.',
+          ),
+        ],
+        [
+          t(
+            'Text similarity can miss a change in meaning: two answers can share most words and still disagree. Prefer Compare meaning for policy answers.',
+          ),
+        ],
+        [
+          t(
+            'The newer evaluation screen calls Tool use Capability use, and offers Classification, which labels answers by instructions you write, much like Custom. The methods you see can vary by environment.',
+          ),
+        ],
+      ]),
     ],
     buildSteps: buildSteps(8, [
       openPracticeAgent(),
@@ -1799,7 +1879,7 @@ export const modules: Module[] = [
         t('Select '),
         ui('Add test method'),
         t(
-          '. Keep General quality, which scores how good each answer is overall, and add Compare meaning, which checks each answer against the one you expect. Set a pass score if a method asks for one, then select ',
+          '. Keep General quality, which scores how good each answer is overall. Add Compare meaning, which checks each answer against the one you expect, and Content safety, which fails any harmful answer. Set a pass score if a method asks for one, then select ',
         ),
         ui('Evaluate'),
         t(' to start the run.'),
@@ -1819,6 +1899,7 @@ export const modules: Module[] = [
     watchOuts: [],
     tips: [
       'Nothing ships untested: evaluation before publishing, every time. A 10-question test set is the minimum bar.',
+      'If the right answer is a polite refusal, General quality may flag it, because it checks whether the agent tried to answer. Use a Custom test method that describes the refusal you expect.',
     ],
     screenshots: [],
     screenshotsToCapture: m8ScreenshotsToCapture,
@@ -1848,7 +1929,8 @@ export const modules: Module[] = [
     ]),
     checklist: [
       'Wrote a 10-question test set from real user questions',
-      'Ran an evaluation with General quality and Compare meaning, and read the results',
+      'Ran an evaluation with General quality, Compare meaning, and Content safety, and read the results',
+      'Can explain the difference between content safety (a test) and content moderation (a filter)',
       'Found my worst-scoring answer',
       'Fixed a description or instruction and re-ran the test',
     ],
@@ -2113,14 +2195,40 @@ export const modules: Module[] = [
           ),
         ],
       ]),
+      para([
+        t('To show the numbers to a manager or analyst, don’t make them an editor. Share the '),
+        kw('agent', 'agent'),
+        t(' with the '),
+        kw('Analytics Viewer', 'analytics-viewer'),
+        t(' role instead: open '),
+        ui('Share'),
+        t(', add the person, and select '),
+        ui('Analytics viewer'),
+        t(
+          '. They land on the Monitor page and see nothing else: no topics, tools, settings, test pane, or publishing, and they can’t share the agent on. Only the agent’s owner can give the role, and only to individuals, not groups.',
+        ),
+      ]),
+      para([
+        t(
+          'Analytics Viewer doesn’t include conversation transcripts. Opening the questions behind a metric, or downloading sessions, also needs the ',
+        ),
+        ui('Bot Transcript Viewer'),
+        t(
+          ' security role, which an admin grants for the environment. Transcripts are real user conversations, so ask for that role only when someone needs it.',
+        ),
+      ]),
     ],
     goodToKnow: [
       list([
         [t('User question and reaction lists can be filtered and downloaded as a CSV file.')],
-        [t('Session transcripts are available to people with the transcript viewer privilege.')],
         [
           t(
-            'The Analytics Viewer role (April 2026) shares analytics with colleagues without giving them maker rights.',
+            'Monitor keeps data for up to 360 days. Session details and transcripts are kept for the last 28 days, and times are shown in UTC.',
+          ),
+        ],
+        [
+          t(
+            'Someone who is an editor on any agent in an environment can’t also be an Analytics Viewer in that environment.',
           ),
         ],
         [t('Custom metrics (preview): describe a business outcome and Copilot Studio scores it.')],
@@ -2201,6 +2309,10 @@ export const modules: Module[] = [
         label: 'Session transcripts',
       },
       {
+        url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/admin-share-bots',
+        label: 'Share an agent’s analytics (Analytics Viewer)',
+      },
+      {
         url: 'https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-custom-metrics',
         label: 'Custom metrics (preview)',
       },
@@ -2211,6 +2323,7 @@ export const modules: Module[] = [
       "Named one thing I'd improve based on the data",
       'Turned sign-in back on and published again',
       'Know what a 15-minute weekly review should cover',
+      'Know how to share the numbers with the Analytics Viewer role instead of edit rights',
     ],
   },
 ]

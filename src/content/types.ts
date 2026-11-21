@@ -158,6 +158,8 @@ export interface ModuleProgress {
   checklist: Record<string, boolean>
   buildSteps: Record<string, boolean>
   tryItDone: boolean
+  /** The learner's own short account of doing the Try it task. */
+  reflection: string
   notes: string
   /** Best quiz score as a percent. */
   quizBestPercent: number

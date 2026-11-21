@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Outlet } from 'react-router-dom'
-import { COURSE_BUILDER } from '../../content/support'
+import { BUILT_BY } from '../../content/support'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import { SearchDialog } from './SearchDialog'
@@ -73,7 +73,7 @@ export function AppShell() {
           <Outlet />
 
           <footer className="mx-auto mt-12 max-w-3xl border-t border-line pt-4 text-center font-mono text-xs text-muted print:hidden">
-            Built by {COURSE_BUILDER.name} ·{' '}
+            Built by {BUILT_BY} ·{' '}
             <Link to="/help" className="text-violet underline">
               Help and support
             </Link>

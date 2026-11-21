@@ -1,4 +1,6 @@
-/** Who learners contact for help, and who built the course. Change contacts here only. */
+/** Who learners contact for help, and who the course credits as its builder. Change them here only. */
+export const BUILT_BY = 'CDO'
+
 export const SUPPORT_EMAIL = 'cdo-agent-support@digitalrealty.com'
 
 export const COURSE_BUILDER = {

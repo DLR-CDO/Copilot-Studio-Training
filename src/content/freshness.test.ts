@@ -56,6 +56,14 @@ describe('module freshness metadata', () => {
       'm1-step-4',
       'm1-step-5',
     ])
+    expect(modules[6]!.buildSteps.map((s) => s.id).slice(0, 6)).toEqual([
+      'm7-step-1',
+      'm7-step-2',
+      'm7-step-3',
+      'm7-step-4',
+      'm7-step-retired-models',
+      'm7-step-5',
+    ])
   })
 })
 

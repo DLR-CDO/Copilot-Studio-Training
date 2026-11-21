@@ -7,6 +7,7 @@ export function getModuleProgress(state: LearnerState, moduleId: number): Module
       checklist: {},
       buildSteps: {},
       tryItDone: false,
+      reflection: '',
       notes: '',
       quizBestPercent: 0,
       quizAttempts: 0,
@@ -29,6 +30,7 @@ export function getModuleStatus(state: LearnerState, moduleId: number): ModuleSt
 
   const hasActivity =
     progress.tryItDone ||
+    progress.reflection.trim().length > 0 ||
     progress.quizAttempts > 0 ||
     Object.values(progress.buildSteps).some(Boolean) ||
     Object.values(progress.checklist).some(Boolean) ||

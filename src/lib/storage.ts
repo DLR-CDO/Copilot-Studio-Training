@@ -17,6 +17,7 @@ export function emptyModuleProgress(): ModuleProgress {
     checklist: {},
     buildSteps: {},
     tryItDone: false,
+    reflection: '',
     notes: '',
     quizBestPercent: 0,
     quizAttempts: 0,
@@ -43,6 +44,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 const MAX_CHEAT_SHEET_CHECKS = 100
+export const MAX_REFLECTION_CHARS = 500
+export const MIN_REFLECTION_CHARS = 15
 /** Quizzes had 5 questions before scores were saved as percents. */
 const LEGACY_QUIZ_SIZE = 5
 
@@ -78,6 +81,8 @@ function coerceModuleProgress(raw: unknown): ModuleProgress {
       ? Object.fromEntries(Object.entries(raw.buildSteps).map(([k, v]) => [k, Boolean(v)]))
       : {},
     tryItDone: Boolean(raw.tryItDone),
+    reflection:
+      typeof raw.reflection === 'string' ? raw.reflection.slice(0, MAX_REFLECTION_CHARS) : '',
     notes: typeof raw.notes === 'string' ? raw.notes : '',
     quizBestPercent: coercePercent(raw),
     quizAttempts:

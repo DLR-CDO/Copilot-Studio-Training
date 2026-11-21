@@ -196,6 +196,24 @@ export const glossary: GlossaryTerm[] = [
     definition:
       'A setting under Settings > Generative AI > Knowledge (older screens: use general knowledge). When it is off, the agent only answers when it used a knowledge source or tool, instead of falling back on the AI model’s general knowledge.',
   },
+  {
+    id: 'content-moderation',
+    term: 'Content moderation',
+    definition:
+      'How strictly the agent filters harmful content out of generated answers, from Lowest to Highest. The default is High. Set it for the whole agent in Generative AI settings, or for one topic in its generative answers node, which wins at runtime.',
+  },
+  {
+    id: 'content-safety',
+    term: 'Content safety (test method)',
+    definition:
+      'An evaluation test method that fails any answer containing harmful content of the type you pick: violent, hateful, self-harm, or sexual.',
+  },
+  {
+    id: 'analytics-viewer',
+    term: 'Analytics Viewer',
+    definition:
+      'A sharing role that lets one person see an agent’s Monitor page and nothing else. They can’t edit, test, publish, or share the agent. Only individuals can get it, not groups.',
+  },
 ]
 
 export function getGlossaryTerm(id: string): GlossaryTerm | undefined {

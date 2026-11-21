@@ -76,7 +76,7 @@ describe('module quiz attempts', () => {
     expect(authored.filter((q) => q.scenario).length).toBeGreaterThanOrEqual(2)
   })
 
-  it('returns the same open attempt until it is submitted, then draws mostly new questions', async () => {
+  it('returns the same open attempt until it is submitted, then draws all new questions', async () => {
     const { service } = await setup()
     const first = await service.startQuiz(alice, '2')
     const reopened = await service.startQuiz(alice, '2')
@@ -86,11 +86,8 @@ describe('module quiz attempts', () => {
     const retake = await service.startQuiz(alice, '2')
     expect(retake.attemptId).not.toBe(first.attemptId)
     const before = new Set(first.questions.map((q) => q.id))
-    // Unseen questions are used first, so only the shortfall repeats.
-    const bankSize = quizzesByModule[2]!.length
-    expect(retake.questions.filter((q) => before.has(q.id)).length).toBe(
-      2 * MODULE_QUIZ_SIZE - bankSize,
-    )
+    expect(quizzesByModule[2]!.length).toBeGreaterThanOrEqual(2 * MODULE_QUIZ_SIZE)
+    expect(retake.questions.filter((q) => before.has(q.id))).toEqual([])
   })
 
   it('grades on the server and returns explanations, sources, and a timestamped attempt', async () => {
@@ -289,13 +286,27 @@ describe('saved progress', () => {
   it('returns the same saved progress from any device', async () => {
     const { service } = await setup()
     await take(service, alice, '2', MODULE_QUIZ_SIZE)
-    await service.saveUiState(alice, { version: 1, modules: { '2': { tryItDone: true } } })
+    await service.saveUiState(alice, {
+      version: 1,
+      modules: { '2': { tryItDone: true, reflection: 'Switched to Dev.' } },
+    })
     const laterSession = await service.getProgress({ ...alice })
     expect(laterSession.state.modules['2']).toMatchObject({
       quizBestPercent: 100,
       quizAttempts: 1,
       tryItDone: true,
+      reflection: 'Switched to Dev.',
     })
+  })
+
+  it('caps a saved Try it reflection at 500 characters', async () => {
+    const { service } = await setup()
+    await service.saveUiState(alice, {
+      version: 1,
+      modules: { '1': { reflection: 'x'.repeat(5000) } },
+    })
+    const view = await service.getProgress(alice)
+    expect(view.state.modules['1']!.reflection).toHaveLength(500)
   })
 
   it('ignores quiz scores sent in saved UI state', async () => {

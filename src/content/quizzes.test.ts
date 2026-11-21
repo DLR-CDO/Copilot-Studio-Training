@@ -119,6 +119,15 @@ describe('draws', () => {
     }
   })
 
+  it.each(banks)('module $id retakes never repeat the last attempt’s questions', ({ bank }) => {
+    let last = new Set<string>()
+    for (let seed = 1; seed <= SEEDS; seed += 1) {
+      const quiz = drawModuleQuiz(bank, last, seeded(seed))
+      expect(quiz.filter((q) => last.has(q.id))).toEqual([])
+      last = new Set(quiz.map((q) => q.id))
+    }
+  })
+
   it('always draws a valid final assessment with no repeats from the last attempt', () => {
     let last = new Set<string>()
     for (let seed = 1; seed <= SEEDS; seed += 1) {
