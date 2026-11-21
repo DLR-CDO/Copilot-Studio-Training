@@ -584,7 +584,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
         'You should check a citation to confirm an answer actually came from your knowledge, rather than assuming it is correct.',
       correct: true,
       explanation:
-        'Checking whether an answer actually came from your knowledge is one of the skills this module builds.',
+        'Check the citation. It shows whether an answer actually came from your knowledge sources.',
       sourceUrl: src.knowledgeTest,
     },
     {
@@ -771,7 +771,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm4-q3',
       type: 'multiple-choice',
-      prompt: "Which three nodes does this module call the 'everyday' building blocks of a topic?",
+      prompt: "Which three nodes are the 'everyday' building blocks of a topic?",
       options: [
         'Message, question, condition',
         'Trigger, tool, channel',
@@ -991,7 +991,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm5-q5',
       type: 'multiple-choice',
-      prompt: 'What is a prompt, as covered in this module?',
+      prompt: 'In Copilot Studio, what is a prompt?',
       options: [
         'Reusable AI instructions that can be added as a tool',
         'A knowledge source made from your saved chat messages',
@@ -1122,7 +1122,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
     {
       id: 'm5-q14',
       type: 'multiple-choice',
-      prompt: 'Which of these is NOT a kind of tool covered in this module?',
+      prompt: 'Which of these can NOT be added to an agent as a tool?',
       options: ['A knowledge source', 'A connector action', 'A prompt', 'An agent flow'],
       correctIndex: 0,
       explanation:
@@ -1214,7 +1214,7 @@ export const quizzesByModule: Record<number, QuizQuestion[]> = {
       type: 'multiple-choice',
       scenario: true,
       prompt:
-        'One agent answers IT, HR, and facilities questions and keeps mixing them up. What structure does this module recommend?',
+        'One agent answers IT, HR, and facilities questions and keeps mixing them up. Which structure fixes this?',
       options: [
         'Specialist child agents with narrow jobs and clear descriptions',
         'One much longer set of instructions that covers all three areas',

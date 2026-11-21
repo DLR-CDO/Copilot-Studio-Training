@@ -380,7 +380,7 @@ function QuizQuestionField({
 
       {question.type === 'order' ? (
         <>
-          <ol className="space-y-2">
+          <ol className="space-y-2" aria-labelledby={promptId}>
             {order.map((stepIndex, position) => {
               const label = question.steps[stepIndex] ?? ''
               return (

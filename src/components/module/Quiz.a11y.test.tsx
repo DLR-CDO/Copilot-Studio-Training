@@ -24,6 +24,18 @@ function radioNamesAreAnswerText() {
   }
 }
 
+function answerGroupsNamedByQuestion() {
+  const groups = [
+    ...screen.getAllByRole('group'),
+    ...screen.queryAllByRole('radiogroup'),
+    ...screen.queryAllByRole('list').filter((list) => list.closest('fieldset')),
+  ]
+  expect(groups.length).toBeGreaterThanOrEqual(10)
+  for (const group of groups) {
+    expect(group).toHaveAccessibleName(/^\d+\. .+/)
+  }
+}
+
 async function answerEverything(user: ReturnType<typeof userEvent.setup>) {
   const groups = new Map<string, HTMLElement>()
   for (const radio of screen.getAllByRole('radio')) {
@@ -69,6 +81,7 @@ describe('Quiz accessibility', () => {
 
     expect(await seriousViolations(container)).toEqual([])
     radioNamesAreAnswerText()
+    answerGroupsNamedByQuestion()
     expect(screen.getByText('Answer all questions to submit.')).toBeInTheDocument()
 
     await answerEverything(user)
@@ -97,6 +110,7 @@ describe('Quiz accessibility', () => {
     const user = userEvent.setup()
     renderQuiz()
     await startQuiz(user)
+    answerGroupsNamedByQuestion()
     const down = screen.getAllByRole('button', { name: /down$/ })[0]!
     await user.click(down)
     expect(document.body.textContent).toMatch(/Moved ".+" to position 2 of \d+\./)

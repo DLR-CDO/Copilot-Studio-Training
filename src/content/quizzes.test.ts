@@ -66,6 +66,13 @@ describe('question banks', () => {
     }
   })
 
+  it.each(allQuestions.map((q) => ({ id: q.id, q })))(
+    '$id reads correctly in the final assessment, away from its module',
+    ({ q }) => {
+      expect(`${q.prompt} ${q.explanation}`).not.toMatch(/\bthis (module|lesson)\b/i)
+    },
+  )
+
   it.each(banks)('module $id does not give answers away by length', ({ bank }) => {
     const choices = bank.filter((q) => q.type === 'multiple-choice')
     const longest = choices.filter(

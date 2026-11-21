@@ -1,4 +1,4 @@
-import { PRE_PUBLISH_CHECKS, getModuleById } from '../content/modules'
+import { PRE_PUBLISH_CHECKS, getModuleById, modules } from '../content/modules'
 import { houseRules } from '../content/links'
 import { useLearner } from '../lib/useLearner'
 
@@ -29,7 +29,7 @@ function CheckList({ section, items }: { section: string; items: string[] }) {
 
 export function CheatSheetPage() {
   const devTestProd = getModuleById(2)
-  const weeklyReview = getModuleById(9)
+  const weeklyReview = modules.find((m) => m.slug === 'monitor-and-improve')
 
   return (
     <div className="mx-auto max-w-4xl print:max-w-full">
