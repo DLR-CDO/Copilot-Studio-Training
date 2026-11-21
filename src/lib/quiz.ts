@@ -1,14 +1,4 @@
-import type { QuizQuestion } from '../content/types'
-
-export type ShuffledQuizQuestion =
-  | (Extract<QuizQuestion, { type: 'multiple-choice' }> & { type: 'multiple-choice' })
-  | Extract<QuizQuestion, { type: 'true-false' }>
-  | (Omit<Extract<QuizQuestion, { type: 'order' }>, 'steps'> & {
-      steps: string[]
-      /** originalIndices[i] is the index into the *original* question's `steps` array
-       *  for the item currently displayed at position i. */
-      originalIndices: number[]
-    })
+import type { PublicQuizQuestion, QuizQuestion } from '../content/types'
 
 /** Fisher–Yates shuffle. Accepts a pluggable RNG so behavior is testable/deterministic. */
 export function shuffleArray<T>(items: T[], rng: () => number = Math.random): T[] {
@@ -30,45 +20,31 @@ function shuffledIndices(count: number, rng: () => number): number[] {
   )
 }
 
-/**
- * Shuffle question order, and within each question:
- * - multiple-choice: shuffle option order (correctIndex remapped)
- * - order: shuffle the displayed step order (correctOrder stays relative to original steps)
- * - true-false: unchanged
- */
-export function shuffleQuiz(
-  questions: QuizQuestion[],
+export interface DisplayQuestion {
+  question: PublicQuizQuestion
+  /** Option positions (indices into `question.options`) in the order they are shown. */
+  optionOrder: number[]
+  /** Starting arrangement of an ordering question, as indices into `question.steps`. */
+  stepOrder: number[]
+}
+
+/** Shuffles each question's options and starting step order for display. */
+export function arrangeForDisplay(
+  questions: PublicQuizQuestion[],
   rng: () => number = Math.random,
-): ShuffledQuizQuestion[] {
-  const questionOrder = shuffledIndices(questions.length, rng)
-  return questionOrder.map((qIndex) => {
-    const q = questions[qIndex]!
-
-    if (q.type === 'multiple-choice') {
-      const optionOrder = shuffledIndices(q.options.length, rng)
-      return {
-        ...q,
-        options: optionOrder.map((i) => q.options[i]!),
-        correctIndex: optionOrder.indexOf(q.correctIndex),
-      }
-    }
-
-    if (q.type === 'order') {
-      const originalIndices = shuffledIndices(q.steps.length, rng)
-      return {
-        ...q,
-        steps: originalIndices.map((i) => q.steps[i]!),
-        originalIndices,
-      }
-    }
-
-    return q
-  })
+): DisplayQuestion[] {
+  return questions.map((question) => ({
+    question,
+    optionOrder:
+      question.type === 'multiple-choice' ? shuffledIndices(question.options.length, rng) : [],
+    stepOrder: question.type === 'order' ? shuffledIndices(question.steps.length, rng) : [],
+  }))
 }
 
 /**
- * Answers keyed by question id, always relative to the *original* (unshuffled) question:
- * option index for multiple-choice, boolean for true-false, original step indices for order.
+ * Answers keyed by question id: an option index for multiple-choice, a boolean for true/false,
+ * and step indices in the chosen order for ordering questions. Indices refer to the question as
+ * it was sent (the browser) or as it was authored (server grading).
  */
 export type QuizAnswers = Record<string, unknown>
 

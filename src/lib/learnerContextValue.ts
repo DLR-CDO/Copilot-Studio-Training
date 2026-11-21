@@ -1,8 +1,15 @@
 import { createContext } from 'react'
-import type { LearnerState, ModuleProgress, ThemeMode } from '../content/types'
-import type { CertificateSummary, SessionUser } from './api'
+import type {
+  AttemptLogEntry,
+  LearnerState,
+  ModuleProgress,
+  QuizAttemptView,
+  QuizScope,
+  ThemeMode,
+} from '../content/types'
+import type { AssessmentStatus, CertificateSummary, QuizOutcome, SessionUser } from './api'
 import type { CompletionResult } from './completion'
-import type { QuizResult } from '../components/module/Quiz'
+import type { QuizAnswers } from './quiz'
 
 export type Session =
   | { mode: 'loading' }
@@ -17,6 +24,8 @@ export interface ServerStatus {
   /** Name for the certificate, entered by the learner; empty until entered. */
   name: string
   completion: CompletionResult
+  assessment: AssessmentStatus
+  attempts: AttemptLogEntry[]
   certificate: CertificateSummary | null
   passingPercent: number
 }
@@ -30,7 +39,9 @@ export interface LearnerContextValue {
   setTheme: (value: ThemeMode) => void
   updateModule: (moduleId: number, patch: Partial<ModuleProgress>) => void
   setCheatSheetCheck: (key: string, checked: boolean) => void
-  recordQuizResult: (moduleId: number, result: QuizResult) => Promise<void>
+  /** Rejects with a message to show the learner, e.g. during a cooldown. */
+  startQuiz: (scope: QuizScope) => Promise<QuizAttemptView>
+  submitQuiz: (scope: QuizScope, attemptId: string, answers: QuizAnswers) => Promise<QuizOutcome>
   /** Rejects with a message to show the learner if the name is not accepted. */
   saveName: (name: string) => Promise<void>
   resetProgress: () => void

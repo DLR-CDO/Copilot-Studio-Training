@@ -34,7 +34,10 @@ async function main(): Promise<void> {
 
   const logoPath = join(staticDir, 'assets', 'digital-realty-logo.png')
   const loadLogo = () => readFile(logoPath).catch(() => null)
-  const service = new LearnerService(store, quizzesByModule)
+  const service = new LearnerService(store, quizzesByModule, {
+    maxFailures: config.assessmentMaxFailures,
+    cooldownHours: config.assessmentCooldownHours,
+  })
   createServer(
     createRequestHandler({
       config,

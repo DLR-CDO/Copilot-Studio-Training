@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PASSING_PERCENT, PASSING_SCORE } from '../content/types'
+import { PASSING_PERCENT } from '../content/types'
 import { quizzesByModule } from '../content/quizzes'
 import {
   addMonthsUtc,
@@ -7,52 +7,52 @@ import {
   evaluateCompletion,
   formatCertificateDate,
   isExpired,
-  isQuizScorePassing,
+  isPercentPassing,
 } from './completion'
+import { FINAL_ASSESSMENT } from './assessments'
 import { scoreQuizSubmission } from './quiz'
 
-const sizes = Object.fromEntries(Object.entries(quizzesByModule).map(([id, q]) => [id, q.length]))
-const scoresOf = (score: number) =>
-  Object.fromEntries(Array.from({ length: 10 }, (_, i) => [String(i + 1), score]))
+const allModules = (percent: number) =>
+  Object.fromEntries(Array.from({ length: 10 }, (_, i) => [String(i + 1), percent]))
 
 describe('completion rule', () => {
-  it('derives the per-quiz pass mark from the single passing percent', () => {
+  it('uses one 80% pass mark for module quizzes and the final assessment', () => {
     expect(PASSING_PERCENT).toBe(80)
-    expect(PASSING_SCORE).toBe(4)
-    expect(isQuizScorePassing(4, 5)).toBe(true)
-    expect(isQuizScorePassing(3, 5)).toBe(false)
-    expect(isQuizScorePassing(0, 0)).toBe(false)
+    expect(isPercentPassing(80, '1')).toBe(true)
+    expect(isPercentPassing(79, '1')).toBe(false)
+    expect(isPercentPassing(80, FINAL_ASSESSMENT.scope)).toBe(true)
+    expect(isPercentPassing(75, FINAL_ASSESSMENT.scope)).toBe(false)
   })
 
-  it('is not complete when any single quiz is below the pass mark', () => {
-    const result = evaluateCompletion({ ...scoresOf(5), '7': 3 }, sizes)
+  it('is not complete when any single module quiz is below the pass mark', () => {
+    const result = evaluateCompletion({ ...allModules(100), '7': 75, [FINAL_ASSESSMENT.scope]: 90 })
     expect(result.complete).toBe(false)
+    expect(result.modulesComplete).toBe(false)
     expect(result.remainingModules).toEqual([7])
     expect(result.passedModules).toHaveLength(9)
   })
 
-  it('is not complete when a quiz was never taken', () => {
-    const scores = scoresOf(5)
+  it('is not complete when a module quiz was never taken', () => {
+    const scores = { ...allModules(100), [FINAL_ASSESSMENT.scope]: 90 }
     delete scores['10']
-    expect(evaluateCompletion(scores, sizes).complete).toBe(false)
+    expect(evaluateCompletion(scores).complete).toBe(false)
   })
 
-  it('is complete when every quiz passes, with the final score as a percent of all questions', () => {
-    const result = evaluateCompletion({ ...scoresOf(5), '1': 4, '2': 4 }, sizes)
+  it('is not complete until the final assessment is passed', () => {
+    const notTaken = evaluateCompletion(allModules(100))
+    expect(notTaken.modulesComplete).toBe(true)
+    expect(notTaken.assessmentPassed).toBe(false)
+    expect(notTaken.complete).toBe(false)
+    expect(evaluateCompletion({ ...allModules(100), [FINAL_ASSESSMENT.scope]: 75 }).complete).toBe(
+      false,
+    )
+  })
+
+  it('is complete with every module and the final passed, reporting the final score', () => {
+    const result = evaluateCompletion({ ...allModules(80), [FINAL_ASSESSMENT.scope]: 85 })
     expect(result.complete).toBe(true)
-    expect(result.finalPercent).toBe(96)
+    expect(result.finalPercent).toBe(85)
     expect(result.remainingModules).toEqual([])
-  })
-
-  it('accepts exactly the pass mark on every quiz', () => {
-    const result = evaluateCompletion(scoresOf(4), sizes)
-    expect(result.complete).toBe(true)
-    expect(result.finalPercent).toBe(80)
-  })
-
-  it('ignores impossible scores above the quiz length', () => {
-    const result = evaluateCompletion({ ...scoresOf(4), '3': 99 }, sizes)
-    expect(result.finalPercent).toBe(82)
   })
 })
 

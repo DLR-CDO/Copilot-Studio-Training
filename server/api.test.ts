@@ -15,6 +15,8 @@ const config: ServerConfig = {
   adminEmails: new Set(['admin@example.com']),
   publicBaseUrl: 'https://academy.example.test',
   mockUsers: [],
+  assessmentMaxFailures: 3,
+  assessmentCooldownHours: 24,
 }
 
 const clock = { now: new Date('2026-11-17T15:00:00Z') }
@@ -27,7 +29,7 @@ beforeEach(() => {
   deps = {
     config,
     store,
-    service: new LearnerService(store, quizzesByModule, () => clock.now),
+    service: new LearnerService(store, quizzesByModule, { now: () => clock.now }),
     loadLogo: async () => null,
     now: () => clock.now,
   }
@@ -63,11 +65,23 @@ const sendJson = (method: string, path: string, body: unknown, headers: Headers)
   )
 const parse = (res: ApiResponse) => JSON.parse(String(res.body))
 
+async function takeQuiz(scope: string, correct: number, headers: Headers) {
+  const start = await sendJson('POST', `/api/quiz/${scope}/start`, {}, headers)
+  expect(start.status).toBe(200)
+  const view = parse(start)
+  const res = await sendJson(
+    'POST',
+    `/api/quiz/${scope}/submit`,
+    { attemptId: view.attemptId, answers: answersFor(view, correct) },
+    headers,
+  )
+  expect(res.status).toBe(200)
+  return parse(res)
+}
+
 async function passAllQuizzes(headers: Headers) {
-  for (let id = 1; id <= 10; id += 1) {
-    const res = await sendJson('POST', `/api/quiz/${id}`, { answers: answersFor(id, 5) }, headers)
-    expect(res.status).toBe(200)
-  }
+  for (let id = 1; id <= 10; id += 1) await takeQuiz(String(id), 8, headers)
+  await takeQuiz('final-1', 20, headers)
 }
 
 function certificate(overrides: Partial<CertificateRecord> = {}): CertificateRecord {
@@ -208,21 +222,41 @@ describe('learner data', () => {
     expect(res.status).toBe(400)
   })
 
-  it('scores quizzes on the server and ignores a claimed score', async () => {
+  it('sends questions without answers, then grades on the server and ignores a claimed score', async () => {
+    const start = await sendJson('POST', '/api/quiz/1/start', {}, alice)
+    const view = parse(start)
+    expect(String(start.body)).not.toMatch(/correctIndex|correctOrder|explanation|sourceUrl/)
     const res = await sendJson(
       'POST',
-      '/api/quiz/1',
-      { answers: answersFor(1, 2), score: 5 },
+      '/api/quiz/1/submit',
+      { attemptId: view.attemptId, answers: answersFor(view, 2), score: 8, percent: 100 },
       alice,
     )
-    expect(parse(res)).toMatchObject({ score: 2, passed: false })
+    const body = parse(res)
+    expect(body.result).toMatchObject({ percent: 25, passed: false, correctCount: 2, total: 8 })
+    expect(Object.keys(body.result.results).sort()).toEqual(
+      view.questions.map((q: { id: string }) => q.id).sort(),
+    )
+    expect(body.attempts).toHaveLength(1)
+    expect(body.state.modules['1']).toMatchObject({ quizBestPercent: 25, quizAttempts: 1 })
+  })
+
+  it('keeps the final assessment closed until every module quiz is passed', async () => {
+    const res = await sendJson('POST', '/api/quiz/final-1/start', {}, alice)
+    expect(res.status).toBe(409)
+    expect(parse(await get('/api/progress', alice)).assessment).toMatchObject({ open: false })
+  })
+
+  it('rejects unknown quiz scopes', async () => {
+    expect((await sendJson('POST', '/api/quiz/99/start', {}, alice)).status).toBe(404)
+    expect((await sendJson('POST', '/api/quiz/1/peek', {}, alice)).status).toBe(404)
   })
 
   it('rejects cross-site writes and non-JSON bodies', async () => {
     const crossSite = await sendJson(
       'POST',
-      '/api/quiz/1',
-      { answers: {} },
+      '/api/quiz/1/start',
+      {},
       {
         ...alice,
         'sec-fetch-site': 'cross-site',
@@ -231,7 +265,7 @@ describe('learner data', () => {
     expect(crossSite.status).toBe(403)
     const form = await call(
       'POST',
-      '/api/quiz/1',
+      '/api/quiz/1/start',
       { ...alice, 'content-type': 'application/x-www-form-urlencoded' },
       'answers=1',
     )
@@ -278,5 +312,34 @@ describe('/api/admin/completions.csv', () => {
       '"Alice Learner","alice@example.com","2026-11-17","2027-11-17","96","DR-CSA-7K2M-Q9XD-4HTB"',
     )
     expect(csv).toContain(`"'=HYPERLINK(""x"")"`)
+  })
+})
+
+describe('/api/admin/learners.csv', () => {
+  it('lists attempt counts that match the learner’s own progress, for admins only', async () => {
+    await sendJson('PUT', '/api/profile', { name: 'Alice Learner' }, alice)
+    await takeQuiz('1', 3, alice)
+    await takeQuiz('1', 8, alice)
+    await takeQuiz('2', 8, alice)
+
+    expect((await get('/api/admin/learners.csv', alice)).status).toBe(403)
+    const res = await get('/api/admin/learners.csv', admin)
+    expect(res.status).toBe(200)
+    expect(res.headers['Content-Type']).toContain('text/csv')
+    const [header, row] = String(res.body).trim().split('\r\n')
+    expect(header).toContain('"Module 1 attempts"')
+    expect(header).toContain('"Final assessment attempts"')
+    const cells = row!.split(',')
+    expect(cells.slice(0, 5)).toEqual([
+      '"Alice Learner"',
+      '"alice@example.com"',
+      '"2 of 10"',
+      '"2"',
+      '"1"',
+    ])
+
+    const progress = parse(await get('/api/progress', alice))
+    expect(progress.state.modules['1'].quizAttempts).toBe(2)
+    expect(progress.state.modules['2'].quizAttempts).toBe(1)
   })
 })

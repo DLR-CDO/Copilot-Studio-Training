@@ -7,6 +7,17 @@ export interface ServerConfig {
   adminEmails: Set<string>
   publicBaseUrl?: string
   mockUsers: string[]
+  /** Failed final assessment attempts allowed before a cooldown. */
+  assessmentMaxFailures: number
+  assessmentCooldownHours: number
+}
+
+function positiveInt(raw: string | undefined, fallback: number, name: string): number {
+  if (raw == null || raw.trim() === '') return fallback
+  const value = Number(raw)
+  if (!Number.isInteger(value) || value < 1)
+    throw new Error(`${name} must be a whole number of 1 or more.`)
+  return value
 }
 
 const DEFAULT_MOCK_USERS = 'learner.one@example.com;learner.two@example.com;outsider@contoso.test'
@@ -43,5 +54,11 @@ export function loadConfig(env: NodeJS.ProcessEnv): ServerConfig {
     adminEmails: parseEmailList(env.ADMIN_EMAILS),
     publicBaseUrl: env.PUBLIC_BASE_URL?.trim().replace(/\/+$/, '') || undefined,
     mockUsers: [...parseEmailList(env.MOCK_USERS ?? DEFAULT_MOCK_USERS)],
+    assessmentMaxFailures: positiveInt(env.ASSESSMENT_MAX_FAILURES, 3, 'ASSESSMENT_MAX_FAILURES'),
+    assessmentCooldownHours: positiveInt(
+      env.ASSESSMENT_COOLDOWN_HOURS,
+      24,
+      'ASSESSMENT_COOLDOWN_HOURS',
+    ),
   }
 }

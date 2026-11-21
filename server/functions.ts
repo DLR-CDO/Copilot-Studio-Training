@@ -29,7 +29,10 @@ function getDeps(): Promise<ApiDeps> {
   depsPromise ??= (async () => {
     const config = loadConfig(process.env)
     const store = await TableStore.connect(config.storageConnectionString!)
-    const service = new LearnerService(store, quizzesByModule)
+    const service = new LearnerService(store, quizzesByModule, {
+      maxFailures: config.assessmentMaxFailures,
+      cooldownHours: config.assessmentCooldownHours,
+    })
     return {
       config,
       store,

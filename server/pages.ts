@@ -1,5 +1,7 @@
-import { CERT_TITLE } from '../src/lib/completion'
-import type { CertificateRecord } from './store'
+import { MODULE_COUNT } from '../src/content/types'
+import { FINAL_ASSESSMENT } from '../src/lib/assessments'
+import { CERT_TITLE, evaluateCompletion } from '../src/lib/completion'
+import type { CertificateRecord, LearnerRecord } from './store'
 
 export function escapeHtml(value: string): string {
   return value
@@ -80,5 +82,35 @@ export function completionsCsv(certificates: CertificateRecord[]): string {
     c.scorePercent,
     c.id,
   ])
+  return [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n') + '\r\n'
+}
+
+/** One row per learner: progress and attempt counts, which match each learner's Progress page. */
+export function learnersCsv(learners: LearnerRecord[]): string {
+  const modules = Array.from({ length: MODULE_COUNT }, (_, i) => String(i + 1))
+  const final = FINAL_ASSESSMENT.scope
+  const header = [
+    'Name',
+    'Email',
+    'Modules passed',
+    ...modules.map((id) => `Module ${id} attempts`),
+    'Final assessment attempts',
+    'Final assessment best (%)',
+    'Last attempt (UTC)',
+    'Certificate ID',
+  ]
+  const rows = learners.map((l) => {
+    const completion = evaluateCompletion(l.bestPercent)
+    return [
+      l.name,
+      l.email,
+      `${completion.passedModules.length} of ${MODULE_COUNT}`,
+      ...modules.map((id) => l.attempts[id] ?? 0),
+      l.attempts[final] ?? 0,
+      l.bestPercent[final] ?? 0,
+      l.attemptLog.at(-1)?.at ?? '',
+      l.certificateId ?? '',
+    ]
+  })
   return [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n') + '\r\n'
 }

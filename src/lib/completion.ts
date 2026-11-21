@@ -1,4 +1,5 @@
-import { MODULE_COUNT, PASSING_PERCENT } from '../content/types'
+import { MODULE_COUNT, type QuizScope } from '../content/types'
+import { FINAL_ASSESSMENT, passPercentFor } from './assessments'
 
 export type CertificateTrack = 'fundamentals' | 'practitioner'
 
@@ -23,45 +24,39 @@ export const CERTIFICATE_ISSUER = 'Digital University, Digital Realty'
 export const CERTIFICATE_VALID_MONTHS = 12
 
 export interface CompletionResult {
+  /** Modules and the final assessment are both passed. */
   complete: boolean
-  /** Best scores across all module quizzes as a percent of all questions, rounded down. */
-  finalPercent: number
+  /** Every module quiz is passed, so the final assessment is open. */
+  modulesComplete: boolean
   passedModules: number[]
   remainingModules: number[]
+  assessmentPassed: boolean
+  /** Best final assessment percent; this is the certificate's score. */
+  finalPercent: number
 }
 
-export function isQuizScorePassing(score: number, total: number): boolean {
-  return total > 0 && score * 100 >= PASSING_PERCENT * total
+export function isPercentPassing(percent: number, scope: QuizScope): boolean {
+  return percent >= passPercentFor(scope)
 }
 
-/**
- * Course completion rule: every module quiz passed at PASSING_PERCENT, and the overall
- * percent at or above PASSING_PERCENT.
- */
-export function evaluateCompletion(
-  bestScores: Record<string, number>,
-  quizSizes: Record<string, number>,
-): CompletionResult {
+/** Course completion rule: every module quiz passed, then the final assessment passed. */
+export function evaluateCompletion(bestPercent: Record<string, number>): CompletionResult {
   const passedModules: number[] = []
   const remainingModules: number[] = []
-  let earned = 0
-  let possible = 0
-
   for (let id = 1; id <= MODULE_COUNT; id += 1) {
-    const total = quizSizes[String(id)] ?? 0
-    const score = Math.min(Math.max(bestScores[String(id)] ?? 0, 0), total)
-    earned += score
-    possible += total
-    if (isQuizScorePassing(score, total)) passedModules.push(id)
+    if (isPercentPassing(bestPercent[String(id)] ?? 0, String(id))) passedModules.push(id)
     else remainingModules.push(id)
   }
-
-  const finalPercent = possible > 0 ? Math.floor((earned * 100) / possible) : 0
+  const finalPercent = bestPercent[FINAL_ASSESSMENT.scope] ?? 0
+  const modulesComplete = remainingModules.length === 0
+  const assessmentPassed = isPercentPassing(finalPercent, FINAL_ASSESSMENT.scope)
   return {
-    complete: remainingModules.length === 0 && finalPercent >= PASSING_PERCENT,
-    finalPercent,
+    complete: modulesComplete && assessmentPassed,
+    modulesComplete,
     passedModules,
     remainingModules,
+    assessmentPassed,
+    finalPercent,
   }
 }
 

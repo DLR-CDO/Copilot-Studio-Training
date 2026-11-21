@@ -11,6 +11,7 @@ import { NotFoundPage } from './pages/NotFoundPage'
 import { VerifyPage } from './pages/VerifyPage'
 import { SignedOutPage } from './pages/SignedOutPage'
 import { AdminPage } from './pages/AdminPage'
+import { AssessmentPage } from './pages/AssessmentPage'
 import { LearnerProvider } from './lib/LearnerProvider'
 
 /** Remounts the module page per module so quiz answers and other local state start fresh. */
@@ -30,6 +31,7 @@ function Course() {
           <Route path="/cheatsheet" element={<CheatSheetPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/assessment" element={<AssessmentPage />} />
           <Route path="/certificate" element={<CertificatePage />} />
           <Route path="/admin/completions" element={<AdminPage />} />
           <Route path="*" element={<NotFoundPage />} />

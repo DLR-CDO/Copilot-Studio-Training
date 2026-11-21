@@ -18,7 +18,7 @@ export function emptyModuleProgress(): ModuleProgress {
     buildSteps: {},
     tryItDone: false,
     notes: '',
-    quizBestScore: 0,
+    quizBestPercent: 0,
     quizAttempts: 0,
     completed: false,
   }
@@ -43,6 +43,19 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 const MAX_CHEAT_SHEET_CHECKS = 100
+/** Quizzes had 5 questions before scores were saved as percents. */
+const LEGACY_QUIZ_SIZE = 5
+
+function coercePercent(raw: Record<string, unknown>): number {
+  const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+  if (finite(raw.quizBestPercent))
+    return Math.max(0, Math.min(100, Math.floor(raw.quizBestPercent)))
+  if (finite(raw.quizBestScore)) {
+    const score = Math.max(0, Math.min(LEGACY_QUIZ_SIZE, Math.floor(raw.quizBestScore)))
+    return Math.floor((score * 100) / LEGACY_QUIZ_SIZE)
+  }
+  return 0
+}
 
 function coerceChecks(raw: Record<string, unknown>): Record<string, boolean> {
   return Object.fromEntries(
@@ -66,10 +79,7 @@ function coerceModuleProgress(raw: unknown): ModuleProgress {
       : {},
     tryItDone: Boolean(raw.tryItDone),
     notes: typeof raw.notes === 'string' ? raw.notes : '',
-    quizBestScore:
-      typeof raw.quizBestScore === 'number' && Number.isFinite(raw.quizBestScore)
-        ? Math.max(0, Math.min(5, Math.floor(raw.quizBestScore)))
-        : 0,
+    quizBestPercent: coercePercent(raw),
     quizAttempts:
       typeof raw.quizAttempts === 'number' && Number.isFinite(raw.quizAttempts)
         ? Math.max(0, Math.floor(raw.quizAttempts))

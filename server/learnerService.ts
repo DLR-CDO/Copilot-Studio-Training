@@ -1,23 +1,40 @@
 import { randomBytes } from 'node:crypto'
-import type { LearnerState, QuizQuestion } from '../src/content/types'
+import type {
+  AttemptLogEntry,
+  LearnerState,
+  QuestionResult,
+  QuizAttemptView,
+  QuizQuestion,
+  QuizScope,
+} from '../src/content/types'
 import { MODULE_COUNT } from '../src/content/types'
+import { FINAL_ASSESSMENT, isModuleScope, passPercentFor } from '../src/lib/assessments'
 import {
   CERTIFICATES,
   CERT_TITLE,
   certificateExpiration,
   evaluateCompletion,
   isExpired,
-  isQuizScorePassing,
+  isPercentPassing,
   type CompletionResult,
 } from '../src/lib/completion'
-import { scoreQuizSubmission } from '../src/lib/quiz'
 import { createDefaultState, migrateState } from '../src/lib/storage'
 import type { SignedInUser } from './auth'
-import { ConflictError, type CertificateRecord, type LearnerRecord, type Store } from './store'
+import { drawFinalAssessment, drawModuleQuiz, gradeAttempt, toPublicQuestion } from './quizEngine'
+import {
+  ConflictError,
+  type CertificateRecord,
+  type Cooldown,
+  type LearnerRecord,
+  type Store,
+} from './store'
 
 /** Table Storage string properties hold at most 32K characters. */
 export const MAX_UI_STATE_CHARS = 30_000
 const MAX_SAVE_ATTEMPTS = 3
+/** Attempts kept per learner for the progress and admin views. */
+export const MAX_ATTEMPT_LOG = 100
+const HOUR_MS = 60 * 60 * 1000
 
 // Crockford base32: no I, L, O, or U, so IDs are easy to read aloud and type.
 const ID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
@@ -36,17 +53,45 @@ export class ValidationError extends Error {
 
 export const MAX_NAME_CHARS = 80
 
+export interface AssessmentStatus {
+  scope: QuizScope
+  /** Every module quiz is passed. */
+  open: boolean
+  attempts: number
+  bestPercent: number
+  passed: boolean
+  /** ISO time the learner may try again, while a cooldown is running. */
+  cooldownUntil: string | null
+  /** Failed attempts left before the next cooldown starts. */
+  attemptsBeforeCooldown: number
+  cooldownHours: number
+}
+
 export interface ProgressSnapshot {
   /** Name the learner entered for their certificate; empty until they enter one. */
   name: string
   state: LearnerState
   completion: CompletionResult
+  assessment: AssessmentStatus
+  attemptLog: AttemptLogEntry[]
   certificate: CertificateRecord | null
 }
 
 export interface QuizOutcome extends ProgressSnapshot {
-  score: number
+  scope: QuizScope
+  percent: number
   passed: boolean
+  correctCount: number
+  total: number
+  results: Record<string, QuestionResult>
+}
+
+export interface LearnerServiceOptions {
+  now?: () => Date
+  rng?: () => number
+  /** Failed final assessment attempts before a cooldown. */
+  maxFailures?: number
+  cooldownHours?: number
 }
 
 /** 60 random bits, e.g. DR-CSF-7K2M-Q9XD-4HTB. */
@@ -67,9 +112,13 @@ function newLearnerRecord(user: SignedInUser, now: Date): LearnerRecord {
   return {
     email: user.email,
     name: '',
-    scores: {},
+    bestPercent: {},
     attempts: {},
     passedAt: {},
+    attemptLog: [],
+    pending: {},
+    lastQuestionIds: {},
+    cooldowns: {},
     cycleStart: now.toISOString(),
     completionStatus: 'in-progress',
     updatedAt: now.toISOString(),
@@ -79,20 +128,26 @@ function newLearnerRecord(user: SignedInUser, now: Date): LearnerRecord {
 export class LearnerService {
   private readonly store: Store
   private readonly quizzes: Record<number, QuizQuestion[]>
+  private readonly questionsById: Map<string, QuizQuestion>
   private readonly now: () => Date
-  private readonly quizSizes: Record<string, number>
+  private readonly rng: () => number
+  private readonly maxFailures: number
+  private readonly cooldownMs: number
 
   constructor(
     store: Store,
     quizzes: Record<number, QuizQuestion[]>,
-    now: () => Date = () => new Date(),
+    options: LearnerServiceOptions = {},
   ) {
     this.store = store
     this.quizzes = quizzes
-    this.now = now
-    this.quizSizes = Object.fromEntries(
-      Object.entries(quizzes).map(([id, questions]) => [id, questions.length]),
+    this.questionsById = new Map(
+      Object.values(quizzes).flatMap((bank) => bank.map((q) => [q.id, q])),
     )
+    this.now = options.now ?? (() => new Date())
+    this.rng = options.rng ?? Math.random
+    this.maxFailures = options.maxFailures ?? 3
+    this.cooldownMs = (options.cooldownHours ?? 24) * HOUR_MS
   }
 
   async getProgress(user: SignedInUser): Promise<ProgressSnapshot> {
@@ -119,23 +174,76 @@ export class LearnerService {
     })
   }
 
-  /** Scores on the server from the raw answers; the client's own score is never trusted. */
-  async submitQuiz(user: SignedInUser, moduleId: number, answers: unknown): Promise<QuizOutcome> {
-    const questions = Number.isInteger(moduleId) ? this.quizzes[moduleId] : undefined
-    if (!questions || moduleId < 1 || moduleId > MODULE_COUNT) {
-      throw new ValidationError('Unknown module.', 404)
-    }
+  /**
+   * Draws and saves the questions for an attempt. An unsubmitted attempt is returned as-is, so
+   * reloading the page never offers a different set of questions.
+   */
+  async startQuiz(user: SignedInUser, scope: QuizScope): Promise<QuizAttemptView> {
+    this.assertScope(scope)
+    let view: QuizAttemptView | null = null
+    await this.update(user, (record, now) => {
+      const pending = record.pending[scope]
+      const pendingQuestions = pending ? this.resolve(pending.questionIds) : null
+      if (pending && pendingQuestions) {
+        view = attemptView(pending.id, scope, pendingQuestions)
+        return
+      }
+      if (scope === FINAL_ASSESSMENT.scope) this.assertAssessmentOpen(record, now)
+      const questions = this.draw(scope, new Set(record.lastQuestionIds[scope] ?? []))
+      const id = randomBytes(12).toString('base64url')
+      record.pending[scope] = {
+        id,
+        questionIds: questions.map((q) => q.id),
+        startedAt: now.toISOString(),
+      }
+      view = attemptView(id, scope, questions)
+    })
+    return view!
+  }
+
+  /** Grades on the server against the saved attempt; the client never sees answers beforehand. */
+  async submitQuiz(
+    user: SignedInUser,
+    scope: QuizScope,
+    attemptId: unknown,
+    answers: unknown,
+  ): Promise<QuizOutcome> {
+    this.assertScope(scope)
+    if (typeof attemptId !== 'string') throw new ValidationError('Attempt ID is missing.')
     if (!isRecord(answers)) throw new ValidationError('Answers must be a JSON object.')
 
-    const { score } = scoreQuizSubmission(questions, answers)
-    const passed = isQuizScorePassing(score, questions.length)
-    const key = String(moduleId)
+    let graded: ReturnType<typeof gradeAttempt> | null = null
+    let passed = false
     const snapshot = await this.update(user, (record, now) => {
-      record.attempts[key] = (record.attempts[key] ?? 0) + 1
-      record.scores[key] = Math.max(record.scores[key] ?? 0, score)
-      if (passed && !record.passedAt[key]) record.passedAt[key] = now.toISOString()
+      const pending = record.pending[scope]
+      const questions = pending?.id === attemptId ? this.resolve(pending.questionIds) : null
+      if (!pending || !questions) {
+        throw new ValidationError('This attempt is no longer open. Start the quiz again.', 409)
+      }
+      graded = gradeAttempt(questions, answers)
+      passed = isPercentPassing(graded.percent, scope)
+      const at = now.toISOString()
+      record.attempts[scope] = (record.attempts[scope] ?? 0) + 1
+      record.bestPercent[scope] = Math.max(record.bestPercent[scope] ?? 0, graded.percent)
+      if (passed && !record.passedAt[scope]) record.passedAt[scope] = at
+      record.attemptLog = [
+        ...record.attemptLog,
+        { scope, at, percent: graded.percent, passed },
+      ].slice(-MAX_ATTEMPT_LOG)
+      record.lastQuestionIds[scope] = pending.questionIds
+      delete record.pending[scope]
+      if (scope === FINAL_ASSESSMENT.scope) this.recordAssessmentResult(record, passed, now)
     })
-    return { ...snapshot, score, passed }
+    const result = graded!
+    return {
+      ...snapshot,
+      scope,
+      percent: result.percent,
+      passed,
+      correctCount: result.correctCount,
+      total: result.total,
+      results: result.results,
+    }
   }
 
   /** The certificate name can change until a certificate is issued, then it is locked. */
@@ -157,6 +265,79 @@ export class LearnerService {
     return all.sort((a, b) => b.completedAt.localeCompare(a.completedAt))
   }
 
+  async listLearners(): Promise<LearnerRecord[]> {
+    const all = await this.store.listLearners()
+    return all.sort((a, b) => a.email.localeCompare(b.email))
+  }
+
+  private assertScope(scope: QuizScope): void {
+    const known =
+      scope === FINAL_ASSESSMENT.scope ||
+      (isModuleScope(scope) && (this.quizzes[Number(scope)]?.length ?? 0) > 0)
+    if (!known) throw new ValidationError('Unknown quiz.', 404)
+  }
+
+  private assertAssessmentOpen(record: LearnerRecord, now: Date): void {
+    if (!evaluateCompletion(record.bestPercent).modulesComplete) {
+      throw new ValidationError('Pass every module quiz before taking the final assessment.', 409)
+    }
+    const { until } = currentCooldown(record.cooldowns[FINAL_ASSESSMENT.scope], now)
+    if (until) {
+      throw new ValidationError(
+        `You have used your attempts for now. Try the final assessment again after ${until}.`,
+        429,
+      )
+    }
+  }
+
+  /** After `maxFailures` failed attempts in a row, the assessment locks for the cooldown. */
+  private recordAssessmentResult(record: LearnerRecord, passed: boolean, now: Date): void {
+    const scope = FINAL_ASSESSMENT.scope
+    if (passed) {
+      delete record.cooldowns[scope]
+      return
+    }
+    const failures = currentCooldown(record.cooldowns[scope], now).failures + 1
+    record.cooldowns[scope] =
+      failures >= this.maxFailures
+        ? { failures, until: new Date(now.getTime() + this.cooldownMs).toISOString() }
+        : { failures }
+  }
+
+  private assessmentStatus(
+    record: LearnerRecord,
+    completion: CompletionResult,
+    now: Date,
+  ): AssessmentStatus {
+    const scope = FINAL_ASSESSMENT.scope
+    const cooldown = currentCooldown(record.cooldowns[scope], now)
+    return {
+      scope,
+      open: completion.modulesComplete,
+      attempts: record.attempts[scope] ?? 0,
+      bestPercent: record.bestPercent[scope] ?? 0,
+      passed: completion.assessmentPassed,
+      cooldownUntil: cooldown.until,
+      attemptsBeforeCooldown: cooldown.until
+        ? 0
+        : Math.max(0, this.maxFailures - cooldown.failures),
+      cooldownHours: this.cooldownMs / HOUR_MS,
+    }
+  }
+
+  private draw(scope: QuizScope, lastIds: ReadonlySet<string>): QuizQuestion[] {
+    if (scope === FINAL_ASSESSMENT.scope) {
+      return drawFinalAssessment(this.quizzes, FINAL_ASSESSMENT, lastIds, this.rng)
+    }
+    return drawModuleQuiz(this.quizzes[Number(scope)] ?? [], lastIds, this.rng)
+  }
+
+  /** Null when a saved question no longer exists, e.g. after a content update. */
+  private resolve(ids: string[]): QuizQuestion[] | null {
+    const questions = ids.map((id) => this.questionsById.get(id))
+    return questions.every((q) => q != null) ? (questions as QuizQuestion[]) : null
+  }
+
   /**
    * Read, change, and save one learner's record with optimistic concurrency. Also restarts the
    * cycle after expiry, and issues a certificate once it is earned and a name has been entered.
@@ -172,7 +353,7 @@ export class LearnerService {
 
       restartCycleIfExpired(record, now)
       change(record, now)
-      const completion = evaluateCompletion(record.scores, this.quizSizes)
+      const completion = evaluateCompletion(record.bestPercent)
       const issued = completion.complete && record.name ? issueIfDue(record, completion, now) : null
 
       if (!existing || JSON.stringify(record) !== JSON.stringify(existing.value)) {
@@ -190,6 +371,8 @@ export class LearnerService {
         name: record.name,
         state: toLearnerState(record),
         completion,
+        assessment: this.assessmentStatus(record, completion, now),
+        attemptLog: record.attemptLog,
         certificate: await this.findCertificate(record, issued),
       }
     }
@@ -211,13 +394,38 @@ export class LearnerService {
   }
 }
 
+function attemptView(id: string, scope: QuizScope, questions: QuizQuestion[]): QuizAttemptView {
+  return {
+    attemptId: id,
+    scope,
+    questions: questions.map(toPublicQuestion),
+    passPercent: passPercentFor(scope),
+  }
+}
+
+/** A finished cooldown starts a fresh count of failures. */
+function currentCooldown(
+  cooldown: Cooldown | undefined,
+  now: Date,
+): { failures: number; until: string | null } {
+  if (!cooldown) return { failures: 0, until: null }
+  if (cooldown.until) {
+    return isExpired(cooldown.until, now)
+      ? { failures: 0, until: null }
+      : { failures: cooldown.failures, until: cooldown.until }
+  }
+  return { failures: cooldown.failures, until: null }
+}
+
 /** Once a certificate expires the learner retakes every quiz to earn a new one. */
 function restartCycleIfExpired(record: LearnerRecord, now: Date): void {
   const expiresAt = record.certificateExpiresAt
   if (!expiresAt || !isExpired(expiresAt, now) || record.cycleStart >= expiresAt) return
-  record.scores = {}
+  record.bestPercent = {}
   record.attempts = {}
   record.passedAt = {}
+  record.pending = {}
+  record.cooldowns = {}
   record.completionStatus = 'in-progress'
   delete record.completedAt
   delete record.finalPercent
@@ -302,7 +510,7 @@ function toLearnerState(record: LearnerRecord): LearnerState {
     const current = state.modules[key] ?? createDefaultState().modules[key]!
     state.modules[key] = {
       ...current,
-      quizBestScore: record.scores[key] ?? 0,
+      quizBestPercent: record.bestPercent[key] ?? 0,
       quizAttempts: record.attempts[key] ?? 0,
     }
   }

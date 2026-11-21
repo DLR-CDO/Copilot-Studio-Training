@@ -1,5 +1,5 @@
 import type { LearnerState, ModuleProgress, ModuleStatus } from '../content/types'
-import { MODULE_COUNT, PASSING_SCORE } from '../content/types'
+import { MODULE_COUNT, PASSING_PERCENT } from '../content/types'
 
 export function getModuleProgress(state: LearnerState, moduleId: number): ModuleProgress {
   return (
@@ -8,7 +8,7 @@ export function getModuleProgress(state: LearnerState, moduleId: number): Module
       buildSteps: {},
       tryItDone: false,
       notes: '',
-      quizBestScore: 0,
+      quizBestPercent: 0,
       quizAttempts: 0,
       completed: false,
     }
@@ -37,8 +37,8 @@ export function getModuleStatus(state: LearnerState, moduleId: number): ModuleSt
   return hasActivity ? 'in-progress' : 'available'
 }
 
-export function isQuizPassed(progress: ModuleProgress): boolean {
-  return progress.quizBestScore >= PASSING_SCORE
+export function isQuizPassed(progress: ModuleProgress, passPercent = PASSING_PERCENT): boolean {
+  return progress.quizBestPercent >= passPercent
 }
 
 export function areChecklistItemsComplete(
@@ -54,12 +54,13 @@ export function areBuildStepsComplete(progress: ModuleProgress, stepIds: string[
 
 export function canMarkModuleComplete(
   progress: ModuleProgress,
-  options: { checklistIds: string[]; requireTryIt: boolean },
+  options: { checklistIds: string[]; requireTryIt: boolean; passPercent?: number },
 ): { ready: boolean; remaining: string[] } {
   const remaining: string[] = []
+  const passPercent = options.passPercent ?? PASSING_PERCENT
 
-  if (!isQuizPassed(progress)) {
-    remaining.push(`Pass the knowledge check (${PASSING_SCORE} of 5)`)
+  if (!isQuizPassed(progress, passPercent)) {
+    remaining.push(`Pass the knowledge check (${passPercent}% or more)`)
   }
 
   for (const id of options.checklistIds) {
@@ -91,7 +92,7 @@ export function quizAverage(state: LearnerState): number | null {
   const scores: number[] = []
   for (let i = 1; i <= MODULE_COUNT; i += 1) {
     const p = getModuleProgress(state, i)
-    if (p.quizAttempts > 0) scores.push(p.quizBestScore)
+    if (p.quizAttempts > 0) scores.push(p.quizBestPercent)
   }
   if (scores.length === 0) return null
   return scores.reduce((a, b) => a + b, 0) / scores.length
@@ -104,17 +105,4 @@ export function findResumeModuleId(state: LearnerState): number {
   }
   // All complete → last module
   return MODULE_COUNT
-}
-
-export function scoreOrderQuestion(learnerOrder: number[], correctOrder: number[]): boolean {
-  if (learnerOrder.length !== correctOrder.length) return false
-  return learnerOrder.every((value, index) => value === correctOrder[index])
-}
-
-export function scoreQuizAnswers(answers: Array<{ correct: boolean }>): {
-  score: number
-  passed: boolean
-} {
-  const score = answers.filter((a) => a.correct).length
-  return { score, passed: score >= PASSING_SCORE }
 }

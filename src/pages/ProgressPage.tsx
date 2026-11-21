@@ -5,21 +5,28 @@ import { countCompletedModules, getModuleStatus, quizAverage } from '../lib/prog
 import { MODULE_NAV } from '../content/moduleNav'
 import { modules } from '../content/modules'
 import { ModuleBadge } from '../components/ui/ModuleBadge'
+import { FINAL_ASSESSMENT } from '../lib/assessments'
+
+function formatAttemptDate(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}
 
 export function ProgressPage() {
-  const { state, resetProgress, session } = useLearner()
+  const { state, resetProgress, session, serverStatus } = useLearner()
   const onServer = session.mode === 'server'
   const [confirming, setConfirming] = useState(false)
   const completed = countCompletedModules(state)
   const avg = quizAverage(state)
   const earnedBadges = modules.filter((m) => getModuleStatus(state, m.id) === 'complete')
+  const lastAttemptAt = (scope: string) =>
+    serverStatus?.attempts.filter((a) => a.scope === scope).at(-1)?.at
 
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="font-display text-3xl font-bold">My progress</h1>
       <p className="mt-2 text-muted">
         {completed}/10 modules complete
-        {avg != null ? ` · Quiz average ${avg.toFixed(1)}/5` : ' · No quizzes attempted yet'}
+        {avg != null ? ` · Quiz average ${Math.round(avg)}%` : ' · No quizzes attempted yet'}
       </p>
 
       <section className="mt-8" aria-labelledby="badges-heading">
@@ -43,6 +50,7 @@ export function ProgressPage() {
         {MODULE_NAV.map((mod) => {
           const status = getModuleStatus(state, mod.id)
           const progress = state.modules[String(mod.id)]
+          const last = lastAttemptAt(String(mod.id))
           return (
             <li
               key={mod.id}
@@ -59,8 +67,9 @@ export function ProgressPage() {
               </div>
               <div className="flex items-center gap-3">
                 <p className="font-mono text-xs text-muted">
-                  Best quiz: {progress?.quizBestScore ?? 0}/5 · Attempts:{' '}
+                  Best quiz: {progress?.quizBestPercent ?? 0}% · Attempts:{' '}
                   {progress?.quizAttempts ?? 0}
+                  {last ? ` · Last: ${formatAttemptDate(last)}` : ''}
                 </p>
                 <Link
                   to={`/module/${mod.id}#quiz`}
@@ -72,6 +81,29 @@ export function ProgressPage() {
             </li>
           )
         })}
+        {serverStatus ? (
+          <li className="flex flex-wrap items-center justify-between gap-2 rounded-inner border border-line bg-card px-4 py-3">
+            <div>
+              <Link to="/assessment" className="font-display font-semibold hover:text-violet">
+                {FINAL_ASSESSMENT.title}
+              </Link>
+              <p className="font-mono text-xs text-muted">
+                {serverStatus.assessment.passed
+                  ? 'passed'
+                  : serverStatus.assessment.open
+                    ? 'open'
+                    : 'opens after every module quiz is passed'}
+              </p>
+            </div>
+            <p className="font-mono text-xs text-muted">
+              Best: {serverStatus.assessment.bestPercent}% · Attempts:{' '}
+              {serverStatus.assessment.attempts}
+              {lastAttemptAt(FINAL_ASSESSMENT.scope)
+                ? ` · Last: ${formatAttemptDate(lastAttemptAt(FINAL_ASSESSMENT.scope)!)}`
+                : ''}
+            </p>
+          </li>
+        ) : null}
       </ul>
 
       <div className="mt-10 rounded-card border border-line bg-card p-5">

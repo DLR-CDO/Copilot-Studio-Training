@@ -57,30 +57,58 @@ export interface LinkItem {
   url: string
 }
 
+interface QuizQuestionBase {
+  id: string
+  prompt: string
+  /** Shown after the attempt is graded. */
+  explanation: string
+  /** The learn.microsoft.com page that backs the answer. */
+  sourceUrl: string
+  /** Asks the learner to apply the idea to a situation, not just recall it. */
+  scenario?: boolean
+}
+
+/**
+ * Quiz questions with their answers. Only the server reads these; the browser receives
+ * `PublicQuizQuestion`s and gets results back after grading.
+ */
 export type QuizQuestion =
-  | {
-      id: string
-      type: 'multiple-choice'
-      prompt: string
-      options: string[]
-      correctIndex: number
-      explanation: string
-    }
-  | {
-      id: string
-      type: 'true-false'
-      prompt: string
-      correct: boolean
-      explanation: string
-    }
-  | {
-      id: string
-      type: 'order'
-      prompt: string
-      steps: string[]
-      correctOrder: number[]
-      explanation: string
-    }
+  | (QuizQuestionBase & { type: 'multiple-choice'; options: string[]; correctIndex: number })
+  | (QuizQuestionBase & { type: 'true-false'; correct: boolean })
+  | (QuizQuestionBase & { type: 'order'; steps: string[]; correctOrder: number[] })
+
+/**
+ * A question as sent to the browser: no answer, and options and steps sorted alphabetically so
+ * their order gives nothing away. Answers refer to positions in these arrays.
+ */
+export type PublicQuizQuestion =
+  | { id: string; type: 'multiple-choice'; prompt: string; options: string[] }
+  | { id: string; type: 'true-false'; prompt: string }
+  | { id: string; type: 'order'; prompt: string; steps: string[] }
+
+/** Module quizzes use the module id as the scope; final assessments use `final-<part>`. */
+export type QuizScope = string
+
+export interface QuizAttemptView {
+  attemptId: string
+  scope: QuizScope
+  questions: PublicQuizQuestion[]
+  passPercent: number
+}
+
+export interface QuestionResult {
+  correct: boolean
+  explanation: string
+  sourceUrl: string
+}
+
+export interface AttemptLogEntry {
+  scope: QuizScope
+  /** ISO time the attempt was submitted. */
+  at: string
+  percent: number
+  passed: boolean
+}
 
 /** The Copilot Studio runtime a module's instructions apply to. */
 export type Harness = 'standard' | 'copilot' | 'any'
@@ -102,7 +130,6 @@ export interface Module {
   screenshotsToCapture?: ScreenshotRequest[]
   tryIt: string
   goDeeper: LinkItem[]
-  quiz: QuizQuestion[]
   checklist: string[]
 }
 
@@ -119,7 +146,8 @@ export interface ModuleProgress {
   buildSteps: Record<string, boolean>
   tryItDone: boolean
   notes: string
-  quizBestScore: number
+  /** Best quiz score as a percent. */
+  quizBestPercent: number
   quizAttempts: number
   completed: boolean
 }
@@ -140,8 +168,6 @@ export interface LearnerState {
 }
 
 export const STORAGE_KEY = 'agent-academy-v1'
-/** Percent needed to pass each module quiz, and therefore the course. The one place to change it. */
+/** Percent needed to pass each module quiz and the final assessment. */
 export const PASSING_PERCENT = 80
-export const QUESTIONS_PER_QUIZ = 5
-export const PASSING_SCORE = Math.ceil((QUESTIONS_PER_QUIZ * PASSING_PERCENT) / 100)
 export const MODULE_COUNT = 10

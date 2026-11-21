@@ -11,7 +11,7 @@ import {
 } from './learnerService'
 import { log } from './log'
 import { clientIp, type RateLimiter } from './rateLimit'
-import { completionsCsv } from './pages'
+import { completionsCsv, learnersCsv } from './pages'
 import type { CertificateRecord, Store } from './store'
 
 /** Hosting-neutral request, so the same handler runs in Azure Functions and the local server. */
@@ -109,6 +109,8 @@ function progressBody(snapshot: ProgressSnapshot, req: ApiRequest, deps: ApiDeps
     name: snapshot.name,
     state: snapshot.state,
     completion: snapshot.completion,
+    assessment: snapshot.assessment,
+    attempts: snapshot.attemptLog,
     passingPercent: PASSING_PERCENT,
     certificate: certificateSummary(snapshot.certificate, req, deps),
   }
@@ -177,14 +179,22 @@ async function signedInRoute(
     return json(200, progressBody(snapshot, req, deps))
   }
 
-  const quizMatch = /^\/api\/quiz\/(\d{1,2})$/.exec(path)
+  const quizMatch = /^\/api\/quiz\/([a-z0-9-]{1,20})\/(start|submit)$/.exec(path)
   if (quizMatch && method === 'POST') {
+    const [, scope = '', action] = quizMatch
     const body = readJsonBody(req)
-    const outcome = await service.submitQuiz(user, Number(quizMatch[1]), body.answers)
+    if (action === 'start') return json(200, await service.startQuiz(user, scope))
+    const outcome = await service.submitQuiz(user, scope, body.attemptId, body.answers)
     return json(200, {
       ...progressBody(outcome, req, deps),
-      score: outcome.score,
-      passed: outcome.passed,
+      result: {
+        scope: outcome.scope,
+        percent: outcome.percent,
+        passed: outcome.passed,
+        correctCount: outcome.correctCount,
+        total: outcome.total,
+        results: outcome.results,
+      },
     })
   }
 
@@ -218,6 +228,20 @@ async function signedInRoute(
         'Content-Disposition': `attachment; filename="completions-${day}.csv"`,
       },
       body: completionsCsv(await service.listCertificates()),
+    }
+  }
+
+  if (path === '/api/admin/learners.csv' && method === 'GET') {
+    if (!isAdmin) return json(403, { error: 'Only course admins can export learner progress.' })
+    const day = (deps.now?.() ?? new Date()).toISOString().slice(0, 10)
+    return {
+      status: 200,
+      headers: {
+        ...SECURITY_HEADERS,
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="learners-${day}.csv"`,
+      },
+      body: learnersCsv(await service.listLearners()),
     }
   }
 

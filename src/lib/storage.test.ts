@@ -73,14 +73,14 @@ describe('storage migration & reset', () => {
     state.modules['2'] = {
       ...state.modules['2']!,
       completed: true,
-      quizBestScore: 5,
+      quizBestPercent: 87,
       quizAttempts: 2,
     }
     saveState(state, localStorage)
     const loaded = loadState(localStorage)
     expect(loaded.freeRoam).toBe(true)
     expect(loaded.modules['2']?.completed).toBe(true)
-    expect(loaded.modules['2']?.quizBestScore).toBe(5)
+    expect(loaded.modules['2']?.quizBestPercent).toBe(87)
   })
 
   it('resets progress in storage', () => {
@@ -109,6 +109,7 @@ describe('storage migration & reset', () => {
     expect(migrated.version).toBe(1)
     expect(migrated.freeRoam).toBe(true)
     expect(migrated.modules['1']?.completed).toBe(true)
+    expect(migrated.modules['1']?.quizBestPercent).toBe(80)
     expect(migrated.modules['3']?.completed).toBe(false)
   })
 
@@ -124,9 +125,13 @@ describe('storage migration & reset', () => {
       version: 1,
       modules: {
         '1': { quizBestScore: 99, quizAttempts: -3, notes: 123 },
+        '2': { quizBestPercent: 250 },
+        '3': { quizBestPercent: -4 },
       },
     })
-    expect(migrated.modules['1']?.quizBestScore).toBe(5)
+    expect(migrated.modules['1']?.quizBestPercent).toBe(100)
+    expect(migrated.modules['2']?.quizBestPercent).toBe(100)
+    expect(migrated.modules['3']?.quizBestPercent).toBe(0)
     expect(migrated.modules['1']?.quizAttempts).toBe(0)
     expect(migrated.modules['1']?.notes).toBe('')
   })

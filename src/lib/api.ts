@@ -1,4 +1,10 @@
-import type { LearnerState } from '../content/types'
+import type {
+  AttemptLogEntry,
+  LearnerState,
+  QuestionResult,
+  QuizAttemptView,
+  QuizScope,
+} from '../content/types'
 import type { CompletionResult } from './completion'
 import type { QuizAnswers } from './quiz'
 
@@ -19,18 +25,41 @@ export interface CertificateSummary {
   verifyUrl: string
 }
 
+export interface AssessmentStatus {
+  scope: QuizScope
+  /** Every module quiz is passed. */
+  open: boolean
+  attempts: number
+  bestPercent: number
+  passed: boolean
+  cooldownUntil: string | null
+  attemptsBeforeCooldown: number
+  cooldownHours: number
+}
+
 export interface ServerProgress {
   /** Name the learner entered for their certificate; empty until entered. */
   name: string
   state: LearnerState
   completion: CompletionResult
+  assessment: AssessmentStatus
+  /** Recent graded attempts, oldest first. */
+  attempts: AttemptLogEntry[]
   passingPercent: number
   certificate: CertificateSummary | null
 }
 
-export interface QuizSubmission extends ServerProgress {
-  score: number
+export interface QuizOutcome {
+  scope: QuizScope
+  percent: number
   passed: boolean
+  correctCount: number
+  total: number
+  results: Record<string, QuestionResult>
+}
+
+export interface QuizSubmission extends ServerProgress {
+  result: QuizOutcome
 }
 
 export type VerifyResult =
@@ -120,10 +149,17 @@ export const fetchProgress = () => request<ServerProgress>('/api/progress')
 export const saveProgress = (state: LearnerState) =>
   request<void>('/api/progress', { method: 'PUT', body: JSON.stringify({ state }) })
 
-export const submitQuiz = (moduleId: number, answers: QuizAnswers) =>
-  request<QuizSubmission>(`/api/quiz/${moduleId}`, {
+/** Draws questions for an attempt, or returns the learner's unsubmitted one. */
+export const startQuiz = (scope: QuizScope) =>
+  request<QuizAttemptView>(`/api/quiz/${encodeURIComponent(scope)}/start`, {
     method: 'POST',
-    body: JSON.stringify({ answers }),
+    body: '{}',
+  })
+
+export const submitQuiz = (scope: QuizScope, attemptId: string, answers: QuizAnswers) =>
+  request<QuizSubmission>(`/api/quiz/${encodeURIComponent(scope)}/submit`, {
+    method: 'POST',
+    body: JSON.stringify({ attemptId, answers }),
   })
 
 export const saveCertificateName = (name: string) =>

@@ -1,18 +1,40 @@
+import type { AttemptLogEntry } from '../src/content/types'
 import type { CertificateTrack } from '../src/lib/completion'
+
+/** Questions drawn for an attempt that has not been submitted yet. */
+export interface PendingAttempt {
+  id: string
+  questionIds: string[]
+  startedAt: string
+}
+
+export interface Cooldown {
+  /** Failed attempts since the last cooldown ended. */
+  failures: number
+  /** ISO time the learner may try again. */
+  until?: string
+}
 
 export interface LearnerRecord {
   email: string
   /** Typed by the learner for their certificate; empty until entered. */
   name: string
-  /** Best quiz score per module id, for the current certification cycle. */
-  scores: Record<string, number>
+  /** Best percent per quiz scope (module id or `final-1`), for the current certification cycle. */
+  bestPercent: Record<string, number>
   attempts: Record<string, number>
-  /** When each module quiz was first passed in the current cycle (ISO). */
+  /** When each quiz scope was first passed in the current cycle (ISO). */
   passedAt: Record<string, string>
+  /** Most recent submitted attempts, oldest first. */
+  attemptLog: AttemptLogEntry[]
+  pending: Record<string, PendingAttempt>
+  /** Questions in the last submitted attempt per scope, so retakes draw different ones. */
+  lastQuestionIds: Record<string, string[]>
+  cooldowns: Record<string, Cooldown>
   /** Starts at first sign-in; restarts when the learner's certificate expires. */
   cycleStart: string
   completionStatus: 'in-progress' | 'complete'
   completedAt?: string
+  /** Best final assessment percent when the certificate was issued. */
   finalPercent?: number
   certificateId?: string
   certificateExpiresAt?: string
@@ -54,6 +76,7 @@ export interface Store {
   getCertificate(id: string): Promise<CertificateRecord | null>
   saveCertificate(record: CertificateRecord): Promise<void>
   listCertificates(): Promise<CertificateRecord[]>
+  listLearners(): Promise<LearnerRecord[]>
 }
 
 /** For local development and tests only — everything is lost on restart. */
@@ -85,5 +108,9 @@ export class MemoryStore implements Store {
 
   async listCertificates(): Promise<CertificateRecord[]> {
     return [...this.certificates.values()].map((c) => ({ ...c }))
+  }
+
+  async listLearners(): Promise<LearnerRecord[]> {
+    return [...this.learners.values()].map((l) => structuredClone(l.value))
   }
 }

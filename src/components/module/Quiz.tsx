@@ -1,36 +1,69 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import type { QuizQuestion } from '../../content/types'
-import { PASSING_SCORE } from '../../content/types'
-import {
-  scoreQuizSubmission,
-  shuffleQuiz,
-  type QuizAnswers,
-  type ShuffledQuizQuestion,
-} from '../../lib/quiz'
+import type { QuizAttemptView, QuizScope } from '../../content/types'
+import type { QuizOutcome } from '../../lib/api'
+import { arrangeForDisplay, type DisplayQuestion, type QuizAnswers } from '../../lib/quiz'
+import { useLearner } from '../../lib/useLearner'
 import { Callout } from '../ui/Callout'
 
-export interface QuizResult {
-  score: number
-  passed: boolean
-  answers: QuizAnswers
-}
-
 interface QuizProps {
-  questions: QuizQuestion[]
+  scope: QuizScope
+  title?: string
+  /** One line under the heading, e.g. how many questions and the pass mark. */
+  summary: string
   locked: boolean
-  bestScore: number
-  onResult: (result: QuizResult) => void
+  lockedMessage?: string
+  bestPercent: number
+  attempts: number
+  /** Shown instead of the start and retake buttons, e.g. during a cooldown. */
+  blockedMessage?: string
 }
 
-/** Full quiz UI for a module: all questions at once, one submit, immediate feedback, retakes reshuffle. */
-export function Quiz({ questions, locked, bestScore, onResult }: QuizProps) {
-  const [attempt, setAttempt] = useState(0)
+type Phase =
+  | { kind: 'idle' }
+  | { kind: 'loading' }
+  | { kind: 'error'; message: string }
+  | { kind: 'attempt'; view: QuizAttemptView }
+
+function messageOf(err: unknown): string {
+  return err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+}
+
+/** A server-drawn quiz: start an attempt, answer, submit for grading, read the explanations. */
+export function Quiz({
+  scope,
+  title = 'Knowledge check',
+  summary,
+  locked,
+  lockedMessage = 'Quiz is disabled until prior modules are complete (or enable Free roam in Settings).',
+  bestPercent,
+  attempts,
+  blockedMessage,
+}: QuizProps) {
+  const { session, startQuiz } = useLearner()
+  const [phase, setPhase] = useState<Phase>({ kind: 'idle' })
   const headingRef = useRef<HTMLHeadingElement>(null)
-  const retake = useCallback(() => setAttempt((a) => a + 1), [])
+  const retaking = useRef(false)
+
+  const begin = useCallback(async () => {
+    setPhase({ kind: 'loading' })
+    try {
+      setPhase({ kind: 'attempt', view: await startQuiz(scope) })
+    } catch (err) {
+      setPhase({ kind: 'error', message: messageOf(err) })
+    }
+  }, [scope, startQuiz])
+
+  const retake = useCallback(() => {
+    retaking.current = true
+    void begin()
+  }, [begin])
 
   useEffect(() => {
-    if (attempt > 0) headingRef.current?.focus()
-  }, [attempt])
+    if (phase.kind === 'attempt' && retaking.current) {
+      retaking.current = false
+      headingRef.current?.focus()
+    }
+  }, [phase])
 
   return (
     <section id="quiz" className="scroll-mt-28 rounded-card border border-line bg-card p-5">
@@ -40,28 +73,57 @@ export function Quiz({ questions, locked, bestScore, onResult }: QuizProps) {
           tabIndex={-1}
           className="font-display text-sm font-bold uppercase tracking-[0.06em] outline-none"
         >
-          Knowledge check
+          {title}
         </h2>
-        {!locked && questions.length > 0 ? (
+        {!locked ? (
           <p className="font-mono text-xs text-muted">
-            {questions.length} questions · pass with {PASSING_SCORE} of {questions.length}
-            {bestScore > 0 ? ` · best score: ${bestScore}/${questions.length}` : ''}
+            {summary}
+            {attempts > 0 ? ` · best: ${bestPercent}% · attempts: ${attempts}` : ''}
           </p>
         ) : null}
       </div>
 
       {locked ? (
+        <p className="text-sm text-muted">{lockedMessage}</p>
+      ) : session.mode === 'loading' ? null : session.mode !== 'server' ? (
         <p className="text-sm text-muted">
-          Quiz is disabled until prior modules are complete (or enable Free roam in Settings).
+          Quizzes are graded by the course server. Open the course site and sign in to take them.
         </p>
-      ) : questions.length === 0 ? (
-        <p className="text-sm text-muted">No questions are available for this module yet.</p>
+      ) : phase.kind === 'idle' && blockedMessage ? (
+        <p className="text-sm text-muted">{blockedMessage}</p>
+      ) : phase.kind === 'idle' ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void begin()}
+            className="rounded-pill bg-violet px-5 py-2.5 font-display text-sm font-semibold text-white hover:opacity-90"
+          >
+            {attempts > 0 ? 'Take the quiz again' : 'Start the quiz'}
+          </button>
+          <p className="text-sm text-muted">Each attempt draws a new set of questions.</p>
+        </div>
+      ) : phase.kind === 'loading' ? (
+        <p className="text-sm text-muted" role="status">
+          Drawing your questions…
+        </p>
+      ) : phase.kind === 'error' ? (
+        <div className="space-y-3">
+          <Callout variant="watch" title="The quiz could not start">
+            <p>{phase.message}</p>
+          </Callout>
+          <button
+            type="button"
+            onClick={() => void begin()}
+            className="rounded-pill border border-line px-5 py-2.5 font-display text-sm font-semibold hover:border-violet"
+          >
+            Try again
+          </button>
+        </div>
       ) : (
         <QuizAttempt
-          key={`${questions[0]?.id ?? 'quiz'}-${attempt}`}
-          questions={questions}
-          onResult={onResult}
-          onRetake={retake}
+          key={phase.view.attemptId}
+          view={phase.view}
+          onRetake={blockedMessage ? undefined : retake}
         />
       )}
     </section>
@@ -69,36 +131,36 @@ export function Quiz({ questions, locked, bestScore, onResult }: QuizProps) {
 }
 
 interface QuizAttemptProps {
-  questions: QuizQuestion[]
-  onResult: (result: QuizResult) => void
-  onRetake: () => void
+  view: QuizAttemptView
+  /** Omitted when another attempt is not allowed yet. */
+  onRetake?: () => void
 }
 
-/** One attempt: owns its own shuffle + answer state, remounted fresh (via `key`) on retake. */
-function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
-  const shuffled = useMemo(() => shuffleQuiz(questions), [questions])
-  const originalById = useMemo(() => new Map(questions.map((q) => [q.id, q])), [questions])
+/** One attempt: owns its display order and answers, remounted (via `key`) for each new attempt. */
+function QuizAttempt({ view, onRetake }: QuizAttemptProps) {
+  const { submitQuiz } = useLearner()
+  const display = useMemo(() => arrangeForDisplay(view.questions), [view.questions])
 
-  const [mcAnswers, setMcAnswers] = useState<Record<string, number | undefined>>({})
-  const [tfAnswers, setTfAnswers] = useState<Record<string, boolean | undefined>>({})
-  const [orderAnswers, setOrderAnswers] = useState<Record<string, number[]>>(() =>
+  const [choices, setChoices] = useState<Record<string, number | undefined>>({})
+  const [truths, setTruths] = useState<Record<string, boolean | undefined>>({})
+  const [orders, setOrders] = useState<Record<string, number[]>>(() =>
     Object.fromEntries(
-      shuffled
-        .filter((q) => q.type === 'order')
-        .map((q) => [q.id, (q as ShuffledQuizQuestion & { type: 'order' }).originalIndices]),
+      display.filter((d) => d.question.type === 'order').map((d) => [d.question.id, d.stepOrder]),
     ),
   )
-  const [submitted, setSubmitted] = useState(false)
-  const [results, setResults] = useState<Record<string, boolean>>({})
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [outcome, setOutcome] = useState<QuizOutcome | null>(null)
 
-  const allAnswered = shuffled.every((q) => {
-    if (q.type === 'multiple-choice') return mcAnswers[q.id] != null
-    if (q.type === 'true-false') return tfAnswers[q.id] != null
+  const allAnswered = view.questions.every((q) => {
+    if (q.type === 'multiple-choice') return choices[q.id] != null
+    if (q.type === 'true-false') return truths[q.id] != null
     return true
   })
+  const graded = outcome != null
 
-  const moveOrderItem = useCallback((questionId: string, from: number, to: number) => {
-    setOrderAnswers((prev) => {
+  const moveStep = useCallback((questionId: string, from: number, to: number) => {
+    setOrders((prev) => {
       const current = prev[questionId]
       if (!current || to < 0 || to >= current.length) return prev
       const next = [...current]
@@ -109,86 +171,64 @@ function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
   }, [])
 
   const handleSubmit = useCallback(
-    (e: FormEvent) => {
+    async (e: FormEvent) => {
       e.preventDefault()
-      if (submitted || !allAnswered) return
-
+      if (graded || submitting || !allAnswered) return
       const answers: QuizAnswers = {}
-      for (const q of shuffled) {
-        const original = originalById.get(q.id)
-        if (q.type === 'multiple-choice') {
-          const picked = mcAnswers[q.id]
-          answers[q.id] =
-            picked != null && original?.type === 'multiple-choice'
-              ? original.options.indexOf(q.options[picked] ?? '')
-              : null
-        } else if (q.type === 'true-false') {
-          answers[q.id] = tfAnswers[q.id] ?? null
-        } else {
-          answers[q.id] = orderAnswers[q.id] ?? []
-        }
+      for (const q of view.questions) {
+        if (q.type === 'multiple-choice') answers[q.id] = choices[q.id] ?? null
+        else if (q.type === 'true-false') answers[q.id] = truths[q.id] ?? null
+        else answers[q.id] = orders[q.id] ?? []
       }
-
-      const { score, results: nextResults } = scoreQuizSubmission(questions, answers)
-      const passed = score >= PASSING_SCORE
-      setResults(nextResults)
-      setSubmitted(true)
-      onResult({ score, passed, answers })
+      setSubmitting(true)
+      setSubmitError(null)
+      try {
+        setOutcome(await submitQuiz(view.scope, view.attemptId, answers))
+      } catch (err) {
+        setSubmitError(messageOf(err))
+      } finally {
+        setSubmitting(false)
+      }
     },
-    [
-      submitted,
-      allAnswered,
-      shuffled,
-      questions,
-      mcAnswers,
-      tfAnswers,
-      orderAnswers,
-      originalById,
-      onResult,
-    ],
+    [graded, submitting, allAnswered, view, choices, truths, orders, submitQuiz],
   )
 
-  const submitHintId = `${shuffled[0]?.id ?? 'quiz'}-submit-hint`
-  const score = submitted ? Object.values(results).filter(Boolean).length : 0
-  const passed = submitted && score >= PASSING_SCORE
+  const submitHintId = `${view.attemptId}-submit-hint`
+  const canSubmit = allAnswered && !submitting
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={(e) => void handleSubmit(e)} noValidate>
       <div className="space-y-6">
-        {shuffled.map((q, index) => {
-          const original = originalById.get(q.id)
-          return (
-            <QuizQuestionField
-              key={q.id}
-              index={index}
-              question={q}
-              submitted={submitted}
-              correct={results[q.id]}
-              mcValue={mcAnswers[q.id] ?? null}
-              onMcChange={(v) => setMcAnswers((prev) => ({ ...prev, [q.id]: v }))}
-              tfValue={tfAnswers[q.id] ?? null}
-              onTfChange={(v) => setTfAnswers((prev) => ({ ...prev, [q.id]: v }))}
-              orderValue={orderAnswers[q.id] ?? []}
-              originalSteps={original?.type === 'order' ? original.steps : []}
-              onMoveOrderItem={(from, to) => moveOrderItem(q.id, from, to)}
-            />
-          )
-        })}
+        {display.map((d, index) => (
+          <QuizQuestionField
+            key={d.question.id}
+            index={index}
+            item={d}
+            graded={graded}
+            result={outcome?.results[d.question.id]}
+            choice={choices[d.question.id] ?? null}
+            onChoice={(v) => setChoices((prev) => ({ ...prev, [d.question.id]: v }))}
+            truth={truths[d.question.id] ?? null}
+            onTruth={(v) => setTruths((prev) => ({ ...prev, [d.question.id]: v }))}
+            order={orders[d.question.id] ?? []}
+            onMoveStep={(from, to) => moveStep(d.question.id, from, to)}
+          />
+        ))}
       </div>
 
-      {!submitted ? (
+      {!graded ? (
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <button
             type="submit"
-            aria-disabled={!allAnswered}
+            aria-disabled={!canSubmit}
             aria-describedby={allAnswered ? undefined : submitHintId}
             className={`rounded-pill px-5 py-2.5 font-display text-sm font-semibold ${
-              allAnswered
+              canSubmit
                 ? 'bg-violet text-white hover:opacity-90'
                 : 'cursor-not-allowed bg-line text-muted'
             }`}
           >
-            Submit answers
+            {submitting ? 'Grading…' : 'Submit answers'}
           </button>
           {!allAnswered ? (
             <p id={submitHintId} className="text-sm text-muted">
@@ -199,24 +239,32 @@ function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
       ) : null}
 
       <div className="mt-6 space-y-3" role="status" aria-live="polite">
-        {submitted ? (
-          <Callout variant={passed ? 'why' : 'watch'} title={passed ? 'Passed!' : 'Not quite yet'}>
+        {outcome ? (
+          <Callout
+            variant={outcome.passed ? 'why' : 'watch'}
+            title={outcome.passed ? 'Passed!' : 'Not quite yet'}
+          >
             <p>
-              You scored {score} of {shuffled.length}
-              {passed
-                ? ` — that's a pass (${PASSING_SCORE} of ${shuffled.length} needed).`
-                : `. You need ${PASSING_SCORE} of ${shuffled.length} to pass — check the explanations below, then retake.`}
+              You scored {outcome.correctCount} of {outcome.total} ({outcome.percent}%).{' '}
+              {outcome.passed
+                ? `That's a pass (${view.passPercent}% needed).`
+                : `You need ${view.passPercent}% to pass. Read the explanations below, then try again with a new set of questions.`}
             </p>
           </Callout>
         ) : null}
+        {submitError ? (
+          <Callout variant="watch" title="Your answers could not be graded">
+            <p>{submitError}</p>
+          </Callout>
+        ) : null}
       </div>
-      {submitted ? (
+      {(graded || submitError) && onRetake ? (
         <button
           type="button"
           onClick={onRetake}
           className="mt-3 rounded-pill border border-line px-5 py-2.5 font-display text-sm font-semibold hover:border-violet"
         >
-          Retake quiz
+          {submitError ? 'Start again' : 'Retake with new questions'}
         </button>
       ) : null}
     </form>
@@ -225,56 +273,54 @@ function QuizAttempt({ questions, onResult, onRetake }: QuizAttemptProps) {
 
 interface QuizQuestionFieldProps {
   index: number
-  question: ShuffledQuizQuestion
-  submitted: boolean
-  correct?: boolean
-  mcValue: number | null
-  onMcChange: (value: number) => void
-  tfValue: boolean | null
-  onTfChange: (value: boolean) => void
-  orderValue: number[]
-  originalSteps: string[]
-  onMoveOrderItem: (from: number, to: number) => void
+  item: DisplayQuestion
+  graded: boolean
+  result?: { correct: boolean; explanation: string; sourceUrl: string }
+  choice: number | null
+  onChoice: (value: number) => void
+  truth: boolean | null
+  onTruth: (value: boolean) => void
+  order: number[]
+  onMoveStep: (from: number, to: number) => void
 }
 
 function QuizQuestionField({
   index,
-  question,
-  submitted,
-  correct,
-  mcValue,
-  onMcChange,
-  tfValue,
-  onTfChange,
-  orderValue,
-  originalSteps,
-  onMoveOrderItem,
+  item,
+  graded,
+  result,
+  choice,
+  onChoice,
+  truth,
+  onTruth,
+  order,
+  onMoveStep,
 }: QuizQuestionFieldProps) {
+  const { question, optionOrder } = item
   const [moveMessage, setMoveMessage] = useState('')
   const move = (from: number, to: number, label: string) => {
-    onMoveOrderItem(from, to)
-    setMoveMessage(`Moved "${label}" to position ${to + 1} of ${orderValue.length}.`)
+    onMoveStep(from, to)
+    setMoveMessage(`Moved "${label}" to position ${to + 1} of ${order.length}.`)
   }
-  const feedbackClass = !submitted
+  const correct = result?.correct === true
+  const feedbackClass = !result
     ? 'border-line bg-paper'
     : correct
       ? 'border-teal bg-teal-soft/40'
       : 'border-red bg-red-soft/40'
+  const promptId = `${question.id}-prompt`
 
   return (
     <fieldset className={`rounded-block border px-4 py-4 ${feedbackClass}`}>
-      <legend
-        id={`${question.id}-prompt`}
-        className="mb-3 px-1 text-[15px] font-semibold leading-snug"
-      >
+      <legend id={promptId} className="mb-3 px-1 text-[15px] font-semibold leading-snug">
         {index + 1}. {question.prompt}
       </legend>
 
       {question.type === 'multiple-choice' ? (
-        <div className="space-y-2" role="radiogroup" aria-labelledby={`${question.id}-prompt`}>
-          {question.options.map((option, i) => {
-            const optionId = `${question.id}-opt-${i}`
-            const selected = mcValue === i
+        <div className="space-y-2" role="radiogroup" aria-labelledby={promptId}>
+          {optionOrder.map((optionIndex) => {
+            const optionId = `${question.id}-opt-${optionIndex}`
+            const selected = choice === optionIndex
             return (
               <label
                 key={optionId}
@@ -287,14 +333,14 @@ function QuizQuestionField({
                   id={optionId}
                   type="radio"
                   name={question.id}
-                  value={String(i)}
+                  value={String(optionIndex)}
                   aria-labelledby={`${optionId}-text`}
                   className="mt-0.5 size-4 accent-violet"
                   checked={selected}
-                  disabled={submitted}
-                  onChange={() => onMcChange(i)}
+                  disabled={graded}
+                  onChange={() => onChoice(optionIndex)}
                 />
-                <span id={`${optionId}-text`}>{option}</span>
+                <span id={`${optionId}-text`}>{question.options[optionIndex]}</span>
               </label>
             )
           })}
@@ -302,10 +348,10 @@ function QuizQuestionField({
       ) : null}
 
       {question.type === 'true-false' ? (
-        <div className="flex gap-3" role="radiogroup" aria-labelledby={`${question.id}-prompt`}>
+        <div className="flex gap-3" role="radiogroup" aria-labelledby={promptId}>
           {[true, false].map((value) => {
             const optionId = `${question.id}-${value}`
-            const selected = tfValue === value
+            const selected = truth === value
             return (
               <label
                 key={String(value)}
@@ -322,8 +368,8 @@ function QuizQuestionField({
                   aria-labelledby={`${optionId}-text`}
                   className="size-4 accent-violet"
                   checked={selected}
-                  disabled={submitted}
-                  onChange={() => onTfChange(value)}
+                  disabled={graded}
+                  onChange={() => onTruth(value)}
                 />
                 <span id={`${optionId}-text`}>{value ? 'True' : 'False'}</span>
               </label>
@@ -333,57 +379,65 @@ function QuizQuestionField({
       ) : null}
 
       {question.type === 'order' ? (
-        <ol className="space-y-2">
-          {orderValue.map((originalIndex, position) => {
-            const label = originalSteps[originalIndex] ?? ''
-            return (
-              <li
-                key={originalIndex}
-                className="flex items-center gap-3 rounded-inner border border-line bg-card px-3 py-2 text-sm"
-              >
-                <span aria-hidden="true" className="font-mono text-xs text-muted">
-                  {position + 1}.
-                </span>
-                <span className="flex-1">{label}</span>
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    disabled={submitted || position === 0}
-                    onClick={() => move(position, position - 1, label)}
-                    aria-label={`Move "${label}" up`}
-                    className="rounded-inner border border-line px-2 py-1 text-xs hover:border-violet disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    disabled={submitted || position === orderValue.length - 1}
-                    onClick={() => move(position, position + 1, label)}
-                    aria-label={`Move "${label}" down`}
-                    className="rounded-inner border border-line px-2 py-1 text-xs hover:border-violet disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    ↓
-                  </button>
-                </div>
-              </li>
-            )
-          })}
-        </ol>
-      ) : null}
-      {question.type === 'order' ? (
-        <p className="sr-only" aria-live="polite">
-          {moveMessage}
-        </p>
+        <>
+          <ol className="space-y-2">
+            {order.map((stepIndex, position) => {
+              const label = question.steps[stepIndex] ?? ''
+              return (
+                <li
+                  key={stepIndex}
+                  className="flex items-center gap-3 rounded-inner border border-line bg-card px-3 py-2 text-sm"
+                >
+                  <span aria-hidden="true" className="font-mono text-xs text-muted">
+                    {position + 1}.
+                  </span>
+                  <span className="flex-1">{label}</span>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      disabled={graded || position === 0}
+                      onClick={() => move(position, position - 1, label)}
+                      aria-label={`Move "${label}" up`}
+                      className="rounded-inner border border-line px-2 py-1 text-xs hover:border-violet disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      disabled={graded || position === order.length - 1}
+                      onClick={() => move(position, position + 1, label)}
+                      aria-label={`Move "${label}" down`}
+                      className="rounded-inner border border-line px-2 py-1 text-xs hover:border-violet disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+          <p className="sr-only" aria-live="polite">
+            {moveMessage}
+          </p>
+        </>
       ) : null}
 
       <div aria-live="polite">
-        {submitted ? (
+        {result ? (
           <p className={`mt-3 text-sm ${correct ? 'text-teal' : 'text-red'}`}>
             <strong>
               <span aria-hidden="true">{correct ? '✓ ' : '✗ '}</span>
               {correct ? 'Correct.' : 'Not quite.'}
             </strong>{' '}
-            {question.explanation}
+            <span className="text-ink">{result.explanation}</span>{' '}
+            <a
+              href={result.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-violet underline underline-offset-2"
+            >
+              Source on Microsoft Learn
+            </a>
           </p>
         ) : null}
       </div>

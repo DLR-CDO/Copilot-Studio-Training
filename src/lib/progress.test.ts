@@ -7,8 +7,6 @@ import {
   isModuleUnlocked,
   overallCompletionRatio,
   quizAverage,
-  scoreOrderQuestion,
-  scoreQuizAnswers,
 } from './progress'
 
 describe('module gating', () => {
@@ -51,10 +49,10 @@ describe('progress computation', () => {
   it('averages quiz scores only for attempted modules', () => {
     const state = createDefaultState()
     state.modules['1']!.quizAttempts = 1
-    state.modules['1']!.quizBestScore = 5
+    state.modules['1']!.quizBestPercent = 100
     state.modules['2']!.quizAttempts = 2
-    state.modules['2']!.quizBestScore = 3
-    expect(quizAverage(state)).toBe(4)
+    state.modules['2']!.quizBestPercent = 75
+    expect(quizAverage(state)).toBe(87.5)
   })
 
   it('finds resume module as first incomplete unlocked module', () => {
@@ -66,7 +64,7 @@ describe('progress computation', () => {
   it('requires quiz pass and checklist for mark-complete', () => {
     const state = createDefaultState()
     const progress = state.modules['1']!
-    progress.quizBestScore = 4
+    progress.quizBestPercent = 87
     progress.checklist = { a: true, b: false }
     progress.tryItDone = true
     const result = canMarkModuleComplete(progress, {
@@ -78,30 +76,25 @@ describe('progress computation', () => {
   })
 })
 
-describe('quiz scoring', () => {
-  it('scores reorder questions by exact sequence', () => {
-    expect(scoreOrderQuestion([0, 1, 2], [0, 1, 2])).toBe(true)
-    expect(scoreOrderQuestion([2, 1, 0], [0, 1, 2])).toBe(false)
+describe('quiz pass mark', () => {
+  it('blocks mark-complete below 80% and allows it at 80%', () => {
+    const progress = createDefaultState().modules['1']!
+    progress.quizBestPercent = 75
+    expect(
+      canMarkModuleComplete(progress, { checklistIds: [], requireTryIt: false }).remaining,
+    ).toContain('Pass the knowledge check (80% or more)')
+    progress.quizBestPercent = 80
+    expect(canMarkModuleComplete(progress, { checklistIds: [], requireTryIt: false }).ready).toBe(
+      true,
+    )
   })
 
-  it('requires 4 of 5 to pass', () => {
+  it('honors a per-module pass mark', () => {
+    const progress = createDefaultState().modules['1']!
+    progress.quizBestPercent = 87
     expect(
-      scoreQuizAnswers([
-        { correct: true },
-        { correct: true },
-        { correct: true },
-        { correct: true },
-        { correct: false },
-      ]),
-    ).toEqual({ score: 4, passed: true })
-    expect(
-      scoreQuizAnswers([
-        { correct: true },
-        { correct: true },
-        { correct: true },
-        { correct: false },
-        { correct: false },
-      ]),
-    ).toEqual({ score: 3, passed: false })
+      canMarkModuleComplete(progress, { checklistIds: [], requireTryIt: false, passPercent: 90 })
+        .ready,
+    ).toBe(false)
   })
 })

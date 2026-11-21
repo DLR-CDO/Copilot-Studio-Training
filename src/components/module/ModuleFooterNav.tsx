@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { MODULE_COUNT } from '../../content/types'
 
 interface ModuleFooterNavProps {
   moduleId: number
@@ -56,12 +57,21 @@ export function ModuleFooterNav({
         ) : null}
       </div>
 
-      {moduleId < 10 ? (
+      {moduleId < MODULE_COUNT ? (
         <Link to={`/module/${moduleId + 1}`} className="text-violet hover:underline">
           Next module →
         </Link>
       ) : (
-        <span />
+        <Link
+          to="/assessment"
+          className={
+            completed
+              ? 'rounded-pill bg-violet px-5 py-2.5 font-display text-sm font-semibold text-white hover:opacity-90'
+              : 'text-violet hover:underline'
+          }
+        >
+          Take the final assessment →
+        </Link>
       )}
     </nav>
   )

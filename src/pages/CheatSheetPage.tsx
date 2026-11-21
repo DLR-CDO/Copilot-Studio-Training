@@ -1,4 +1,4 @@
-import { getModuleById } from '../content/modules'
+import { PRE_PUBLISH_CHECKS, getModuleById } from '../content/modules'
 import { houseRules } from '../content/links'
 import { useLearner } from '../lib/useLearner'
 
@@ -30,7 +30,6 @@ function CheckList({ section, items }: { section: string; items: string[] }) {
 export function CheatSheetPage() {
   const devTestProd = getModuleById(2)
   const weeklyReview = getModuleById(9)
-  const prePublish = getModuleById(10)
 
   return (
     <div className="mx-auto max-w-4xl print:max-w-full">
@@ -83,14 +82,12 @@ export function CheatSheetPage() {
           </section>
         ) : null}
 
-        {prePublish ? (
-          <section className="rounded-card border border-line bg-card p-5 print:break-inside-avoid print:border-ink print:p-3">
-            <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em] text-sun">
-              Pre-publish checklist
-            </h2>
-            <CheckList section="prePublish" items={prePublish.checklist} />
-          </section>
-        ) : null}
+        <section className="rounded-card border border-line bg-card p-5 print:break-inside-avoid print:border-ink print:p-3">
+          <h2 className="font-display text-sm font-bold uppercase tracking-[0.06em] text-sun">
+            Pre-publish checklist
+          </h2>
+          <CheckList section="prePublish" items={PRE_PUBLISH_CHECKS} />
+        </section>
 
         {weeklyReview ? (
           <section className="rounded-card border border-line bg-card p-5 print:break-inside-avoid print:border-ink print:p-3">

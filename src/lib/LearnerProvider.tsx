@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useEffect, useRef, type ReactNode } from 'react'
-import type { LearnerState, ModuleProgress, ThemeMode } from '../content/types'
+import type { LearnerState, ModuleProgress, QuizScope, ThemeMode } from '../content/types'
 import { MODULE_COUNT } from '../content/types'
 import {
   applyTheme,
@@ -24,12 +24,15 @@ import {
   redirectToSignIn,
   saveCertificateName,
   saveProgress,
-  submitQuiz,
+  startQuiz as startQuizAttempt,
+  submitQuiz as submitQuizAttempt,
   type ServerProgress,
 } from './api'
-import type { QuizResult } from '../components/module/Quiz'
+import type { QuizAnswers } from './quiz'
 
 const SAVE_DELAY_MS = 800
+const QUIZ_NEEDS_SERVER =
+  'Quizzes are graded by the course server. Open the course site and sign in to take them.'
 
 /** Server-owned quiz fields win; everything else keeps the learner's latest local edits. */
 function withServerQuizScores(local: LearnerState, server: LearnerState): LearnerState {
@@ -40,7 +43,7 @@ function withServerQuizScores(local: LearnerState, server: LearnerState): Learne
     if (!fromServer) continue
     modules[key] = {
       ...getModuleProgress(local, id),
-      quizBestScore: fromServer.quizBestScore,
+      quizBestPercent: fromServer.quizBestPercent,
       quizAttempts: fromServer.quizAttempts,
     }
   }
@@ -51,6 +54,8 @@ function toServerStatus(progress: ServerProgress): ServerStatus {
   return {
     name: progress.name,
     completion: progress.completion,
+    assessment: progress.assessment,
+    attempts: progress.attempts,
     certificate: progress.certificate,
     passingPercent: progress.passingPercent,
   }
@@ -175,35 +180,34 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const recordQuizResult = useCallback(
-    async (moduleId: number, result: QuizResult) => {
-      if (session.mode !== 'server') {
-        setState((prev) => {
-          const current = getModuleProgress(prev, moduleId)
-          return {
-            ...prev,
-            modules: {
-              ...prev.modules,
-              [String(moduleId)]: {
-                ...current,
-                quizBestScore: Math.max(current.quizBestScore, result.score),
-                quizAttempts: current.quizAttempts + 1,
-              },
-            },
-          }
-        })
-        return
-      }
+  const startQuiz = useCallback(
+    async (scope: QuizScope) => {
+      if (session.mode !== 'server') throw new Error(QUIZ_NEEDS_SERVER)
       try {
-        const saved = await submitQuiz(moduleId, result.answers)
+        return await startQuizAttempt(scope)
+      } catch (err) {
+        if (err instanceof SignInRequiredError) redirectToSignIn()
+        throw err
+      }
+    },
+    [session.mode],
+  )
+
+  const submitQuiz = useCallback(
+    async (scope: QuizScope, attemptId: string, answers: QuizAnswers) => {
+      if (session.mode !== 'server') throw new Error(QUIZ_NEEDS_SERVER)
+      try {
+        const saved = await submitQuizAttempt(scope, attemptId, answers)
         setState((prev) => withServerQuizScores(prev, saved.state))
         setServerStatus(toServerStatus(saved))
         setSyncError(null)
+        return saved.result
       } catch (err) {
-        handleSyncError(err)
+        if (err instanceof SignInRequiredError) redirectToSignIn()
+        throw err
       }
     },
-    [session.mode, handleSyncError],
+    [session.mode],
   )
 
   const saveName = useCallback(async (name: string) => {
@@ -244,7 +248,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       setTheme,
       updateModule,
       setCheatSheetCheck,
-      recordQuizResult,
+      startQuiz,
+      submitQuiz,
       saveName,
       resetProgress,
       dismissNotice,
@@ -258,7 +263,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       setTheme,
       updateModule,
       setCheatSheetCheck,
-      recordQuizResult,
+      startQuiz,
+      submitQuiz,
       saveName,
       resetProgress,
       dismissNotice,

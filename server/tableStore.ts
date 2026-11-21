@@ -25,6 +25,17 @@ function parseJson<T>(raw: unknown, fallback: T): T {
   }
 }
 
+/** Quizzes had 5 questions before scores were stored as percents. */
+const LEGACY_QUIZ_SIZE = 5
+
+function readBestPercent(e: Record<string, unknown>): Record<string, number> {
+  if (typeof e.bestPercent === 'string') return parseJson(e.bestPercent, {})
+  const legacy = parseJson<Record<string, number>>(e.scores, {})
+  return Object.fromEntries(
+    Object.entries(legacy).map(([k, v]) => [k, Math.floor((Number(v) * 100) / LEGACY_QUIZ_SIZE)]),
+  )
+}
+
 function optionalString(value: unknown): string | undefined {
   return typeof value === 'string' && value !== '' ? value : undefined
 }
@@ -57,23 +68,7 @@ export class TableStore implements Store {
         LEARNER_PARTITION,
         learnerKey(email),
       )
-      const record: LearnerRecord = {
-        email: String(e.email),
-        name: String(e.name),
-        scores: parseJson(e.scores, {}),
-        attempts: parseJson(e.attempts, {}),
-        passedAt: parseJson(e.passedAt, {}),
-        cycleStart: String(e.cycleStart),
-        completionStatus: e.completionStatus === 'complete' ? 'complete' : 'in-progress',
-        completedAt: optionalString(e.completedAt),
-        finalPercent:
-          typeof e.finalPercent === 'number' && e.finalPercent >= 0 ? e.finalPercent : undefined,
-        certificateId: optionalString(e.certificateId),
-        certificateExpiresAt: optionalString(e.certificateExpiresAt),
-        uiState: optionalString(e.uiState),
-        updatedAt: String(e.updatedAt),
-      }
-      return { value: record, etag: String(e.etag) }
+      return { value: toLearner(e), etag: String(e.etag) }
     } catch (err) {
       if (err instanceof RestError && err.statusCode === 404) return null
       throw err
@@ -86,9 +81,13 @@ export class TableStore implements Store {
       rowKey: learnerKey(record.email),
       email: record.email,
       name: record.name,
-      scores: JSON.stringify(record.scores),
+      bestPercent: JSON.stringify(record.bestPercent),
       attempts: JSON.stringify(record.attempts),
       passedAt: JSON.stringify(record.passedAt),
+      attemptLog: JSON.stringify(record.attemptLog),
+      pending: JSON.stringify(record.pending),
+      lastQuestionIds: JSON.stringify(record.lastQuestionIds),
+      cooldowns: JSON.stringify(record.cooldowns),
       cycleStart: record.cycleStart,
       completionStatus: record.completionStatus,
       completedAt: record.completedAt ?? '',
@@ -142,6 +141,38 @@ export class TableStore implements Store {
     })
     for await (const e of entities) results.push(toCertificate(e))
     return results
+  }
+
+  async listLearners(): Promise<LearnerRecord[]> {
+    const results: LearnerRecord[] = []
+    const entities = this.learners.listEntities<Record<string, unknown>>({
+      queryOptions: { filter: odata`PartitionKey eq ${LEARNER_PARTITION}` },
+    })
+    for await (const e of entities) results.push(toLearner(e))
+    return results
+  }
+}
+
+function toLearner(e: Record<string, unknown>): LearnerRecord {
+  return {
+    email: String(e.email),
+    name: String(e.name),
+    bestPercent: readBestPercent(e),
+    attempts: parseJson(e.attempts, {}),
+    passedAt: parseJson(e.passedAt, {}),
+    attemptLog: parseJson(e.attemptLog, []),
+    pending: parseJson(e.pending, {}),
+    lastQuestionIds: parseJson(e.lastQuestionIds, {}),
+    cooldowns: parseJson(e.cooldowns, {}),
+    cycleStart: String(e.cycleStart),
+    completionStatus: e.completionStatus === 'complete' ? 'complete' : 'in-progress',
+    completedAt: optionalString(e.completedAt),
+    finalPercent:
+      typeof e.finalPercent === 'number' && e.finalPercent >= 0 ? e.finalPercent : undefined,
+    certificateId: optionalString(e.certificateId),
+    certificateExpiresAt: optionalString(e.certificateExpiresAt),
+    uiState: optionalString(e.uiState),
+    updatedAt: String(e.updatedAt),
   }
 }
 

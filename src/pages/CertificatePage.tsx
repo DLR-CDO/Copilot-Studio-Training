@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { MODULE_NAV } from '../content/moduleNav'
 import { CERTIFICATE_PDF_URL } from '../lib/api'
+import { FINAL_ASSESSMENT } from '../lib/assessments'
 import { CERT_TITLE, formatCertificateDate } from '../lib/completion'
 import { getModuleProgress } from '../lib/progress'
 import { useLearner } from '../lib/useLearner'
@@ -35,7 +36,7 @@ function NameForm({ current, ready }: { current: string; ready: boolean }) {
       </h2>
       <p className="mt-1 text-sm text-muted">
         {ready
-          ? 'You passed every quiz. Your certificate is issued as soon as you save your name.'
+          ? 'You passed every module quiz and the final assessment. Your certificate is issued as soon as you save your name.'
           : 'Enter your name as it should appear on your certificate. You can change it until the certificate is issued.'}
       </p>
       <form onSubmit={onSubmit} className="mt-4 flex flex-wrap items-end gap-3">
@@ -90,7 +91,7 @@ export function CertificatePage() {
     )
   }
 
-  const { certificate, completion, passingPercent, name } = serverStatus
+  const { certificate, completion, assessment, passingPercent, name } = serverStatus
   const valid = certificate != null && !certificate.expired
 
   return (
@@ -113,7 +114,7 @@ export function CertificatePage() {
             <dd className="font-semibold">{formatCertificateDate(certificate.completedAt)}</dd>
             <dt className="text-muted">{valid ? 'Expires' : 'Expired'}</dt>
             <dd className="font-semibold">{formatCertificateDate(certificate.expiresAt)}</dd>
-            <dt className="text-muted">Final score</dt>
+            <dt className="text-muted">Final assessment score</dt>
             <dd className="font-semibold">{certificate.scorePercent}%</dd>
             <dt className="text-muted">Certificate ID</dt>
             <dd className="font-mono font-semibold">{certificate.id}</dd>
@@ -132,7 +133,8 @@ export function CertificatePage() {
           </a>
           {!valid ? (
             <p className="mt-4 text-sm">
-              Pass every module quiz again to earn a new certificate with a new ID.
+              Pass every module quiz and the final assessment again to earn a new certificate with a
+              new ID.
             </p>
           ) : null}
         </section>
@@ -143,18 +145,16 @@ export function CertificatePage() {
       {!valid ? (
         <section aria-labelledby="requirements-heading" className="mt-8">
           <h2 id="requirements-heading" className="font-display text-lg font-bold">
-            {completion.remainingModules.length === 0
-              ? 'All quizzes passed'
-              : `${completion.passedModules.length} of ${MODULE_NAV.length} quizzes passed`}
+            {completion.complete ? 'Everything is passed' : 'What is still needed'}
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Score {passingPercent}% or higher on every module knowledge check to earn your
-            certificate.
+            Score {passingPercent}% or higher on every module knowledge check, then pass the final
+            assessment, to earn your certificate.
           </p>
           <ul className="mt-4 space-y-2">
             {MODULE_NAV.map((mod) => {
               const passed = completion.passedModules.includes(mod.id)
-              const best = getModuleProgress(state, mod.id).quizBestScore
+              const best = getModuleProgress(state, mod.id).quizBestPercent
               return (
                 <li
                   key={mod.id}
@@ -167,15 +167,27 @@ export function CertificatePage() {
                     {String(mod.id).padStart(2, '0')} · {mod.title}
                   </Link>
                   <span className={`font-mono text-xs ${passed ? 'text-teal' : 'text-muted'}`}>
-                    {passed
-                      ? `Passed · best ${best}/5`
-                      : best > 0
-                        ? `Best ${best}/5`
-                        : 'Not passed'}
+                    {passed ? `Passed · best ${best}%` : best > 0 ? `Best ${best}%` : 'Not passed'}
                   </span>
                 </li>
               )
             })}
+            <li className="flex flex-wrap items-center justify-between gap-2 rounded-inner border border-line bg-card px-4 py-3">
+              <Link to="/assessment" className="font-display font-semibold hover:text-violet">
+                {FINAL_ASSESSMENT.title}
+              </Link>
+              <span
+                className={`font-mono text-xs ${assessment.passed ? 'text-teal' : 'text-muted'}`}
+              >
+                {assessment.passed
+                  ? `Passed · best ${assessment.bestPercent}%`
+                  : !assessment.open
+                    ? 'Opens after every module quiz is passed'
+                    : assessment.attempts > 0
+                      ? `Best ${assessment.bestPercent}%`
+                      : 'Not taken'}
+              </span>
+            </li>
           </ul>
         </section>
       ) : null}

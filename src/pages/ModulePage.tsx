@@ -20,14 +20,15 @@ import { GoDeeper } from '../components/module/GoDeeper'
 import { ModuleFooterNav } from '../components/module/ModuleFooterNav'
 import { ModuleMiniMap } from '../components/module/ModuleMiniMap'
 import { NotesBox } from '../components/module/NotesBox'
-import { Quiz, type QuizResult } from '../components/module/Quiz'
+import { Quiz } from '../components/module/Quiz'
+import { MODULE_QUIZ_SIZE, passPercentFor } from '../lib/assessments'
 import { Celebration } from '../components/module/Celebration'
 import { Callout } from '../components/ui/Callout'
 
 export function ModulePage() {
   const { id } = useParams()
   const moduleId = Number(id)
-  const { state, updateModule, recordQuizResult } = useLearner()
+  const { state, updateModule } = useLearner()
   const [celebrate, setCelebrate] = useState(false)
 
   // The page is keyed by module id, so this runs once per module visit.
@@ -44,10 +45,11 @@ export function ModulePage() {
   const status = getModuleStatus(state, moduleId)
 
   const stepIds = useMemo(() => mod?.buildSteps.map((s) => s.id) ?? [], [mod])
+  const passPercent = passPercentFor(String(moduleId))
 
   const completion = useMemo(() => {
     if (!mod) return { ready: false, remaining: ['Module not found'] }
-    // Treat build steps as the checklist gate. Quiz must be passed (best score >= 4 of 5).
+    // Treat build steps as the checklist gate. The quiz must be passed at the module's pass mark.
     return canMarkModuleComplete(
       {
         ...progress,
@@ -55,9 +57,9 @@ export function ModulePage() {
           stepIds.map((sid) => [sid, progress.buildSteps[sid] === true]),
         ),
       },
-      { checklistIds: stepIds, requireTryIt: true },
+      { checklistIds: stepIds, requireTryIt: true, passPercent },
     )
-  }, [mod, progress, stepIds])
+  }, [mod, progress, stepIds, passPercent])
 
   const onToggleStep = useCallback(
     (stepId: string, value: boolean) => {
@@ -80,13 +82,6 @@ export function ModulePage() {
       updateModule(moduleId, { notes })
     },
     [moduleId, updateModule],
-  )
-
-  const onQuizResult = useCallback(
-    (result: QuizResult) => {
-      void recordQuizResult(moduleId, result)
-    },
-    [moduleId, recordQuizResult],
   )
 
   const onMarkComplete = useCallback(() => {
@@ -122,7 +117,7 @@ export function ModulePage() {
     {
       id: 'quiz',
       label: 'Knowledge check',
-      done: isQuizPassed(progress),
+      done: isQuizPassed(progress, passPercent),
     },
     { id: 'notes', label: 'My notes', done: progress.notes.trim().length > 0 },
     { id: 'go-deeper', label: 'Go deeper', done: true },
@@ -206,10 +201,11 @@ export function ModulePage() {
           <TryIt text={mod.tryIt} done={progress.tryItDone} onToggle={onToggleTryIt} />
 
           <Quiz
-            questions={mod.quiz}
+            scope={String(moduleId)}
+            summary={`${MODULE_QUIZ_SIZE} questions drawn at random · pass mark ${passPercent}%`}
             locked={!unlocked}
-            bestScore={progress.quizBestScore}
-            onResult={onQuizResult}
+            bestPercent={progress.quizBestPercent}
+            attempts={progress.quizAttempts}
           />
 
           <NotesBox value={progress.notes} onChange={onNotes} />

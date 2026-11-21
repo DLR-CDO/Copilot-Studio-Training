@@ -16,7 +16,6 @@ import type {
   Screenshot,
   ScreenshotRequest,
 } from './types'
-import { getQuizForModule } from './quizzes'
 
 const t = (text: string): InlineToken => ({ type: 'text', text })
 const kw = (text: string, termId: string): InlineToken => ({ type: 'kw', text, termId })
@@ -223,6 +222,14 @@ const m10ScreenshotsToCapture: ScreenshotRequest[] = [
     authorNotes:
       'Capture: the demo website after you ask one question. Annotate: point to the browser address bar with "share this demo link for feedback before going live".',
   },
+]
+
+/** In dependency order: each check relies on the one before it. */
+export const PRE_PUBLISH_CHECKS = [
+  'Right environment: you are publishing the right agent, from the right environment',
+  'Knowledge verified: the sources are current and citations point where you expect',
+  'Evaluation passed: your test set runs clean on the latest version',
+  'Right channel: the audience you mean to reach, starting with the demo website',
 ]
 
 export const modules: Module[] = [
@@ -452,7 +459,6 @@ export const modules: Module[] = [
         label: 'Licensing and subscriptions',
       },
     ]),
-    quiz: getQuizForModule(1),
     checklist: [
       'Confirmed the DEV environment is selected before building',
       'Created a solution in Power Apps and created my agent inside it',
@@ -557,7 +563,6 @@ export const modules: Module[] = [
         label: 'Licenses and access',
       },
     ]),
-    quiz: getQuizForModule(2),
     checklist: [
       'Opened the Switch environment menu from the globe icon in the bottom left corner',
       'Confirmed I am in DEV',
@@ -695,7 +700,6 @@ export const modules: Module[] = [
         label: 'Test knowledge sources',
       },
     ]),
-    quiz: getQuizForModule(3),
     checklist: [
       'Added one SharePoint site or file as a knowledge source',
       'Wrote a clear description for the source',
@@ -884,7 +888,6 @@ export const modules: Module[] = [
         label: 'Work with variables',
       },
     ]),
-    quiz: getQuizForModule(4),
     checklist: [
       'Built one topic with a question node',
       'Added a condition node that branches two ways',
@@ -1026,7 +1029,6 @@ export const modules: Module[] = [
         label: 'Build an agent flow with natural language',
       },
     ]),
-    quiz: getQuizForModule(5),
     checklist: [
       'Added one connector-based tool to my practice agent',
       'Wrote a clear description so the agent knows when to use it',
@@ -1194,7 +1196,6 @@ export const modules: Module[] = [
         label: 'MCP in Copilot Studio',
       },
     ]),
-    quiz: getQuizForModule(6),
     checklist: [
       'Added one child agent with a narrow job',
       'Wrote a crisp, one-line description for the child agent',
@@ -1316,7 +1317,6 @@ export const modules: Module[] = [
         label: 'Configure end-user authentication',
       },
     ]),
-    quiz: getQuizForModule(7),
     checklist: [
       'Opened Settings on my practice agent',
       'Wrote down the current orchestration mode without changing it',
@@ -1457,7 +1457,6 @@ export const modules: Module[] = [
         label: 'Run tests and view results',
       },
     ]),
-    quiz: getQuizForModule(8),
     checklist: [
       'Wrote a 10-question test set from real user questions',
       'Ran an evaluation and read the results',
@@ -1546,7 +1545,6 @@ export const modules: Module[] = [
         label: 'Analyze autonomous agent health',
       },
     ]),
-    quiz: getQuizForModule(9),
     checklist: [
       'Opened the Analytics summary page of a live or demo agent',
       'Read sessions, engagement, resolution, and escalation numbers',
@@ -1589,11 +1587,11 @@ export const modules: Module[] = [
         [t('Teams and M365 deployment, including the admin approval step')],
         [t('Single sign-on, awareness level')],
         [
-          t('The pre-publish checklist: knowledge verified, '),
+          t('The pre-publish checklist, in order: right '),
+          kw('environment', 'environment'),
+          t(', knowledge verified, '),
           kw('evaluation', 'evaluation'),
           t(' passed, right '),
-          kw('environment', 'environment'),
-          t(', right '),
           kw('channel', 'channel'),
         ],
       ]),
@@ -1614,7 +1612,7 @@ export const modules: Module[] = [
     buildSteps: buildSteps(10, [
       [
         t(
-          'Run through the pre-publish checklist: knowledge verified, evaluation passed, right environment, right channel.',
+          'Run through the pre-publish checklist, in order: right environment, knowledge verified, evaluation passed, right channel.',
         ),
       ],
       openPracticeAgent(),
@@ -1656,7 +1654,7 @@ export const modules: Module[] = [
     ]),
     watchOuts: [
       'Nothing is live until you press Publish — changes stay in draft on purpose, so you decide exactly when users see them.',
-      'Run the pre-publish checklist first: knowledge verified, evaluation passed, right environment, right channel.',
+      'Run the pre-publish checklist first, in order: right environment, knowledge verified, evaluation passed, right channel.',
       'Use the demo website for stakeholder review before broad rollout.',
     ],
     screenshots: [],
@@ -1681,7 +1679,6 @@ export const modules: Module[] = [
         label: 'Extend Microsoft 365 Copilot with agents',
       },
     ]),
-    quiz: getQuizForModule(10),
     checklist: [
       'Completed the pre-publish checklist',
       'Published my practice agent',
