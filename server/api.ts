@@ -268,7 +268,7 @@ async function signedInRoute(
   return json(404, { error: 'Not found.' })
 }
 
-/** Returns name, title, dates, and status only — never email, score, or other personal data. */
+/** Returns name, title, dates, status, and final score only — never email or other personal data. */
 async function verify(req: ApiRequest, deps: ApiDeps): Promise<ApiResponse> {
   const now = deps.now?.() ?? new Date()
   if (deps.verifyLimiter && !deps.verifyLimiter.allow(clientIp(req.headers), now.getTime())) {
@@ -287,5 +287,6 @@ async function verify(req: ApiRequest, deps: ApiDeps): Promise<ApiResponse> {
     completedAt: certificate.completedAt,
     expiresAt: certificate.expiresAt,
     status: isExpired(certificate.expiresAt, now) ? 'expired' : 'valid',
+    scorePercent: certificate.scorePercent,
   })
 }

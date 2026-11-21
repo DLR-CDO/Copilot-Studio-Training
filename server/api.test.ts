@@ -99,7 +99,7 @@ function certificate(overrides: Partial<CertificateRecord> = {}): CertificateRec
 }
 
 describe('/api/verify (public)', () => {
-  it('needs no sign-in and returns only name, title, dates, and status', async () => {
+  it('needs no sign-in and returns only name, title, dates, status, and score', async () => {
     await store.saveCertificate(certificate())
     const res = await get('/api/verify?id=dr-csa-7k2m-q9xd-4htb')
 
@@ -111,10 +111,10 @@ describe('/api/verify (public)', () => {
       completedAt: '2026-11-17T15:00:00.000Z',
       expiresAt: '2027-11-17T15:00:00.000Z',
       status: 'valid',
+      scorePercent: 96,
     })
     expect(String(res.body)).not.toMatch(/advanced/i)
     expect(String(res.body)).not.toContain('alice@example.com')
-    expect(String(res.body)).not.toContain('96')
   })
 
   it('reports expired certificates as expired', async () => {

@@ -13,7 +13,7 @@ Static Web App `copilotstudio-training` (Free plan) in resource group `rg-copilo
 - **API:** `server/` runs as one Azure Function (`server/functions.ts`, bundled to `api-dist/` by `npm run build:api`) behind `/api/*`.
 - **Storage:** Azure Table Storage account `stcopilotacademy`, tables `Learners` and `Certificates`.
 - **Completion rule:** pass all 10 module quizzes at `PASSING_PERCENT` (80%, `src/content/types.ts`). The final score is the average of best quiz scores. Certificates expire after 12 months; a retake then issues a new ID.
-- **Public verification:** `/verify?id=DR-CSA-XXXX-XXXX-XXXX` shows only name, course, completion date, and valid/expired.
+- **Public verification:** `/verify?id=DR-CSA-XXXX-XXXX-XXXX` shows only name, course, completion date, valid/expired, and the final assessment score.
 - **Admin export:** `/admin/completions` (CSV of every certificate) for emails listed in `ADMIN_EMAILS`.
 
 App settings (Static Web App → Settings → Environment variables; never commit these):

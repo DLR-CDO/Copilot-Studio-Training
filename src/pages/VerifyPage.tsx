@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { verifyCertificate, type VerifyResult } from '../lib/api'
 import { formatCertificateDate } from '../lib/completion'
 
-/** Public page: shows only name, certificate title, dates, and status. */
+/** Public page: shows only name, certificate title, dates, status, and final score. */
 export function VerifyPage() {
   const [params, setParams] = useSearchParams()
   const id = (params.get('id') ?? '').trim()
@@ -77,6 +77,12 @@ export function VerifyPage() {
             >
               {current.status === 'valid' ? 'Valid' : 'Expired'}
             </dd>
+            {current.scorePercent !== null ? (
+              <>
+                <dt className="text-muted">Final assessment score</dt>
+                <dd className="font-semibold">{current.scorePercent}%</dd>
+              </>
+            ) : null}
           </dl>
         </div>
       ) : null}

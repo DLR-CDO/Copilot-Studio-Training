@@ -275,7 +275,7 @@ const m7Screenshots: Screenshot[] = [
     id: 'm7-shot-generative-ai',
     src: 'images/07-generative-ai-settings.png',
     width: 1024,
-    height: 598,
+    height: 310,
     alt: 'Settings, Generative AI page showing the Orchestration choice set to Yes, generative, and the Continue using retired models toggle set to Off in the Model section.',
     caption:
       'Generative AI settings: the orchestration mode, and Continue using retired models in the Model section.',
@@ -289,7 +289,7 @@ const m8Screenshots: Screenshot[] = [
     id: 'm8-shot-activity-map',
     src: 'images/08-activity-map-tool.png',
     width: 1024,
-    height: 650,
+    height: 610,
     alt: 'The test pane’s activity map for a question that used the Get my profile (V2) tool, listing each tool step with a check mark, followed by the tool’s outputs.',
     caption:
       'The activity map in the test pane: each step of the Get my profile (V2) tool call, then its outputs.',
@@ -300,7 +300,7 @@ const m8Screenshots: Screenshot[] = [
     id: 'm8-shot-evaluation-tab',
     src: 'images/08-evaluation-tab.png',
     width: 1024,
-    height: 598,
+    height: 121,
     alt: 'The Evaluation tab listing one test set with its last run status, with an arrow pointing to the New evaluation button in the top right corner.',
     caption:
       'The Evaluation tab. Start a new test set with + New evaluation in the top right corner.',
@@ -331,7 +331,7 @@ const m8Screenshots: Screenshot[] = [
     id: 'm8-shot-run-results',
     src: 'images/08-run-results.png',
     width: 1024,
-    height: 650,
+    height: 610,
     alt: 'A finished evaluation run with an overall score of 100%, listing each question, the agent response and an Answer quality Pass result.',
     caption: 'A finished run: the overall score, and a result for each question.',
     afterStep: 'm8-step-12',
@@ -386,7 +386,7 @@ const m9Screenshots: Screenshot[] = [
     id: 'm9-shot-demo-website',
     src: 'images/09-demo-website.png',
     width: 1024,
-    height: 453,
+    height: 426,
     alt: 'The demo website open in a browser, with the agent’s chat window on the right answering a test message.',
     caption: 'The demo website in a browser, with the agent answering in the chat window.',
     afterStep: 'm9-step-8',
@@ -1409,7 +1409,7 @@ export const modules: Module[] = [
       // VERIFY IN UI
       verifyStep([
         t('On the same page, check that '),
-        ui('Authentication'),
+        ui('Credentials to use'),
         t(' is set to '),
         ui('End user credentials'),
         t(

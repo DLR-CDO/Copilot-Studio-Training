@@ -72,6 +72,7 @@ export type VerifyResult =
       completedAt: string
       expiresAt: string
       status: 'valid' | 'expired'
+      scorePercent: number | null
     }
   | { kind: 'not-found' | 'invalid' | 'error'; message: string }
 
@@ -198,6 +199,7 @@ export async function verifyCertificate(id: string): Promise<VerifyResult> {
         completedAt: String(body.completedAt ?? ''),
         expiresAt: String(body.expiresAt ?? ''),
         status: body.status === 'valid' ? 'valid' : 'expired',
+        scorePercent: typeof body.scorePercent === 'number' ? body.scorePercent : null,
       }
     }
     if (res.status === 404) return { kind: 'not-found', message }

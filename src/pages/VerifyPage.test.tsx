@@ -26,7 +26,7 @@ function renderAt(path: string) {
 }
 
 describe('VerifyPage', () => {
-  it('shows name, course, completion date, and status without signing in', async () => {
+  it('shows name, course, dates, status, and final score without signing in', async () => {
     const fetchMock = mockApi(() =>
       jsonResponse(200, {
         id: 'DR-CSA-7K2M-Q9XD-4HTB',
@@ -48,9 +48,10 @@ describe('VerifyPage', () => {
     expect(screen.getByText('November 17, 2026')).toBeInTheDocument()
     expect(screen.getByText('November 17, 2027')).toBeInTheDocument()
     expect(screen.getByText('Valid')).toBeInTheDocument()
+    expect(screen.getByText('Final assessment score')).toBeInTheDocument()
+    expect(screen.getByText('96%')).toBeInTheDocument()
     // Even if the API sent more, the page shows nothing else about the learner.
     expect(document.body.textContent).not.toContain('alice@example.com')
-    expect(document.body.textContent).not.toContain('96')
     // The public page never asks who is signed in.
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       '/api/verify?id=DR-CSA-7K2M-Q9XD-4HTB',
