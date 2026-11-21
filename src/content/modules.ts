@@ -396,7 +396,6 @@ const m9Screenshots: Screenshot[] = [
 ]
 
 const m10Screenshots: Screenshot[] = [
-  // TODO: replace with module10-step05.png (date range dropdown open)
   {
     id: 'm10-shot-date-range',
     src: 'images/10-date-range.png',
