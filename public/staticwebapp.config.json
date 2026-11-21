@@ -2,9 +2,6 @@
   "routes": [
     { "route": "/.auth/login/github", "statusCode": 404 },
     { "route": "/.auth/login/twitter", "statusCode": 404 },
-    { "route": "/admin", "allowedRoles": ["admin"] },
-    { "route": "/admin/*", "allowedRoles": ["admin"] },
-    { "route": "/api/admin/*", "allowedRoles": ["admin"] },
     { "route": "/api/*", "allowedRoles": ["anonymous"] },
     { "route": "/verify", "allowedRoles": ["anonymous"] },
     { "route": "/signed-out", "allowedRoles": ["anonymous"] },

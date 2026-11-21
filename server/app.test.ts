@@ -98,15 +98,11 @@ describe('Azure Functions adapter', () => {
 })
 
 describe('staticwebapp.config.json', () => {
-  it('limits admin routes to the admin role before the broader rules match', () => {
+  it('needs sign-in for pages and leaves admin checks to the API, not Static Web Apps roles', () => {
     const config = JSON.parse(
       readFileSync(join(process.cwd(), 'public/staticwebapp.config.json'), 'utf8'),
     ) as { routes: { route: string; allowedRoles?: string[] }[] }
-    const index = (route: string) => config.routes.findIndex((r) => r.route === route)
-    for (const route of ['/admin', '/admin/*', '/api/admin/*']) {
-      expect(config.routes[index(route)]?.allowedRoles).toEqual(['admin'])
-      expect(index(route)).toBeLessThan(index('/api/*'))
-      expect(index(route)).toBeLessThan(index('/*'))
-    }
+    expect(config.routes.some((r) => r.allowedRoles?.includes('admin'))).toBe(false)
+    expect(config.routes.find((r) => r.route === '/*')?.allowedRoles).toEqual(['authenticated'])
   })
 })

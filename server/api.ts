@@ -1,6 +1,7 @@
 import { PASSING_PERCENT } from '../src/content/types'
 import { certificateTitle, isExpired } from '../src/lib/completion'
-import { LOGOUT_URL, identify, isAdmin as isAdminUser, type SignedInUser } from './auth'
+import { AdminService } from './adminService'
+import { LOGOUT_URL, identify, type SignedInUser } from './auth'
 import { certificateContent, renderCertificatePdf, verifyUrlFor } from './certificatePdf'
 import type { ServerConfig } from './config'
 import {
@@ -157,12 +158,17 @@ async function signedInRoute(
   user: SignedInUser,
   deps: ApiDeps,
 ): Promise<ApiResponse> {
-  const { service, config } = deps
+  const { service } = deps
   const { path, method } = req
-  const isAdmin = isAdminUser(user, config)
+  const admins = new AdminService(deps.store, deps.config, deps.now)
 
   if (path === '/api/me' && method === 'GET') {
+    const isAdmin = await admins.isAdmin(user.email)
     return json(200, { email: user.email, isAdmin, logoutUrl: LOGOUT_URL })
+  }
+
+  if (path.startsWith('/api/admin/') && !(await admins.isAdmin(user.email))) {
+    return json(403, { error: 'Only course admins can do this.' })
   }
 
   if (path === '/api/progress' && method === 'GET') {
@@ -203,7 +209,7 @@ async function signedInRoute(
     const { certificate } = await service.getProgress(user)
     if (!certificate) return json(404, { error: 'No certificate has been issued yet.' })
     const pdf = await renderCertificatePdf(
-      certificateContent(certificate, verifyUrlFor(baseUrl(req, config), certificate.id)),
+      certificateContent(certificate, verifyUrlFor(baseUrl(req, deps.config), certificate.id)),
       await deps.loadLogo(),
     )
     return {
@@ -218,7 +224,6 @@ async function signedInRoute(
   }
 
   if (path === '/api/admin/completions.csv' && method === 'GET') {
-    if (!isAdmin) return json(403, { error: 'Only course admins can export completions.' })
     const day = (deps.now?.() ?? new Date()).toISOString().slice(0, 10)
     return {
       status: 200,
@@ -232,12 +237,22 @@ async function signedInRoute(
   }
 
   if (path === '/api/admin/learners' && method === 'GET') {
-    if (!isAdmin) return json(403, { error: 'Only course admins can see learner progress.' })
     return json(200, { learners: await service.adminOverview() })
   }
 
+  if (path === '/api/admin/admins' && method === 'GET') {
+    return json(200, await admins.overview())
+  }
+
+  if (path === '/api/admin/admins' && method === 'POST') {
+    return json(200, await admins.add(user.email, readJsonBody(req).email))
+  }
+
+  if (path === '/api/admin/admins/remove' && method === 'POST') {
+    return json(200, await admins.remove(user.email, readJsonBody(req).email))
+  }
+
   if (path === '/api/admin/learners.csv' && method === 'GET') {
-    if (!isAdmin) return json(403, { error: 'Only course admins can export learner progress.' })
     const day = (deps.now?.() ?? new Date()).toISOString().slice(0, 10)
     return {
       status: 200,

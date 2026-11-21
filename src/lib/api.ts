@@ -1,5 +1,6 @@
 import type {
   AdminLearnerRow,
+  AdminList,
   AttemptLogEntry,
   LearnerState,
   QuestionResult,
@@ -169,6 +170,17 @@ export const saveCertificateName = (name: string) =>
 
 export const fetchAdminLearners = () =>
   request<{ learners: AdminLearnerRow[] }>('/api/admin/learners').then((r) => r.learners)
+
+export const fetchAdmins = () => request<AdminList>('/api/admin/admins')
+
+export const addAdmin = (email: string) =>
+  request<AdminList>('/api/admin/admins', { method: 'POST', body: JSON.stringify({ email }) })
+
+export const removeAdmin = (email: string) =>
+  request<AdminList>('/api/admin/admins/remove', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
 
 /** Public: no sign-in needed. */
 export async function verifyCertificate(id: string): Promise<VerifyResult> {

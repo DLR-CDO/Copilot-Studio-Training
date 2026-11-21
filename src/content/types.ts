@@ -196,3 +196,23 @@ export interface AdminLearnerRow {
   lastActivity: string
   certificate: { id: string; issuedAt: string; expiresAt: string } | null
 }
+
+export interface AdminAccount {
+  email: string
+  /** Set in the app's configuration, so it can't be removed from the Admin page. */
+  permanent: boolean
+  addedBy: string | null
+  addedAt: string | null
+}
+
+export interface AdminChange {
+  at: string
+  actor: string
+  action: 'added' | 'removed'
+  target: string
+}
+
+export interface AdminList {
+  admins: AdminAccount[]
+  audit: AdminChange[]
+}

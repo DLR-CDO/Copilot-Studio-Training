@@ -58,6 +58,43 @@ describe('Admin learners dashboard', () => {
     expect(screen.getByText('No learners match.')).toBeInTheDocument()
   })
 
+  it('lets an admin add and remove other admins, with a change log', async () => {
+    installFakeServer(quizzesByModule, { ADMIN_EMAILS: ADMIN })
+    const user = userEvent.setup()
+    renderAdmin()
+
+    const section = await screen.findByRole('region', { name: 'Admins' })
+    expect(await within(section).findByText(/Permanent admin/)).toBeInTheDocument()
+    expect(within(section).queryByRole('button', { name: `Remove ${ADMIN}` })).toBeNull()
+
+    const input = within(section).getByRole('textbox', { name: 'Work email of the new admin' })
+    await user.type(input, 'eve@elsewhere.com')
+    await user.click(within(section).getByRole('button', { name: 'Add admin' }))
+    expect(await within(section).findByRole('alert')).toHaveTextContent(
+      'Only @example.com accounts can be admins.',
+    )
+
+    await user.clear(input)
+    await user.type(input, LEARNER.email)
+    await user.click(within(section).getByRole('button', { name: 'Add admin' }))
+    expect(
+      await within(section).findByText(`${LEARNER.email} is now an admin.`),
+    ).toBeInTheDocument()
+    expect(input).toHaveValue('')
+    expect(
+      within(section).getByText(new RegExp(`${ADMIN} added ${LEARNER.email}`)),
+    ).toBeInTheDocument()
+
+    await user.click(within(section).getByRole('button', { name: `Remove ${LEARNER.email}` }))
+    await user.click(within(section).getByRole('button', { name: 'Confirm remove' }))
+    expect(
+      await within(section).findByText(`${LEARNER.email} is no longer an admin.`),
+    ).toBeInTheDocument()
+    expect(
+      within(section).getByText(new RegExp(`${ADMIN} removed ${LEARNER.email}`)),
+    ).toBeInTheDocument()
+  })
+
   it('tells non-admins they cannot see learners', async () => {
     installFakeServer()
     renderAdmin()

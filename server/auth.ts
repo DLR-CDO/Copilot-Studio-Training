@@ -79,11 +79,6 @@ export function identify(
   return { kind: 'signed-in', user: { email, roles } }
 }
 
-/** Admins are on ADMIN_EMAILS and hold the Static Web Apps `admin` role (route rules need it). */
-export function isAdmin(user: SignedInUser, config: ServerConfig): boolean {
-  return config.adminEmails.has(user.email) && (user.roles ?? []).includes('admin')
-}
-
 /** Only same-site relative paths, so login and logout can't be used as open redirects. */
 export function safeRedirectPath(raw: string | null | undefined): string {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) return '/'

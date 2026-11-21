@@ -276,14 +276,12 @@ describe('learner data', () => {
 })
 
 describe('/api/admin/completions.csv', () => {
-  it('needs both the admin allowlist and the Static Web Apps admin role', async () => {
+  it('is for admins only, decided by the admin list rather than Static Web Apps roles', async () => {
     expect((await get('/api/admin/completions.csv', alice)).status).toBe(403)
     expect((await get('/api/admin/completions.csv', admin)).status).toBe(200)
-    // On the allowlist but without the role, e.g. before accepting the role invitation.
     expect((await get('/api/admin/completions.csv', principal('admin@example.com'))).status).toBe(
-      403,
+      200,
     )
-    // Holding the role but not on the allowlist.
     const roleOnly = principal('alice@example.com', 'aad', ['authenticated', 'admin'])
     expect((await get('/api/admin/completions.csv', roleOnly)).status).toBe(403)
     expect(parse(await get('/api/me', roleOnly)).isAdmin).toBe(false)
@@ -385,5 +383,82 @@ describe('/api/admin/learners', () => {
       modulesPassed: 0,
       currentModule: 1,
     })
+  })
+})
+
+describe('/api/admin/admins', () => {
+  const add = (email: unknown, who = admin) => sendJson('POST', '/api/admin/admins', { email }, who)
+  const remove = (email: unknown, who = admin) =>
+    sendJson('POST', '/api/admin/admins/remove', { email }, who)
+
+  it('lets admins add and remove admins, and logs each change', async () => {
+    expect(parse(await get('/api/me', alice)).isAdmin).toBe(false)
+    const added = await add(' Alice@Example.com ')
+    expect(added.status).toBe(200)
+    expect(parse(added).admins).toEqual([
+      { email: 'admin@example.com', permanent: true, addedBy: null, addedAt: null },
+      {
+        email: 'alice@example.com',
+        permanent: false,
+        addedBy: 'admin@example.com',
+        addedAt: clock.now.toISOString(),
+      },
+    ])
+    expect(parse(await get('/api/me', alice)).isAdmin).toBe(true)
+    expect((await get('/api/admin/learners', alice)).status).toBe(200)
+
+    // A newly added admin can add others.
+    expect((await add('bob@example.com', alice)).status).toBe(200)
+    expect((await remove('alice@example.com', bob)).status).toBe(200)
+    expect(parse(await get('/api/me', alice)).isAdmin).toBe(false)
+    expect((await get('/api/admin/learners', alice)).status).toBe(403)
+
+    const overview = parse(await get('/api/admin/admins', admin))
+    expect(overview.audit).toEqual([
+      expect.objectContaining({
+        actor: 'bob@example.com',
+        action: 'removed',
+        target: 'alice@example.com',
+      }),
+      expect.objectContaining({
+        actor: 'alice@example.com',
+        action: 'added',
+        target: 'bob@example.com',
+      }),
+      expect.objectContaining({
+        actor: 'admin@example.com',
+        action: 'added',
+        target: 'alice@example.com',
+      }),
+    ])
+  })
+
+  it('rejects bad emails, other domains, duplicates, self-removal and permanent admins', async () => {
+    expect((await add('not-an-email')).status).toBe(400)
+    expect(parse(await add('eve@elsewhere.com')).error).toBe(
+      'Only @example.com accounts can be admins.',
+    )
+    expect((await add('admin@example.com')).status).toBe(409)
+    expect((await add('bob@example.com')).status).toBe(200)
+    expect((await add('bob@example.com')).status).toBe(409)
+    expect(parse(await remove('bob@example.com', bob)).error).toBe(
+      "You can't remove yourself as an admin.",
+    )
+    expect((await remove('admin@example.com', bob)).status).toBe(400)
+    expect((await remove('carol@example.com')).status).toBe(404)
+  })
+
+  it('is closed to non-admins and to cross-site requests', async () => {
+    expect((await get('/api/admin/admins', alice)).status).toBe(403)
+    expect((await add('alice@example.com', alice)).status).toBe(403)
+    expect(parse(await get('/api/me', alice)).isAdmin).toBe(false)
+    const crossSite = await call(
+      'POST',
+      '/api/admin/admins',
+      { ...admin, 'content-type': 'text/plain' },
+      JSON.stringify({ email: 'alice@example.com' }),
+    )
+    expect(crossSite.status).toBe(403)
+    expect(parse(await get('/api/me', alice)).isAdmin).toBe(false)
   })
 })

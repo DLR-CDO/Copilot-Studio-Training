@@ -1,12 +1,15 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
-import type { AdminLearnerRow, AdminLearnerStatus } from '../content/types'
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from 'react'
+import type { AdminLearnerRow, AdminLearnerStatus, AdminList } from '../content/types'
 import { MODULE_COUNT } from '../content/types'
 import {
   ADMIN_CSV_URL,
   ADMIN_LEARNERS_CSV_URL,
   SignInRequiredError,
+  addAdmin,
   fetchAdminLearners,
+  fetchAdmins,
   redirectToSignIn,
+  removeAdmin,
 } from '../lib/api'
 import { useLearner } from '../lib/useLearner'
 
@@ -54,7 +57,10 @@ export function AdminPage() {
     <div className="mx-auto max-w-5xl">
       <h1 className="font-display text-3xl font-bold">Learners</h1>
       {isAdmin ? (
-        <AdminDashboard />
+        <>
+          <AdminDashboard />
+          <AdminsSection currentEmail={session.user.email} />
+        </>
       ) : (
         <p className="mt-3 text-muted" role="alert">
           Only course admins can see learner progress.
@@ -340,5 +346,174 @@ function LearnerRow({ row, open, onToggle }: LearnerRowProps) {
         </tr>
       ) : null}
     </Fragment>
+  )
+}
+
+function AdminsSection({ currentEmail }: { currentEmail: string }) {
+  const [list, setList] = useState<AdminList | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [confirming, setConfirming] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchAdmins()
+      .then((result) => {
+        if (!cancelled) setList(result)
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        if (err instanceof SignInRequiredError) return redirectToSignIn()
+        setError(err instanceof Error ? err.message : 'Could not load admins.')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  async function run(action: () => Promise<AdminList>, success: string) {
+    setBusy(true)
+    setError(null)
+    setNotice(null)
+    try {
+      setList(await action())
+      setNotice(success)
+      return true
+    } catch (err) {
+      if (err instanceof SignInRequiredError) redirectToSignIn()
+      else setError(err instanceof Error ? err.message : 'Something went wrong.')
+      return false
+    } finally {
+      setBusy(false)
+      setConfirming(null)
+    }
+  }
+
+  async function onAdd(e: FormEvent) {
+    e.preventDefault()
+    const target = email.trim().toLowerCase()
+    if (!target) return
+    if (await run(() => addAdmin(target), `${target} is now an admin.`)) setEmail('')
+  }
+
+  return (
+    <section aria-labelledby="admins-heading" className="mt-12 border-t border-line pt-8">
+      <h2 id="admins-heading" className="font-display text-2xl font-bold">
+        Admins
+      </h2>
+      <p className="mt-2 text-muted">
+        Admins can see every learner's progress and download the exports above. Nothing else. A new
+        admin sees the Admin link the next time they open the course.
+      </p>
+
+      <form onSubmit={onAdd} className="mt-5 flex flex-wrap items-center gap-3">
+        <label className="flex-1">
+          <span className="sr-only">Work email of the new admin</span>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@company.com"
+            className="w-full rounded-pill border border-line bg-card px-4 py-2 text-sm"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={busy}
+          className="rounded-pill bg-violet px-5 py-2 font-mono text-xs uppercase tracking-wide text-white disabled:opacity-60"
+        >
+          Add admin
+        </button>
+      </form>
+
+      {error ? (
+        <p className="mt-3 text-sm text-red" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {notice ? (
+        <p className="mt-3 text-sm text-teal" role="status">
+          {notice}
+        </p>
+      ) : null}
+
+      {list === null && !error ? (
+        <p className="mt-4 text-sm text-muted" role="status">
+          Loading admins…
+        </p>
+      ) : null}
+
+      {list ? (
+        <>
+          <ul className="mt-5 divide-y divide-line rounded-card border border-line bg-card">
+            {list.admins.map((a) => (
+              <li key={a.email} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+                <span className="flex-1">
+                  <span className="block font-semibold">
+                    {a.email}
+                    {a.email === currentEmail ? (
+                      <span className="font-normal text-muted"> (you)</span>
+                    ) : null}
+                  </span>
+                  <span className="block text-xs text-muted">
+                    {a.permanent
+                      ? 'Permanent admin (set in the app configuration)'
+                      : `Added by ${a.addedBy} on ${a.addedAt ? formatDate(a.addedAt) : 'unknown date'}`}
+                  </span>
+                </span>
+                {!a.permanent && a.email !== currentEmail ? (
+                  confirming === a.email ? (
+                    <span className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void run(() => removeAdmin(a.email), `${a.email} is no longer an admin.`)
+                        }
+                        className="rounded-pill border border-red px-3 py-1 font-mono text-[11px] uppercase text-red"
+                      >
+                        Confirm remove
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(null)}
+                        className="rounded-pill border border-line px-3 py-1 font-mono text-[11px] uppercase"
+                      >
+                        Cancel
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirming(a.email)}
+                      aria-label={`Remove ${a.email}`}
+                      className="rounded-pill border border-line px-3 py-1 font-mono text-[11px] uppercase hover:border-red hover:text-red"
+                    >
+                      Remove
+                    </button>
+                  )
+                ) : null}
+              </li>
+            ))}
+          </ul>
+
+          <h3 className="mt-6 font-display text-lg font-bold">Recent changes</h3>
+          {list.audit.length === 0 ? (
+            <p className="mt-2 text-sm text-muted">No changes yet.</p>
+          ) : (
+            <ul className="mt-2 space-y-1 text-sm text-muted">
+              {list.audit.map((c) => (
+                <li key={`${c.at}-${c.target}-${c.action}`}>
+                  {formatDateTime(c.at)}: {c.actor} {c.action} {c.target}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : null}
+    </section>
   )
 }

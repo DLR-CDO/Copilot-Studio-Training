@@ -69,6 +69,20 @@ export class ConflictError extends Error {
   }
 }
 
+/** Someone added as an admin from the Admin page. `ADMIN_EMAILS` admins are not stored. */
+export interface AdminRecord {
+  email: string
+  addedBy: string
+  addedAt: string
+}
+
+export interface AdminAuditEntry {
+  at: string
+  actor: string
+  action: 'added' | 'removed'
+  target: string
+}
+
 export interface Store {
   getLearner(email: string): Promise<Versioned<LearnerRecord> | null>
   /** Creates when `etag` is null; otherwise replaces only if the etag still matches. */
@@ -77,12 +91,21 @@ export interface Store {
   saveCertificate(record: CertificateRecord): Promise<void>
   listCertificates(): Promise<CertificateRecord[]>
   listLearners(): Promise<LearnerRecord[]>
+  getAdmin(email: string): Promise<AdminRecord | null>
+  listAdmins(): Promise<AdminRecord[]>
+  saveAdmin(record: AdminRecord): Promise<void>
+  deleteAdmin(email: string): Promise<void>
+  appendAdminAudit(entry: AdminAuditEntry): Promise<void>
+  /** Newest first. */
+  listAdminAudit(limit: number): Promise<AdminAuditEntry[]>
 }
 
 /** For local development and tests only — everything is lost on restart. */
 export class MemoryStore implements Store {
   private learners = new Map<string, Versioned<LearnerRecord>>()
   private certificates = new Map<string, CertificateRecord>()
+  private admins = new Map<string, AdminRecord>()
+  private audit: AdminAuditEntry[] = []
   private version = 0
 
   async getLearner(email: string): Promise<Versioned<LearnerRecord> | null> {
@@ -112,5 +135,30 @@ export class MemoryStore implements Store {
 
   async listLearners(): Promise<LearnerRecord[]> {
     return [...this.learners.values()].map((l) => structuredClone(l.value))
+  }
+
+  async getAdmin(email: string): Promise<AdminRecord | null> {
+    const found = this.admins.get(email)
+    return found ? { ...found } : null
+  }
+
+  async listAdmins(): Promise<AdminRecord[]> {
+    return [...this.admins.values()].map((a) => ({ ...a }))
+  }
+
+  async saveAdmin(record: AdminRecord): Promise<void> {
+    this.admins.set(record.email, { ...record })
+  }
+
+  async deleteAdmin(email: string): Promise<void> {
+    this.admins.delete(email)
+  }
+
+  async appendAdminAudit(entry: AdminAuditEntry): Promise<void> {
+    this.audit.push({ ...entry })
+  }
+
+  async listAdminAudit(limit: number): Promise<AdminAuditEntry[]> {
+    return this.audit.slice(-limit).reverse()
   }
 }

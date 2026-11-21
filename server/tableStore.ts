@@ -1,7 +1,9 @@
-import { createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { RestError, TableClient, odata } from '@azure/data-tables'
 import {
   ConflictError,
+  type AdminAuditEntry,
+  type AdminRecord,
   type CertificateRecord,
   type LearnerRecord,
   type Store,
@@ -10,6 +12,10 @@ import {
 
 const LEARNER_PARTITION = 'learner'
 const CERTIFICATE_PARTITION = 'certificate'
+const ADMIN_PARTITION = 'admin'
+const AUDIT_PARTITION = 'audit'
+/** Row keys sort ascending, so newest-first audit rows use the time remaining until this. */
+const AUDIT_EPOCH_END = 9_999_999_999_999
 
 /** Emails can contain characters Table Storage forbids in keys, so key by a hash. */
 function learnerKey(email: string): string {
@@ -47,10 +53,12 @@ function isConflict(err: unknown): boolean {
 export class TableStore implements Store {
   private readonly learners: TableClient
   private readonly certificates: TableClient
+  private readonly admins: TableClient
 
-  private constructor(learners: TableClient, certificates: TableClient) {
+  private constructor(learners: TableClient, certificates: TableClient, admins: TableClient) {
     this.learners = learners
     this.certificates = certificates
+    this.admins = admins
   }
 
   static async connect(connectionString: string): Promise<TableStore> {
@@ -58,8 +66,9 @@ export class TableStore implements Store {
     const options = { allowInsecureConnection: connectionString.includes('UseDevelopmentStorage') }
     const learners = TableClient.fromConnectionString(connectionString, 'Learners', options)
     const certificates = TableClient.fromConnectionString(connectionString, 'Certificates', options)
-    await Promise.all([learners.createTable(), certificates.createTable()])
-    return new TableStore(learners, certificates)
+    const admins = TableClient.fromConnectionString(connectionString, 'Admins', options)
+    await Promise.all([learners.createTable(), certificates.createTable(), admins.createTable()])
+    return new TableStore(learners, certificates, admins)
   }
 
   async getLearner(email: string): Promise<Versioned<LearnerRecord> | null> {
@@ -151,6 +160,73 @@ export class TableStore implements Store {
     for await (const e of entities) results.push(toLearner(e))
     return results
   }
+
+  async getAdmin(email: string): Promise<AdminRecord | null> {
+    try {
+      const e = await this.admins.getEntity<Record<string, unknown>>(
+        ADMIN_PARTITION,
+        learnerKey(email),
+      )
+      return toAdmin(e)
+    } catch (err) {
+      if (err instanceof RestError && err.statusCode === 404) return null
+      throw err
+    }
+  }
+
+  async listAdmins(): Promise<AdminRecord[]> {
+    const results: AdminRecord[] = []
+    const entities = this.admins.listEntities<Record<string, unknown>>({
+      queryOptions: { filter: odata`PartitionKey eq ${ADMIN_PARTITION}` },
+    })
+    for await (const e of entities) results.push(toAdmin(e))
+    return results
+  }
+
+  async saveAdmin(record: AdminRecord): Promise<void> {
+    await this.admins.upsertEntity(
+      { partitionKey: ADMIN_PARTITION, rowKey: learnerKey(record.email), ...record },
+      'Replace',
+    )
+  }
+
+  async deleteAdmin(email: string): Promise<void> {
+    try {
+      await this.admins.deleteEntity(ADMIN_PARTITION, learnerKey(email))
+    } catch (err) {
+      if (!(err instanceof RestError && err.statusCode === 404)) throw err
+    }
+  }
+
+  async appendAdminAudit(entry: AdminAuditEntry): Promise<void> {
+    const inverted = String(AUDIT_EPOCH_END - Date.parse(entry.at)).padStart(13, '0')
+    await this.admins.createEntity({
+      partitionKey: AUDIT_PARTITION,
+      rowKey: `${inverted}-${randomBytes(4).toString('hex')}`,
+      ...entry,
+    })
+  }
+
+  async listAdminAudit(limit: number): Promise<AdminAuditEntry[]> {
+    const results: AdminAuditEntry[] = []
+    const entities = this.admins.listEntities<Record<string, unknown>>({
+      queryOptions: { filter: odata`PartitionKey eq ${AUDIT_PARTITION}` },
+    })
+    for await (const e of entities) {
+      results.push({
+        at: String(e.at),
+        actor: String(e.actor),
+        action: e.action === 'removed' ? 'removed' : 'added',
+        target: String(e.target),
+      })
+      if (results.length >= limit) break
+    }
+    return results
+  }
+}
+
+function toAdmin(e: Record<string, unknown>): AdminRecord {
+  return { email: String(e.email), addedBy: String(e.addedBy), addedAt: String(e.addedAt) }
 }
 
 function toLearner(e: Record<string, unknown>): LearnerRecord {
